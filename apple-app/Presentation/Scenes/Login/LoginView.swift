@@ -132,13 +132,22 @@ struct LoginView: View {
                 .font(DSTypography.caption2)
                 .foregroundColor(DSColors.textTertiary)
 
-            Text("User: \(AppConfig.TestCredentials.username)")
+            Text("Email: \(AppConfig.TestCredentials.username)@example.com")
                 .font(DSTypography.caption2)
                 .foregroundColor(DSColors.textTertiary)
 
             Text("Pass: \(AppConfig.TestCredentials.password)")
                 .font(DSTypography.caption2)
                 .foregroundColor(DSColors.textTertiary)
+
+            // Botón para llenar automáticamente
+            Button("Llenar credenciales") {
+                email = "\(AppConfig.TestCredentials.username)@example.com"
+                password = AppConfig.TestCredentials.password
+            }
+            .font(DSTypography.caption)
+            .foregroundColor(DSColors.accent)
+            .padding(.top, DSSpacing.xs)
         }
         .padding(DSSpacing.small)
         .background(DSColors.backgroundTertiary)

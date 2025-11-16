@@ -51,11 +51,15 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
             return .success(response.toDomain())
 
         } catch let error as NetworkError {
+            print("❌ Login NetworkError: \(error)")
             return .failure(.network(error))
         } catch let error as KeychainError {
+            print("❌ Login KeychainError: \(error)")
             return .failure(.system(.system(error.localizedDescription)))
         } catch {
-            return .failure(.system(.unknown))
+            print("❌ Login Unknown Error: \(error)")
+            print("❌ Error Type: \(type(of: error))")
+            return .failure(.system(.system("Error: \(error.localizedDescription)")))
         }
     }
 
