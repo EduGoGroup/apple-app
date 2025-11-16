@@ -7,6 +7,8 @@
 
 import Testing
 import SwiftUI
+import Foundation
+import SwiftUI
 @testable import apple_app
 
 @Suite("Theme Entity Tests")

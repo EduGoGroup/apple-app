@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftUI
 @testable import apple_app
 
 final class apple_appTests: XCTestCase {

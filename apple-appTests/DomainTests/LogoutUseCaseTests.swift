@@ -6,6 +6,8 @@
 //
 
 import Testing
+import Foundation
+import SwiftUI
 @testable import apple_app
 
 @Suite("LogoutUseCase Tests")
@@ -41,8 +43,16 @@ struct LogoutUseCaseTests {
         let result = await sut.execute()
         
         // Then
-        #expect(result == .failure(.network(.noConnection)))
-        #expect(mockRepository.logoutCallCount == 1)
+        switch result {
+        case .success:
+            Issue.record("Expected failure")
+        case .failure(let error):
+            if case .network(.noConnection) = error {
+                #expect(mockRepository.logoutCallCount == 1)
+            } else {
+                Issue.record("Expected network error, got \(error)")
+            }
+        }
     }
     
     @Test("Multiple logout calls should accumulate count")

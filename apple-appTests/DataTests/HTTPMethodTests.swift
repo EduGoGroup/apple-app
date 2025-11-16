@@ -6,6 +6,8 @@
 //
 
 import Testing
+import Foundation
+import SwiftUI
 @testable import apple_app
 
 @Suite("HTTPMethod Tests")
