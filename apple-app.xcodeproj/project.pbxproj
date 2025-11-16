@@ -30,6 +30,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A90B28392ECA378500C044C9 /* docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = docs;
+			sourceTree = "<group>";
+		};
 		A9C965142EC967EB0041EB9B /* apple-app */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "apple-app";
@@ -75,6 +80,7 @@
 		A9C965092EC967EB0041EB9B = {
 			isa = PBXGroup;
 			children = (
+				A90B28392ECA378500C044C9 /* docs */,
 				A9C965142EC967EB0041EB9B /* apple-app */,
 				A9C965222EC967ED0041EB9B /* apple-appTests */,
 				A9C9652C2EC967ED0041EB9B /* apple-appUITests */,
