@@ -56,8 +56,10 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
-        // Agregar token de autenticación si existe (para futuro)
-        // Se implementará cuando tengamos KeychainService
+        // Agregar token de autenticación si existe
+        if let token = try? DefaultKeychainService.shared.getToken(for: "access_token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         
         // Agregar body si existe
         if let body = body {
