@@ -14,17 +14,8 @@ struct AdaptiveNavigationView: View {
     @State private var coordinator = NavigationCoordinator()
     @State private var selectedRoute: Route? = nil
 
-    // Dependencias
-    private let authRepository: AuthRepository
-    private let preferencesRepository: PreferencesRepository
-
-    init(
-        authRepository: AuthRepository,
-        preferencesRepository: PreferencesRepository
-    ) {
-        self.authRepository = authRepository
-        self.preferencesRepository = preferencesRepository
-    }
+    // Dependency Container
+    @EnvironmentObject var container: DependencyContainer
 
     var body: some View {
         #if os(iOS)
@@ -45,7 +36,7 @@ struct AdaptiveNavigationView: View {
 
     private var phoneNavigation: some View {
         NavigationStack(path: $coordinator.path) {
-            SplashView(authRepository: authRepository)
+            SplashView(authRepository: container.resolve(AuthRepository.self))
                 .navigationDestination(for: Route.self) { route in
                     destination(for: route)
                 }
@@ -64,7 +55,7 @@ struct AdaptiveNavigationView: View {
             if let route = selectedRoute {
                 destination(for: route)
             } else {
-                SplashView(authRepository: authRepository)
+                SplashView(authRepository: container.resolve(AuthRepository.self))
             }
         }
         .environment(coordinator)
@@ -82,7 +73,7 @@ struct AdaptiveNavigationView: View {
             if let route = selectedRoute {
                 destination(for: route)
             } else {
-                SplashView(authRepository: authRepository)
+                SplashView(authRepository: container.resolve(AuthRepository.self))
             }
         }
         .environment(coordinator)
@@ -105,7 +96,7 @@ struct AdaptiveNavigationView: View {
             Section("Cuenta") {
                 Button {
                     Task {
-                        let logoutUseCase = DefaultLogoutUseCase(authRepository: authRepository)
+                        let logoutUseCase = container.resolve(LogoutUseCase.self)
                         _ = await logoutUseCase.execute()
                         selectedRoute = .login
                     }
@@ -125,32 +116,21 @@ struct AdaptiveNavigationView: View {
     private func destination(for route: Route) -> some View {
         switch route {
         case .splash:
-            SplashView(authRepository: authRepository)
+            SplashView(authRepository: container.resolve(AuthRepository.self))
 
         case .login:
-            LoginView(
-                loginUseCase: DefaultLoginUseCase(
-                    authRepository: authRepository,
-                    validator: DefaultInputValidator()
-                )
-            )
+            LoginView(loginUseCase: container.resolve(LoginUseCase.self))
 
         case .home:
             HomeView(
-                getCurrentUserUseCase: DefaultGetCurrentUserUseCase(
-                    authRepository: authRepository
-                ),
-                logoutUseCase: DefaultLogoutUseCase(
-                    authRepository: authRepository
-                )
+                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                logoutUseCase: container.resolve(LogoutUseCase.self)
             )
 
         case .settings:
             SettingsView(
-                updateThemeUseCase: DefaultUpdateThemeUseCase(
-                    preferencesRepository: preferencesRepository
-                ),
-                preferencesRepository: preferencesRepository
+                updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
+                preferencesRepository: container.resolve(PreferencesRepository.self)
             )
         }
     }
@@ -159,10 +139,57 @@ struct AdaptiveNavigationView: View {
 // MARK: - Previews
 
 #Preview("Adaptive Navigation") {
-    AdaptiveNavigationView(
-        authRepository: AuthRepositoryImpl(
-            apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
-        ),
-        preferencesRepository: PreferencesRepositoryImpl()
-    )
+    let previewContainer = DependencyContainer()
+
+    // Setup mínimo para preview
+    previewContainer.register(KeychainService.self, scope: .singleton) {
+        DefaultKeychainService.shared
+    }
+
+    previewContainer.register(APIClient.self, scope: .singleton) {
+        DefaultAPIClient(baseURL: AppConfig.baseURL)
+    }
+
+    previewContainer.register(AuthRepository.self, scope: .singleton) {
+        AuthRepositoryImpl(
+            apiClient: previewContainer.resolve(APIClient.self),
+            keychainService: previewContainer.resolve(KeychainService.self)
+        )
+    }
+
+    previewContainer.register(PreferencesRepository.self, scope: .singleton) {
+        PreferencesRepositoryImpl()
+    }
+
+    previewContainer.register(InputValidator.self, scope: .singleton) {
+        DefaultInputValidator()
+    }
+
+    previewContainer.register(LoginUseCase.self) {
+        DefaultLoginUseCase(
+            authRepository: previewContainer.resolve(AuthRepository.self),
+            validator: previewContainer.resolve(InputValidator.self)
+        )
+    }
+
+    previewContainer.register(LogoutUseCase.self) {
+        DefaultLogoutUseCase(
+            authRepository: previewContainer.resolve(AuthRepository.self)
+        )
+    }
+
+    previewContainer.register(GetCurrentUserUseCase.self) {
+        DefaultGetCurrentUserUseCase(
+            authRepository: previewContainer.resolve(AuthRepository.self)
+        )
+    }
+
+    previewContainer.register(UpdateThemeUseCase.self) {
+        DefaultUpdateThemeUseCase(
+            preferencesRepository: previewContainer.resolve(PreferencesRepository.self)
+        )
+    }
+
+    return AdaptiveNavigationView()
+        .environmentObject(previewContainer)
 }

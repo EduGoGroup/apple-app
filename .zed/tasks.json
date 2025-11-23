@@ -1,0 +1,52 @@
+[
+  {
+    "label": "Build iOS",
+    "command": "make build",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Run macOS",
+    "command": "make run-macos",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Run iPhone",
+    "command": "make run",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Run iPad",
+    "command": "make run-ipad",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Test All",
+    "command": "make test",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Test Domain",
+    "command": "make test-domain",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Clean",
+    "command": "make clean",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Quick Run",
+    "command": "make quick",
+    "use_new_terminal": false
+  },
+  {
+    "label": "SwiftLint",
+    "command": "make lint",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Open in Xcode",
+    "command": "make open",
+    "use_new_terminal": false
+  }
+]
