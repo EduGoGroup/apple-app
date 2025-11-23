@@ -12,7 +12,7 @@ struct LoginView: View {
     @State private var viewModel: LoginViewModel
     @State private var email = ""
     @State private var password = ""
-    @Environment(NavigationCoordinator.self) private var coordinator
+    @Environment(AuthenticationState.self) private var authState
 
     init(loginUseCase: LoginUseCase) {
         self._viewModel = State(initialValue: LoginViewModel(loginUseCase: loginUseCase))
@@ -52,8 +52,8 @@ struct LoginView: View {
             }
         }
         .onChange(of: viewModel.state) { oldValue, newValue in
-            if case .success = newValue {
-                coordinator.replacePath(with: .home)
+            if case .success(let user) = newValue {
+                authState.authenticate(user: user)
             }
         }
     }
@@ -132,7 +132,7 @@ struct LoginView: View {
                 .font(DSTypography.caption2)
                 .foregroundColor(DSColors.textTertiary)
 
-            Text("Email: \(AppConfig.TestCredentials.username)@example.com")
+            Text("Usuario: \(AppConfig.TestCredentials.username)")
                 .font(DSTypography.caption2)
                 .foregroundColor(DSColors.textTertiary)
 
@@ -142,7 +142,7 @@ struct LoginView: View {
 
             // Botón para llenar automáticamente
             Button("Llenar credenciales") {
-                email = "\(AppConfig.TestCredentials.username)@example.com"
+                email = AppConfig.TestCredentials.username
                 password = AppConfig.TestCredentials.password
             }
             .font(DSTypography.caption)
@@ -158,12 +158,11 @@ struct LoginView: View {
 // MARK: - Previews
 
 #Preview("Login - Idle") {
-    // Preview simplificado sin dependencias de mocks
     LoginView(loginUseCase: DefaultLoginUseCase(
         authRepository: AuthRepositoryImpl(
             apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
         ),
         validator: DefaultInputValidator()
     ))
-    .environment(NavigationCoordinator())
+    .environment(AuthenticationState())
 }

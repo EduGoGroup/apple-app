@@ -57,7 +57,13 @@ final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendabl
             }
 
             // Observar cambios (simplificado)
-            let observation = NotificationCenter.default.addObserver(
+            // Usamos una clase wrapper para hacer el observation Sendable
+            final class ObserverBox: @unchecked Sendable {
+                var observer: NSObjectProtocol?
+            }
+
+            let box = ObserverBox()
+            box.observer = NotificationCenter.default.addObserver(
                 forName: UserDefaults.didChangeNotification,
                 object: nil,
                 queue: .main
@@ -68,8 +74,10 @@ final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendabl
                 }
             }
 
-            continuation.onTermination = { _ in
-                NotificationCenter.default.removeObserver(observation)
+            continuation.onTermination = { @Sendable _ in
+                if let observer = box.observer {
+                    NotificationCenter.default.removeObserver(observer)
+                }
             }
         }
     }
@@ -83,7 +91,13 @@ final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendabl
             }
 
             // Observar cambios
-            let observation = NotificationCenter.default.addObserver(
+            // Usamos una clase wrapper para hacer el observation Sendable
+            final class ObserverBox: @unchecked Sendable {
+                var observer: NSObjectProtocol?
+            }
+
+            let box = ObserverBox()
+            box.observer = NotificationCenter.default.addObserver(
                 forName: UserDefaults.didChangeNotification,
                 object: nil,
                 queue: .main
@@ -94,8 +108,10 @@ final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendabl
                 }
             }
 
-            continuation.onTermination = { _ in
-                NotificationCenter.default.removeObserver(observation)
+            continuation.onTermination = { @Sendable _ in
+                if let observer = box.observer {
+                    NotificationCenter.default.removeObserver(observer)
+                }
             }
         }
     }

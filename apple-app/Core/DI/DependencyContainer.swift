@@ -103,42 +103,51 @@ public class DependencyContainer: ObservableObject {
     public func resolve<T>(_ type: T.Type) -> T {
         let key = String(describing: type)
 
-        lock.lock()
-        defer { lock.unlock() }
+        // Obtener factory y scope con lock, pero liberar antes de ejecutar factory
+        let (factory, scope, existingSingleton): (() -> T, DependencyScope, T?) = {
+            lock.lock()
+            defer { lock.unlock() }
 
-        // Verificar que existe factory registrada
-        guard let factory = factories[key] as? () -> T else {
-            fatalError("""
-                ⚠️ DependencyContainer Error:
-                No se encontró registro para '\(key)'.
+            guard let factory = factories[key] as? () -> T else {
+                fatalError("""
+                    ⚠️ DependencyContainer Error:
+                    No se encontró registro para '\(key)'.
 
-                ¿Olvidaste registrarlo en setupDependencies()?
+                    ¿Olvidaste registrarlo en setupDependencies()?
 
-                Ejemplo:
-                container.register(\(key).self, scope: .singleton) {
-                    // Tu implementación aquí
-                }
-                """)
-        }
+                    Ejemplo:
+                    container.register(\(key).self, scope: .singleton) {
+                        // Tu implementación aquí
+                    }
+                    """)
+            }
 
-        // Obtener scope (default .factory si no existe)
-        let scope = scopes[key] ?? .factory
+            let scope = scopes[key] ?? .factory
+            let singleton = singletons[key] as? T
 
-        // Resolver según scope
+            return (factory, scope, singleton)
+        }()
+
+        // Resolver según scope SIN el lock activo (evitar deadlock)
         switch scope {
         case .singleton:
             // Si ya existe singleton, retornarlo
-            if let singleton = singletons[key] as? T {
+            if let singleton = existingSingleton {
                 return singleton
             }
 
-            // Si no existe, crear, guardar y retornar
+            // Si no existe, crear SIN lock (para permitir nested resolves)
             let instance = factory()
+
+            // Guardar con lock
+            lock.lock()
             singletons[key] = instance
+            lock.unlock()
+
             return instance
 
         case .factory, .transient:
-            // Siempre crear nueva instancia
+            // Siempre crear nueva instancia SIN lock
             return factory()
         }
     }

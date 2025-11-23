@@ -16,10 +16,10 @@ echo -e "${GREEN}🚀 Ejecutando apple-app en ${DEVICE}...${NC}"
 
 case $DEVICE in
   iphone)
-    DESTINATION='platform=iOS Simulator,name=iPhone 15'
+    DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0'
     ;;
   ipad)
-    DESTINATION='platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)'
+    DESTINATION='platform=iOS Simulator,name=iPad Pro 11-inch (M4),OS=18.0'
     ;;
   macos)
     DESTINATION='platform=macOS'
