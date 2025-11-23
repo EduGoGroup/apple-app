@@ -272,6 +272,183 @@ DSTypography.body
 
 ---
 
+## 🔧 Dependency Injection
+
+### DependencyContainer
+
+El proyecto utiliza un **DependencyContainer** personalizado para inyección de dependencias, eliminando el acoplamiento y mejorando la testabilidad.
+
+#### Ubicación
+
+```
+apple-app/Core/DI/
+├── DependencyContainer.swift      # Container principal
+├── DependencyScope.swift          # Scopes de dependencias
+└── (TestDependencyContainer en tests)
+```
+
+#### Conceptos Clave
+
+**Scopes disponibles**:
+- `.singleton`: Una única instancia compartida (Services, Repositories)
+- `.factory`: Nueva instancia cada vez (Use Cases)
+- `.transient`: Alias de factory (ViewModels)
+
+**Cuándo usar cada scope**:
+
+| Tipo | Scope | Razón |
+|------|-------|-------|
+| Services (APIClient, Keychain) | `.singleton` | Compartir recursos |
+| Repositories | `.singleton` | Cachear estado |
+| Validators | `.singleton` | Sin estado |
+| Use Cases | `.factory` | Nueva operación cada vez |
+
+#### Registro de Dependencias
+
+Las dependencias se registran en `apple_appApp.swift` durante el inicio:
+
+```swift
+// En apple_appApp.swift
+init() {
+    let container = DependencyContainer()
+    _container = StateObject(wrappedValue: container)
+    Self.setupDependencies(in: container)
+}
+
+private static func setupDependencies(in container: DependencyContainer) {
+    // Services
+    container.register(APIClient.self, scope: .singleton) {
+        DefaultAPIClient(baseURL: AppConfig.baseURL)
+    }
+    
+    // Repositories
+    container.register(AuthRepository.self, scope: .singleton) {
+        AuthRepositoryImpl(
+            apiClient: container.resolve(APIClient.self),
+            keychainService: container.resolve(KeychainService.self)
+        )
+    }
+    
+    // Use Cases
+    container.register(LoginUseCase.self, scope: .factory) {
+        DefaultLoginUseCase(
+            authRepository: container.resolve(AuthRepository.self),
+            validator: container.resolve(InputValidator.self)
+        )
+    }
+}
+```
+
+#### Resolución de Dependencias
+
+Las dependencias se resuelven en `AdaptiveNavigationView` al crear vistas:
+
+```swift
+// En AdaptiveNavigationView.swift
+@EnvironmentObject var container: DependencyContainer
+
+private func destination(for route: Route) -> some View {
+    switch route {
+    case .login:
+        LoginView(loginUseCase: container.resolve(LoginUseCase.self))
+    case .home:
+        HomeView(
+            getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+            logoutUseCase: container.resolve(LogoutUseCase.self)
+        )
+    }
+}
+```
+
+#### Testing con DependencyContainer
+
+Para tests, usa `TestDependencyContainer`:
+
+```swift
+import Testing
+@testable import apple_app
+
+@Suite("LoginViewModel Tests")
+@MainActor
+struct LoginViewModelTests {
+    
+    @Test("Login exitoso con container")
+    func loginSuccess() async {
+        // Given - Setup container con mocks
+        let container = TestDependencyContainer()
+        
+        let mockAuthRepo = MockAuthRepository()
+        mockAuthRepo.loginResult = .success(User.mock)
+        
+        container.registerMock(AuthRepository.self, mock: mockAuthRepo)
+        container.registerMock(InputValidator.self, mock: DefaultInputValidator())
+        
+        container.register(LoginUseCase.self) {
+            DefaultLoginUseCase(
+                authRepository: container.resolve(AuthRepository.self),
+                validator: container.resolve(InputValidator.self)
+            )
+        }
+        
+        // When
+        let sut = LoginViewModel(
+            loginUseCase: container.resolve(LoginUseCase.self)
+        )
+        await sut.login(email: "test@test.com", password: "123456")
+        
+        // Then
+        if case .success(let user) = sut.state {
+            #expect(user.id == User.mock.id)
+        }
+    }
+}
+```
+
+#### Agregar Nueva Dependencia
+
+**Pasos**:
+
+1. **Registrar** en `apple_appApp.setupDependencies()`:
+```swift
+container.register(NewService.self, scope: .singleton) {
+    DefaultNewService()
+}
+```
+
+2. **Resolver** donde se necesite:
+```swift
+let newService = container.resolve(NewService.self)
+```
+
+3. **Para tests**, registrar mock:
+```swift
+let container = TestDependencyContainer()
+container.registerMock(NewService.self, mock: MockNewService())
+```
+
+#### Ventajas del Container
+
+- ✅ **Punto único de configuración**: Todas las dependencias en un lugar
+- ✅ **Testabilidad**: Fácil inyectar mocks con TestDependencyContainer
+- ✅ **Desacoplamiento**: Vistas no conocen implementaciones concretas
+- ✅ **Type-safe**: Errores de tipo en compile-time
+- ✅ **Lazy loading**: Singletons se crean solo cuando se usan
+- ✅ **Thread-safe**: NSLock para acceso concurrente
+
+#### Troubleshooting
+
+**Error**: "No se encontró registro para X"
+```
+⚠️ DependencyContainer Error:
+No se encontró registro para 'SomeType'.
+```
+**Solución**: Registrar el tipo en `setupDependencies()`
+
+**Error**: Crash al resolver dependencia
+**Solución**: Verificar que todas las dependencias están registradas antes de resolverlas
+
+---
+
 ## ✅ Guía de Testing
 
 ### Estructura de Tests

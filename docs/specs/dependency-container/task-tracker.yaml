@@ -30,13 +30,13 @@ metadata:
 
 progress:
   totalTasks: 28
-  completed: 0
+  completed: 28
   inProgress: 0
-  pending: 28
+  pending: 0
   blocked: 0
-  percentage: 0
-  currentEtapa: null
-  currentTask: null
+  percentage: 100
+  currentEtapa: 5
+  currentTask: "Proyecto completado"
 
 # ============================================================================
 # TAREAS POR ETAPA
