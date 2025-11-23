@@ -24,7 +24,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-public final class TestDependencyContainer: DependencyContainer {
+final class TestDependencyContainer: DependencyContainer {
 
     /// Registra un mock con scope factory por defecto
     ///
@@ -33,7 +33,7 @@ public final class TestDependencyContainer: DependencyContainer {
     ///   - mock: Instancia del mock
     ///
     /// - Note: Siempre usa scope `.factory` para facilitar reset entre tests
-    public func registerMock<T>(_ type: T.Type, mock: T) {
+    func registerMock<T>(_ type: T.Type, mock: T) {
         register(type, scope: .factory) { mock }
     }
 
@@ -41,7 +41,7 @@ public final class TestDependencyContainer: DependencyContainer {
     ///
     /// - Parameter types: Tipos a verificar
     /// - Returns: Array de tipos faltantes (vacío si todos están registrados)
-    public func verifyRegistrations(_ types: [Any.Type]) -> [String] {
+    func verifyRegistrations(_ types: [Any.Type]) -> [String] {
         var missing: [String] = []
 
         for type in types {

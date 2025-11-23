@@ -26,7 +26,7 @@ import SwiftUI
 /// // Resolver
 /// let authRepo = container.resolve(AuthRepository.self)
 /// ```
-public final class DependencyContainer: ObservableObject {
+public class DependencyContainer: ObservableObject {
 
     // MARK: - Storage
 
@@ -180,4 +180,3 @@ public final class DependencyContainer: ObservableObject {
         return factories[key] != nil
     }
 }
-
