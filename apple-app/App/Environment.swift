@@ -3,13 +3,14 @@
 //  apple-app
 //
 //  Created on 23-11-25.
-//  SPEC-001: Environment Configuration System
+//  Updated on 24-01-25 - Refactored to modern Swift 6 approach
+//  SPEC-001: Environment Configuration System (Modernized)
 //
 
 import Foundation
 import OSLog
 
-// MARK: - Authentication Mode (SPEC-003)
+// MARK: - Authentication Mode
 
 /// Modo de autenticación soportado
 enum AuthenticationMode: Sendable, Equatable {
@@ -17,26 +18,29 @@ enum AuthenticationMode: Sendable, Equatable {
     case realAPI    // API Real EduGo (staging/production)
 }
 
-// MARK: - Environment Configuration
+// MARK: - Environment Configuration (Modern Approach)
 
-/// Sistema de configuración de ambientes basado en archivos .xcconfig
+/// Sistema de configuración de ambientes usando Conditional Compilation
 ///
-/// Lee la configuración desde variables inyectadas en tiempo de compilación
-/// vía Build Settings desde los archivos .xcconfig correspondientes.
+/// Este approach moderno (Xcode 26 / Swift 6 / iOS 18+) usa:
+/// - Conditional compilation (#if DEBUG, STAGING, PRODUCTION)
+/// - Constantes compile-time (type-safe, sin runtime overhead)
+/// - SWIFT_ACTIVE_COMPILATION_CONDITIONS configurado en .xcconfig
+///
+/// ## Ventajas
+/// - ✅ Type-safe en compile-time
+/// - ✅ Sin crashes por variables faltantes
+/// - ✅ Funciona en desarrollo, CI/CD, producción, TestFlight
+/// - ✅ Sin runtime overhead
+/// - ✅ Fácil de debuggear
 ///
 /// ## Uso
 /// ```swift
-/// // Obtener ambiente actual
-/// let env = AppEnvironment.current  // .development, .staging, .production
-///
-/// // Acceder a configuración
 /// let apiURL = AppEnvironment.apiBaseURL
 /// let timeout = AppEnvironment.apiTimeout
-/// let logLevel = AppEnvironment.logLevel
 ///
-/// // Feature flags
-/// if AppEnvironment.analyticsEnabled {
-///     // Inicializar analytics
+/// if AppEnvironment.isDevelopment {
+///     print("🔧 Modo desarrollo")
 /// }
 /// ```
 enum AppEnvironment {
@@ -44,44 +48,24 @@ enum AppEnvironment {
     // MARK: - Environment Type
 
     /// Tipos de ambiente soportados
-    enum EnvironmentType: String, Sendable {
+    enum EnvironmentType: String, Sendable, CaseIterable {
         case development = "Development"
         case staging = "Staging"
         case production = "Production"
 
-        /// Indica si es ambiente de producción
-        var isProduction: Bool {
-            self == .production
-        }
+        var displayName: String { rawValue }
 
-        /// Indica si es ambiente de desarrollo
-        var isDevelopment: Bool {
-            self == .development
-        }
-
-        /// Indica si es ambiente de staging
-        var isStaging: Bool {
-            self == .staging
-        }
-
-        /// Nombre descriptivo del ambiente
-        var displayName: String {
-            rawValue
-        }
+        var isProduction: Bool { self == .production }
+        var isDevelopment: Bool { self == .development }
+        var isStaging: Bool { self == .staging }
     }
 
     // MARK: - Log Level
 
     /// Niveles de logging soportados
-    enum LogLevel: String, Sendable {
-        case debug
-        case info
-        case notice
-        case warning
-        case error
-        case critical
+    enum LogLevel: String, Sendable, CaseIterable {
+        case debug, info, notice, warning, error, critical
 
-        /// Convierte el nivel a OSLogType
         var osLogType: OSLogType {
             switch self {
             case .debug: return .debug
@@ -94,137 +78,97 @@ enum AppEnvironment {
         }
     }
 
-    // MARK: - Current Environment
+    // MARK: - Current Environment (Compile-Time)
 
-    /// Ambiente actual detectado desde configuración de build
+    /// Ambiente actual detectado en compile-time
     static var current: EnvironmentType {
-        guard let envString = infoDictionary["ENVIRONMENT_NAME"] as? String,
-              let environment = EnvironmentType(rawValue: envString) else {
-            #if DEBUG
-            assertionFailure("⚠️ ENVIRONMENT_NAME no encontrado en Info.plist. Usando Development por defecto.")
-            #endif
-            return .development // Fallback seguro
-        }
-        return environment
+        #if DEBUG
+        return .development
+        #elseif STAGING
+        return .staging
+        #else
+        return .production
+        #endif
     }
 
-    // MARK: - API Configuration
+    // MARK: - API Configuration (Compile-Time Constants)
 
     /// URL base del API configurada para el ambiente actual
-    ///
-    /// La URL se lee desde la variable `API_BASE_URL` configurada en el archivo .xcconfig
-    /// correspondiente al ambiente actual.
-    ///
-    /// - Note: Si la URL no es válida, la app fallará en debug para detectar el error temprano.
     static var apiBaseURL: URL {
-        guard let urlString = infoDictionary["INFOPLIST_KEY_API_BASE_URL"] as? String else {
-            fatalError("❌ API_BASE_URL no encontrado en configuración de build")
-        }
-
-        // Limpiar workaround de .xcconfig (https:/$()/domain -> https://domain)
-        let cleanedURL = urlString
-            .replacingOccurrences(of: "https:/$()/", with: "https://")
-            .replacingOccurrences(of: "http:/$()/", with: "http://")
-
-        guard let url = URL(string: cleanedURL) else {
-            fatalError("❌ API_BASE_URL tiene formato inválido: \(cleanedURL)")
-        }
-
-        return url
+        #if DEBUG
+        // Desarrollo: DummyJSON
+        return URL(string: "https://dummyjson.com")!
+        #elseif STAGING
+        // Staging: API de staging cuando esté disponible
+        return URL(string: "http://localhost:8080")!
+        #else
+        // Producción: API real
+        return URL(string: "https://api.edugo.com")!
+        #endif
     }
 
     /// Timeout para requests HTTP (en segundos)
-    ///
-    /// Valores típicos por ambiente:
-    /// - Development: 60s (permite debugging)
-    /// - Staging: 45s
-    /// - Production: 30s
     static var apiTimeout: TimeInterval {
-        guard let timeoutString = infoDictionary["INFOPLIST_KEY_API_TIMEOUT"] as? String,
-              let timeout = TimeInterval(timeoutString) else {
-            #if DEBUG
-            assertionFailure("⚠️ API_TIMEOUT no encontrado. Usando 30s por defecto.")
-            #endif
-            return 30
-        }
-        return timeout
+        #if DEBUG
+        return 60  // Desarrollo: permite debugging
+        #elseif STAGING
+        return 45  // Staging
+        #else
+        return 30  // Producción
+        #endif
     }
 
     // MARK: - Logging Configuration
 
     /// Nivel de logging configurado para el ambiente actual
-    ///
-    /// Valores por ambiente:
-    /// - Development: `.debug` (máximo detalle)
-    /// - Staging: `.info`
-    /// - Production: `.warning` (solo problemas)
     static var logLevel: LogLevel {
-        guard let levelString = infoDictionary["INFOPLIST_KEY_LOG_LEVEL"] as? String,
-              let level = LogLevel(rawValue: levelString) else {
-            #if DEBUG
-            assertionFailure("⚠️ LOG_LEVEL no encontrado. Usando .info por defecto.")
-            #endif
-            return .info
-        }
-        return level
+        #if DEBUG
+        return .debug  // Desarrollo: máximo detalle
+        #elseif STAGING
+        return .info   // Staging
+        #else
+        return .warning  // Producción: solo problemas
+        #endif
+    }
+
+    // MARK: - Authentication Mode
+
+    /// Modo de autenticación (DummyJSON vs Real API)
+    static var authMode: AuthenticationMode {
+        #if DEBUG
+        return .dummyJSON  // Desarrollo: DummyJSON
+        #elseif STAGING
+        return .realAPI    // Staging: API real
+        #else
+        return .realAPI    // Producción: API real
+        #endif
     }
 
     // MARK: - Feature Flags
 
     /// Indica si analytics está habilitado
-    ///
-    /// Por defecto:
-    /// - Development: `false`
-    /// - Staging: `true`
-    /// - Production: `true`
     static var analyticsEnabled: Bool {
-        guard let value = infoDictionary["INFOPLIST_KEY_ENABLE_ANALYTICS"] as? String else {
-            return false
-        }
-        return value.lowercased() == "true"
-    }
-
-    /// Indica si crashlytics/crash reporting está habilitado
-    ///
-    /// Por defecto:
-    /// - Development: `false`
-    /// - Staging: `true`
-    /// - Production: `true`
-    static var crashlyticsEnabled: Bool {
-        guard let value = infoDictionary["INFOPLIST_KEY_ENABLE_CRASHLYTICS"] as? String else {
-            return false
-        }
-        return value.lowercased() == "true"
-    }
-
-    // MARK: - Authentication Mode (SPEC-003)
-
-    /// Modo de autenticación (DummyJSON vs Real API)
-    ///
-    /// Por defecto:
-    /// - Development: DummyJSON (para desarrollo rápido)
-    /// - Staging: Real API
-    /// - Production: Real API
-    static var authMode: AuthenticationMode {
-        // Leer de .xcconfig si está configurado
-        if let modeString = infoDictionary["INFOPLIST_KEY_AUTH_MODE"] as? String {
-            return modeString.lowercased() == "real" ? .realAPI : .dummyJSON
-        }
-
-        // Fallback basado en ambiente
         #if DEBUG
-        return .dummyJSON
+        return false  // Desarrollo: deshabilitado
+        #elseif STAGING
+        return true   // Staging: habilitado para testing
         #else
-        return .realAPI
+        return true   // Producción: habilitado
         #endif
     }
 
-    // MARK: - Helpers
-
-    /// Diccionario de Info.plist del bundle principal
-    private static var infoDictionary: [String: Any] {
-        Bundle.main.infoDictionary ?? [:]
+    /// Indica si crashlytics está habilitado
+    static var crashlyticsEnabled: Bool {
+        #if DEBUG
+        return false  // Desarrollo: deshabilitado
+        #elseif STAGING
+        return true   // Staging: habilitado
+        #else
+        return true   // Producción: habilitado
+        #endif
     }
+
+    // MARK: - Convenience Properties
 
     /// Nombre descriptivo del ambiente actual
     static var displayName: String {
@@ -249,18 +193,17 @@ enum AppEnvironment {
     // MARK: - Debug Info
 
     /// Imprime información de configuración en consola (solo en debug)
-    ///
-    /// Útil para verificar que las variables se están leyendo correctamente.
     static func printDebugInfo() {
         #if DEBUG
         print("""
 
-        🌍 Environment Configuration:
+        🌍 Environment Configuration (Modern Approach):
         ════════════════════════════════════════
         Environment:    \(current.rawValue)
         API URL:        \(apiBaseURL.absoluteString)
         Timeout:        \(apiTimeout)s
         Log Level:      \(logLevel.rawValue)
+        Auth Mode:      \(authMode == .dummyJSON ? "DummyJSON" : "Real API")
         Analytics:      \(analyticsEnabled ? "✅" : "❌")
         Crashlytics:    \(crashlyticsEnabled ? "✅" : "❌")
         ════════════════════════════════════════
@@ -273,41 +216,9 @@ enum AppEnvironment {
 // MARK: - Convenience Extensions
 
 extension AppEnvironment.EnvironmentType: CustomStringConvertible {
-    var description: String {
-        displayName
-    }
+    var description: String { displayName }
 }
 
 extension AppEnvironment.LogLevel: CustomStringConvertible {
-    var description: String {
-        rawValue
-    }
+    var description: String { rawValue }
 }
-
-// MARK: - Testing Support
-
-#if DEBUG
-extension AppEnvironment {
-    /// Verifica que todas las variables requeridas estén presentes
-    /// - Returns: Array de variables faltantes (vacío si todo está bien)
-    static func validateConfiguration() -> [String] {
-        var missing: [String] = []
-
-        // Verificar variables requeridas
-        if infoDictionary["ENVIRONMENT_NAME"] == nil {
-            missing.append("ENVIRONMENT_NAME")
-        }
-        if infoDictionary["API_BASE_URL"] == nil {
-            missing.append("API_BASE_URL")
-        }
-        if infoDictionary["API_TIMEOUT"] == nil {
-            missing.append("API_TIMEOUT")
-        }
-        if infoDictionary["LOG_LEVEL"] == nil {
-            missing.append("LOG_LEVEL")
-        }
-
-        return missing
-    }
-}
-#endif
