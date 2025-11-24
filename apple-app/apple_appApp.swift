@@ -97,18 +97,14 @@ struct apple_appApp: App {
             DefaultNetworkMonitor()
         }
 
-        // APIClient - Singleton
-        // Comparte URLSession y configuración
+        // APIClient - Singleton (sin interceptores inicialmente para evitar circular dependency)
+        // Los interceptores se configuran después en setupAPIClientInterceptors()
         container.register(APIClient.self, scope: .singleton) {
-            // SPEC-004: Crear interceptores
-            let authInterceptor = AuthInterceptor(
-                tokenCoordinator: container.resolve(TokenRefreshCoordinator.self)
-            )
             let loggingInterceptor = LoggingInterceptor()
 
             return DefaultAPIClient(
                 baseURL: AppEnvironment.apiBaseURL,
-                requestInterceptors: [authInterceptor, loggingInterceptor],
+                requestInterceptors: [loggingInterceptor],
                 responseInterceptors: [loggingInterceptor],
                 retryPolicy: .default,
                 networkMonitor: container.resolve(NetworkMonitor.self)
