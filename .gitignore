@@ -25,3 +25,7 @@ playground.xcworkspace
 .env
 .env.local
 .env.*.local
+
+# Environment Configuration (SPEC-001)
+Configs/*.xcconfig
+!Configs/Base.xcconfig

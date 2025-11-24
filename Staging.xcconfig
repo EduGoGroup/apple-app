@@ -1,0 +1,49 @@
+// Staging.xcconfig
+// Configuración para ambiente de Staging (Pre-producción)
+// SPEC-001: Environment Configuration System
+
+#include "Base.xcconfig"
+
+// ============================================================================
+// MARK: - Environment Info
+// ============================================================================
+
+ENVIRONMENT_NAME = Staging
+ENVIRONMENT_DISPLAY_NAME = Staging
+
+// ============================================================================
+// MARK: - API Configuration
+// ============================================================================
+
+API_BASE_URL = https:/$()/dummyjson.com
+API_TIMEOUT = 45
+
+// ============================================================================
+// MARK: - Logging & Debugging
+// ============================================================================
+
+LOG_LEVEL = info
+
+// ============================================================================
+// MARK: - Feature Flags
+// ============================================================================
+
+ENABLE_ANALYTICS = true
+ENABLE_CRASHLYTICS = true
+
+// ============================================================================
+// MARK: - App Display
+// ============================================================================
+
+// Display name in home screen
+INFOPLIST_KEY_CFBundleDisplayName = EduGo β
+
+// Icon asset name
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+
+// ============================================================================
+// MARK: - Build Settings
+// ============================================================================
+
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) STAGING
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) STAGING=1

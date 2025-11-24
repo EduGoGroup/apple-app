@@ -236,7 +236,7 @@ private struct AuthenticatedApp: View {
         DefaultKeychainService.shared
     }
     container.register(APIClient.self, scope: .singleton) {
-        DefaultAPIClient(baseURL: AppConfig.baseURL)
+        DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
     }
     container.register(AuthRepository.self, scope: .singleton) {
         AuthRepositoryImpl(
