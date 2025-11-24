@@ -36,13 +36,13 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
             // Para este ejemplo, usamos el email como username
             let username = email.components(separatedBy: "@").first ?? email
 
-            let request = LoginRequest(
+            let request = DummyJSONLoginRequest(
                 username: username,
                 password: password,
                 expiresInMins: AppConfig.tokenExpirationMinutes
             )
 
-            let response: LoginResponse = try await apiClient.execute(
+            let response: DummyJSONLoginResponse = try await apiClient.execute(
                 endpoint: .login,
                 method: .post,
                 body: request
@@ -155,12 +155,12 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
 
             logger.logToken(refreshToken, label: "RefreshToken")
 
-            let request = RefreshRequest(
+            let request = DummyJSONRefreshRequest(
                 refreshToken: refreshToken,
                 expiresInMins: AppConfig.tokenExpirationMinutes
             )
 
-            let response: LoginResponse = try await apiClient.execute(
+            let response: DummyJSONLoginResponse = try await apiClient.execute(
                 endpoint: .refresh,
                 method: .post,
                 body: request
