@@ -43,24 +43,11 @@ GCC_PREPROCESSOR_DEFINITIONS = $(inherited)
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
 
 // ============================================================================
-// MARK: - App Configuration (to be overridden by environment configs)
+// MARK: - Environment Configuration
 // ============================================================================
-
-// API Configuration
-API_BASE_URL = https:/$()/dummyjson.com
-API_TIMEOUT = 30
-LOG_LEVEL = info
-AUTH_MODE = dummy
-ENABLE_ANALYTICS = false
-ENABLE_CRASHLYTICS = false
-
-// Expose variables to Info.plist (para que Swift pueda leerlas)
-INFOPLIST_KEY_API_BASE_URL = $(API_BASE_URL)
-INFOPLIST_KEY_API_TIMEOUT = $(API_TIMEOUT)
-INFOPLIST_KEY_LOG_LEVEL = $(LOG_LEVEL)
-INFOPLIST_KEY_ENABLE_ANALYTICS = $(ENABLE_ANALYTICS)
-INFOPLIST_KEY_ENABLE_CRASHLYTICS = $(ENABLE_CRASHLYTICS)
-INFOPLIST_KEY_AUTH_MODE = $(AUTH_MODE)
+// Nota: La configuración de ambiente (API URLs, timeouts, etc) ahora se maneja
+// en Environment.swift usando Conditional Compilation (#if DEBUG, STAGING, etc)
+// Los .xcconfig solo definen SWIFT_ACTIVE_COMPILATION_CONDITIONS
 
 // Bundle Configuration
 PRODUCT_BUNDLE_IDENTIFIER = com.edugo.apple-app
