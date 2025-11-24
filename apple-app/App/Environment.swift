@@ -96,11 +96,11 @@ enum AppEnvironment {
     /// URL base del API configurada para el ambiente actual
     static var apiBaseURL: URL {
         #if DEBUG
-        // Desarrollo: API local
-        return URL(string: "http://localhost:8080")!
+        // Desarrollo: API local (puerto 9090)
+        return URL(string: "http://localhost:9090")!
         #elseif STAGING
         // Staging: API de staging
-        return URL(string: "http://localhost:8080")!
+        return URL(string: "http://localhost:9090")!
         #else
         // Producción: API real
         return URL(string: "https://api.edugo.com")!
