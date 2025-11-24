@@ -29,7 +29,8 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     private let session: URLSession
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
-    
+    private let logger = LoggerFactory.network
+
     init(
         baseURL: URL,
         session: URLSession = .shared,
@@ -41,7 +42,7 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.encoder = encoder
         self.decoder = decoder
     }
-    
+
     func execute<T: Decodable>(
         endpoint: Endpoint,
         method: HTTPMethod,
@@ -49,49 +50,71 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     ) async throws -> T {
         // Construir URL
         let url = baseURL.appendingPathComponent(endpoint.path)
-        
+
         // Crear request
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
+
+        // Log del request
+        logger.info("HTTP Request started", metadata: [
+            "method": method.rawValue,
+            "endpoint": endpoint.path
+        ])
+
         // Agregar token de autenticación si existe
         if let token = try? DefaultKeychainService.shared.getToken(for: "access_token") {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            logger.debug("Authorization header added")
         }
-        
+
         // Agregar body si existe
         if let body = body {
             do {
                 request.httpBody = try encoder.encode(AnyEncodable(body))
             } catch {
+                logger.error("Failed to encode request body", metadata: [
+                    "error": error.localizedDescription
+                ])
                 throw NetworkError.decodingError
             }
         }
-        
+
         // Ejecutar request
         let (data, response) = try await session.data(for: request)
-        
+
         // Validar respuesta HTTP
         guard let httpResponse = response as? HTTPURLResponse else {
+            logger.error("Invalid HTTP response received")
             throw NetworkError.serverError(0)
         }
-        
+
+        // Log response
+        logger.info("HTTP Response received", metadata: [
+            "statusCode": "\(httpResponse.statusCode)",
+            "size": "\(data.count) bytes"
+        ])
+
         // Manejar códigos de estado
         try validateStatusCode(httpResponse.statusCode)
-        
+
         // Decodificar respuesta
         do {
             let decoded = try decoder.decode(T.self, from: data)
+            logger.debug("Response decoded successfully")
             return decoded
         } catch {
+            logger.error("Failed to decode response", metadata: [
+                "error": error.localizedDescription,
+                "responseType": String(describing: T.self)
+            ])
             throw NetworkError.decodingError
         }
     }
-    
+
     // MARK: - Private Helpers
-    
+
     private func validateStatusCode(_ statusCode: Int) throws {
         guard (200...299).contains(statusCode) else {
             switch statusCode {
@@ -116,11 +139,11 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
 
 private struct AnyEncodable: Encodable {
     private let encodable: any Encodable
-    
+
     init(_ encodable: any Encodable) {
         self.encodable = encodable
     }
-    
+
     func encode(to encoder: Encoder) throws {
         try encodable.encode(to: encoder)
     }
