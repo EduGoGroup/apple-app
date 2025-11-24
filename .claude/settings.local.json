@@ -1,7 +1,9 @@
 {
   "permissions": {
     "additionalDirectories": [
-      "/Users/jhoanmedina/source/Documentation/GuideDesign/Design/Apple"
+      "/Users/jhoanmedina/source/Documentation/GuideDesign/Design/Apple",
+      "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-api-mobile",
+      "/Users/jhoanmedina/source/EduGo/repos-separados"
     ]
   }
 }
