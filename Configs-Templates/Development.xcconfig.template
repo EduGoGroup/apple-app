@@ -9,7 +9,7 @@
 //
 // SPEC-001: Environment Configuration System
 
-#include "Base.xcconfig"
+#include "Configs/Base.xcconfig"
 
 // ============================================================================
 // MARK: - Environment Info
