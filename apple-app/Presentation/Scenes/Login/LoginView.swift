@@ -140,14 +140,8 @@ struct LoginView: View {
                 .font(DSTypography.caption2)
                 .foregroundColor(DSColors.textTertiary)
 
-            // Botón para llenar automáticamente
-            Button("Llenar credenciales") {
-                email = AppConfig.TestCredentials.username
-                password = AppConfig.TestCredentials.password
-            }
-            .font(DSTypography.caption)
-            .foregroundColor(DSColors.accent)
-            .padding(.top, DSSpacing.xs)
+            // SPEC-008: Botón de test removido por seguridad
+            // Para testing: usar credenciales válidas manualmente
         }
         .padding(DSSpacing.small)
         .background(DSColors.backgroundTertiary)
