@@ -3,50 +3,123 @@
 //  apple-app
 //
 //  Created on 16-11-25.
+//  Updated on 24-01-25 - SPEC-003: Added role support
 //
 
 import Foundation
 
 /// Representa un usuario autenticado en el sistema
 struct User: Codable, Identifiable, Equatable, Sendable {
-    /// Identificador único del usuario
+    /// Identificador único del usuario (UUID)
     let id: String
-    
+
     /// Correo electrónico del usuario
     let email: String
-    
+
     /// Nombre para mostrar del usuario
     let displayName: String
-    
-    /// URL de la foto de perfil (opcional)
-    let photoURL: URL?
-    
+
+    /// Rol del usuario en el sistema
+    let role: UserRole
+
     /// Indica si el email ha sido verificado
     let isEmailVerified: Bool
-    
+
+    // MARK: - Computed Properties
+
     /// Retorna las iniciales del nombre (primeras 2 letras en mayúsculas)
     var initials: String {
         String(displayName.prefix(2).uppercased())
     }
+
+    /// Indica si el usuario es estudiante
+    var isStudent: Bool {
+        role == .student
+    }
+
+    /// Indica si el usuario es profesor
+    var isTeacher: Bool {
+        role == .teacher
+    }
+
+    /// Indica si el usuario es administrador
+    var isAdmin: Bool {
+        role == .admin
+    }
+
+    /// Indica si el usuario es padre/tutor
+    var isParent: Bool {
+        role == .parent
+    }
+
+    // MARK: - Initializers
+
+    init(
+        id: String,
+        email: String,
+        displayName: String,
+        role: UserRole,
+        isEmailVerified: Bool = false
+    ) {
+        self.id = id
+        self.email = email
+        self.displayName = displayName
+        self.role = role
+        self.isEmailVerified = isEmailVerified
+    }
 }
 
-// MARK: - Mock Data
+// MARK: - Testing
+
+#if DEBUG
 extension User {
-    /// Usuario de ejemplo para testing y previews
-    static let mock = User(
-        id: "1",
-        email: "test@test.com",
-        displayName: "John Doe",
-        photoURL: nil,
-        isEmailVerified: true
-    )
-    
-    /// Usuario de ejemplo sin verificar
-    static let mockUnverified = User(
-        id: "2",
-        email: "unverified@test.com",
-        displayName: "Jane Smith",
-        photoURL: URL(string: "https://example.com/photo.jpg"),
-        isEmailVerified: false
-    )
+    /// Usuario fixture para testing con valores por defecto
+    static func fixture(
+        id: String = "550e8400-e29b-41d4-a716-446655440000",
+        email: String = "test@edugo.com",
+        displayName: String = "Test User",
+        role: UserRole = .student,
+        isEmailVerified: Bool = true
+    ) -> User {
+        User(
+            id: id,
+            email: email,
+            displayName: displayName,
+            role: role,
+            isEmailVerified: isEmailVerified
+        )
+    }
+
+    /// Usuario estudiante para testing
+    static var studentFixture: User {
+        fixture(
+            displayName: "Juan Pérez",
+            role: .student
+        )
+    }
+
+    /// Usuario profesor para testing
+    static var teacherFixture: User {
+        fixture(
+            id: "550e8400-e29b-41d4-a716-446655440001",
+            email: "profesor@edugo.com",
+            displayName: "Prof. García",
+            role: .teacher
+        )
+    }
+
+    /// Usuario administrador para testing
+    static var adminFixture: User {
+        fixture(
+            id: "550e8400-e29b-41d4-a716-446655440002",
+            email: "admin@edugo.com",
+            displayName: "Admin Sistema",
+            role: .admin
+        )
+    }
+
+    /// Retrocompatibilidad con código existente
+    static let mock = studentFixture
+    static let mockUnverified = fixture(isEmailVerified: false)
 }
+#endif

@@ -42,7 +42,7 @@ struct LoginResponse: Codable {
             id: String(id),
             email: email,
             displayName: "\(firstName) \(lastName)",
-            photoURL: URL(string: image),
+            role: .student, // DummyJSON no proporciona role, asumimos student
             isEmailVerified: true // DummyJSON no proporciona este campo, asumimos true
         )
     }
@@ -79,7 +79,7 @@ struct UserDTO: Codable {
             id: String(id),
             email: email,
             displayName: "\(firstName) \(lastName)",
-            photoURL: URL(string: image),
+            role: .student, // DummyJSON no proporciona role, asumimos student
             isEmailVerified: true
         )
     }
