@@ -125,7 +125,7 @@ NEW_VARIABLE = production_value
 ### 3. Acceder desde Swift
 
 ```swift
-// En Environment.swift (o crear nueva property)
+// En AppEnvironment.swift (o crear nueva property)
 static var newVariable: String {
     guard let value = infoDictionary["NEW_VARIABLE"] as? String else {
         fatalError("❌ NEW_VARIABLE no encontrado en Info.plist")
@@ -137,7 +137,7 @@ static var newVariable: String {
 ### 4. Usar en tu Código
 
 ```swift
-let value = Environment.newVariable
+let value = AppEnvironment.newVariable
 print("Valor: \(value)")
 ```
 
@@ -159,7 +159,7 @@ apple-app/
 │   └── Production.xcconfig.template
 │
 └── apple-app/App/
-    └── Environment.swift             # API Swift para acceder a config
+    └── AppEnvironment.swift             # API Swift para acceder a config
 ```
 
 ---
@@ -205,7 +205,7 @@ cp Configs-Templates/Development.xcconfig.template Configs/Development.xcconfig
 
 ---
 
-### Problema: Variables no aparecen en Swift (Environment.apiBaseURL falla)
+### Problema: Variables no aparecen en Swift (AppEnvironment.apiBaseURL falla)
 
 **Causa**: Las variables no se están inyectando en el build
 
@@ -258,19 +258,19 @@ cp Configs-Templates/Development.xcconfig.template Configs/Development.xcconfig
 import Foundation
 
 // Ambiente actual
-let env = Environment.current  // .development, .staging, .production
+let env = AppEnvironment.current  // .development, .staging, .production
 
 // URL base del API
-let url = Environment.apiBaseURL  // URL
+let url = AppEnvironment.apiBaseURL  // URL
 
 // Timeout
-let timeout = Environment.apiTimeout  // TimeInterval (60, 45, 30)
+let timeout = AppEnvironment.apiTimeout  // TimeInterval (60, 45, 30)
 
 // Log level
-let logLevel = Environment.logLevel  // .debug, .info, .warning
+let logLevel = AppEnvironment.logLevel  // .debug, .info, .warning
 
 // Feature flags
-if Environment.analyticsEnabled {
+if AppEnvironment.analyticsEnabled {
     // Inicializar analytics
 }
 ```
@@ -339,7 +339,7 @@ INFOPLIST_KEY_CFBundleDisplayName = EduGo QA
 
 ```swift
 // En consola (solo debug)
-Environment.printDebugInfo()
+AppEnvironment.printDebugInfo()
 
 // Output:
 // 🌍 Environment: Development
