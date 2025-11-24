@@ -30,9 +30,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		A9689E5E2ED3EE9C00526DD5 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
-		A9689E602ED3EED600526DD5 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
-		A9689E662ED3F0B400526DD5 /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
+		A9689E5E2ED3EE9C00526DD5 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Development.xcconfig; path = Configs/Development.xcconfig; sourceTree = "<group>"; };
+		A9689E602ED3EED600526DD5 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Production.xcconfig; path = Configs/Production.xcconfig; sourceTree = "<group>"; };
+		A9689E662ED3F0B400526DD5 /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Staging.xcconfig; path = Configs/Staging.xcconfig; sourceTree = "<group>"; };
 		A9689E6D2ED3F9C600526DD5 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		A9689E6E2ED3F9C600526DD5 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
 		A9689E6F2ED3F9C600526DD5 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
