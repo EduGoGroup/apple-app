@@ -156,7 +156,10 @@ extension Logger {
             metadata["size"] = "\(size) bytes"
         }
 
-        let level: (String, [String: String]?) -> Void = statusCode >= 400 ? error : info
-        level("HTTP Response", metadata)
+        if statusCode >= 400 {
+            error("HTTP Response", metadata: metadata)
+        } else {
+            info("HTTP Response", metadata: metadata)
+        }
     }
 }

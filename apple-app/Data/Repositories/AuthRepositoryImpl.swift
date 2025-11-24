@@ -11,6 +11,7 @@ import Foundation
 final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
     private let apiClient: APIClient
     private let keychainService: KeychainService
+    private let logger = LoggerFactory.auth
 
     // Claves para almacenar tokens en Keychain
     private let accessTokenKey = "access_token"
@@ -27,6 +28,9 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
     // MARK: - AuthRepository Implementation
 
     func login(email: String, password: String) async -> Result<User, AppError> {
+        logger.info("Login attempt started")
+        logger.logEmail(email)
+
         do {
             // DummyJSON usa username en lugar de email
             // Para este ejemplo, usamos el email como username
@@ -44,36 +48,61 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
                 body: request
             )
 
+            logger.debug("Login API response received", metadata: [
+                "userId": response.id.description,
+                "username": response.username
+            ])
+
             // Guardar tokens en Keychain
             try keychainService.saveToken(response.accessToken, for: accessTokenKey)
-            try keychainService.saveToken(response.refreshToken, for: refreshTokenKey)
+            logger.logToken(response.accessToken, label: "AccessToken")
 
+            try keychainService.saveToken(response.refreshToken, for: refreshTokenKey)
+            logger.debug("Tokens saved to Keychain")
+
+            logger.info("Login successful")
             return .success(response.toDomain())
 
         } catch let error as NetworkError {
-            print("❌ Login NetworkError: \(error)")
+            logger.error("Login failed - Network error", metadata: [
+                "error": error.localizedDescription,
+                "errorType": String(describing: type(of: error))
+            ])
             return .failure(.network(error))
         } catch let error as KeychainError {
-            print("❌ Login KeychainError: \(error)")
+            logger.error("Login failed - Keychain error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.system(error.localizedDescription)))
         } catch {
-            print("❌ Login Unknown Error: \(error)")
-            print("❌ Error Type: \(type(of: error))")
+            logger.error("Login failed - Unknown error", metadata: [
+                "error": error.localizedDescription,
+                "errorType": String(describing: type(of: error))
+            ])
             return .failure(.system(.system("Error: \(error.localizedDescription)")))
         }
     }
 
     func logout() async -> Result<Void, AppError> {
+        logger.info("Logout attempt started")
+
         do {
             // Eliminar tokens del Keychain
             try keychainService.deleteToken(for: accessTokenKey)
             try keychainService.deleteToken(for: refreshTokenKey)
 
+            logger.info("Logout successful - Tokens deleted from Keychain")
             return .success(())
 
         } catch let error as KeychainError {
+            logger.error("Logout failed - Keychain error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.system(error.localizedDescription)))
         } catch {
+            logger.error("Logout failed - Unknown error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.unknown))
         }
     }
@@ -115,11 +144,16 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
     }
 
     func refreshSession() async -> Result<User, AppError> {
+        logger.info("Token refresh attempt started")
+
         do {
             // Obtener refresh token del Keychain
             guard let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+                logger.warning("Token refresh failed - No refresh token in Keychain")
                 return .failure(.network(.unauthorized))
             }
+
+            logger.logToken(refreshToken, label: "RefreshToken")
 
             let request = RefreshRequest(
                 refreshToken: refreshToken,
@@ -132,21 +166,41 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
                 body: request
             )
 
+            logger.debug("Token refresh API response received", metadata: [
+                "userId": response.id.description
+            ])
+
             // Actualizar tokens en Keychain
             try keychainService.saveToken(response.accessToken, for: accessTokenKey)
-            try keychainService.saveToken(response.refreshToken, for: refreshTokenKey)
+            logger.logToken(response.accessToken, label: "NewAccessToken")
 
+            try keychainService.saveToken(response.refreshToken, for: refreshTokenKey)
+            logger.debug("New tokens saved to Keychain")
+
+            logger.info("Token refresh successful")
             return .success(response.toDomain())
 
         } catch let error as NetworkError {
+            logger.error("Token refresh failed - Network error", metadata: [
+                "error": error.localizedDescription
+            ])
+
             // Si el refresh falla, eliminar tokens
             try? keychainService.deleteToken(for: accessTokenKey)
             try? keychainService.deleteToken(for: refreshTokenKey)
+            logger.warning("Tokens deleted due to refresh failure")
+
             return .failure(.network(error))
 
         } catch let error as KeychainError {
+            logger.error("Token refresh failed - Keychain error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.system(error.localizedDescription)))
         } catch {
+            logger.error("Token refresh failed - Unknown error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.unknown))
         }
     }
