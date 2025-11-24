@@ -1,0 +1,34 @@
+spec:
+  id: SPEC-002
+  name: Professional Logging System
+  priority: P0_CRITICAL
+  status: PENDING
+  estimated_hours: 3-4
+  dependencies: []
+  
+phases:
+  - name: Setup
+    estimated_hours: 0.25
+    status: PENDING
+    
+  - name: Core Components
+    estimated_hours: 1.5
+    status: PENDING
+    
+  - name: Migration
+    estimated_hours: 1.0
+    status: PENDING
+    
+  - name: Testing
+    estimated_hours: 0.75
+    status: PENDING
+
+acceptance_criteria:
+  - criterion: "Zero print() statements"
+    verified: false
+  - criterion: "Logging en AuthRepositoryImpl, APIClient, KeychainService"
+    verified: false
+  - criterion: "Privacy redaction funcional"
+    verified: false
+  - criterion: "MockLogger para testing"
+    verified: false

@@ -1,0 +1,7 @@
+spec:
+  id: SPEC-011
+  name: Analytics & Telemetry
+  priority: P3_LOW
+  status: PENDING
+  estimated_hours: 16
+  dependencies: [SPEC-002]

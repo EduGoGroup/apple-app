@@ -1,0 +1,7 @@
+spec:
+  id: SPEC-007
+  name: Testing Infrastructure
+  priority: P1_HIGH
+  status: PENDING
+  estimated_hours: 20
+  dependencies: [SPEC-001, SPEC-002, SPEC-003, SPEC-004]

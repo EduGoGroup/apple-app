@@ -1,0 +1,7 @@
+spec:
+  id: SPEC-006
+  name: Platform Optimization
+  priority: P2_MEDIUM
+  status: PENDING
+  estimated_hours: 24
+  dependencies: [SPEC-001]

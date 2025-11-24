@@ -1,0 +1,6 @@
+spec:
+  id: SPEC-010
+  name: Localization
+  priority: P2_MEDIUM
+  status: PENDING
+  estimated_hours: 16

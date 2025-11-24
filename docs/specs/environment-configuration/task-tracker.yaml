@@ -1,0 +1,157 @@
+spec:
+  id: SPEC-001
+  name: Environment Configuration System
+  priority: P0_CRITICAL
+  status: PENDING
+  estimated_hours: 4-6
+  dependencies: []
+  
+phases:
+  - name: "Etapa 1: Setup Inicial"
+    estimated_hours: 1.0
+    status: PENDING
+    tasks:
+      - id: T1.1
+        name: Crear estructura de carpetas
+        status: PENDING
+        estimated_minutes: 5
+        assignee: null
+        
+      - id: T1.2
+        name: Actualizar .gitignore
+        status: PENDING
+        estimated_minutes: 5
+        assignee: null
+        
+      - id: T1.3
+        name: Crear Base.xcconfig
+        status: PENDING
+        estimated_minutes: 10
+        assignee: null
+        
+      - id: T1.4
+        name: Crear templates
+        status: PENDING
+        estimated_minutes: 30
+        assignee: null
+        
+      - id: T1.5
+        name: Copiar templates a Configs/
+        status: PENDING
+        estimated_minutes: 10
+        assignee: null
+        
+  - name: "Etapa 2: Configuración de Xcode"
+    estimated_hours: 1.0
+    status: PENDING
+    tasks:
+      - id: T2.1
+        name: Crear Build Configurations
+        status: PENDING
+        estimated_minutes: 15
+        assignee: null
+        
+      - id: T2.2
+        name: Asignar .xcconfig a configurations
+        status: PENDING
+        estimated_minutes: 10
+        assignee: null
+        
+      - id: T2.3
+        name: Crear Schemes
+        status: PENDING
+        estimated_minutes: 20
+        assignee: null
+        
+      - id: T2.4
+        name: Actualizar Info.plist
+        status: PENDING
+        estimated_minutes: 15
+        assignee: null
+        
+  - name: "Etapa 3: Swift API Implementation"
+    estimated_hours: 1.0
+    status: PENDING
+    tasks:
+      - id: T3.1
+        name: Crear Environment.swift
+        status: PENDING
+        estimated_minutes: 40
+        assignee: null
+        
+      - id: T3.2
+        name: Deprecar AppConfig.swift
+        status: PENDING
+        estimated_minutes: 5
+        assignee: null
+        
+      - id: T3.3
+        name: Crear tests
+        status: PENDING
+        estimated_minutes: 15
+        assignee: null
+        
+  - name: "Etapa 4: Migration"
+    estimated_hours: 1.5
+    status: PENDING
+    tasks:
+      - id: T4.1
+        name: Actualizar APIClient
+        status: PENDING
+        estimated_minutes: 10
+        assignee: null
+        
+      - id: T4.2
+        name: Actualizar DependencyContainer setup
+        status: PENDING
+        estimated_minutes: 10
+        assignee: null
+        
+      - id: T4.3
+        name: Testing exhaustivo
+        status: PENDING
+        estimated_minutes: 30
+        assignee: null
+        
+      - id: T4.4
+        name: Eliminar AppConfig.swift
+        status: PENDING
+        estimated_minutes: 5
+        assignee: null
+        
+  - name: "Etapa 5: Documentación"
+    estimated_hours: 0.5
+    status: PENDING
+    tasks:
+      - id: T5.1
+        name: Crear README-Environment.md
+        status: PENDING
+        estimated_minutes: 20
+        assignee: null
+        
+      - id: T5.2
+        name: Actualizar README principal
+        status: PENDING
+        estimated_minutes: 10
+        assignee: null
+
+acceptance_criteria:
+  - criterion: "Cambio de ambiente en < 10 segundos"
+    verified: false
+  - criterion: "Zero hardcoded values en Swift"
+    verified: false
+  - criterion: "Builds identificables por nombre"
+    verified: false
+  - criterion: "Setup de nuevo dev en < 5 minutos"
+    verified: false
+  - criterion: "Tests 100% green"
+    verified: false
+    
+blockers: []
+notes: |
+  Esta es la especificación más crítica del proyecto.
+  Debe implementarse antes de SPEC-002, SPEC-003, y SPEC-004.
+  
+  Referencias:
+  - NSHipster: https://nshipster.com/xcconfig/
+  - 12 Factor App: https://12factor.net/config

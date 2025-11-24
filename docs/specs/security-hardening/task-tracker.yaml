@@ -1,0 +1,7 @@
+spec:
+  id: SPEC-008
+  name: Security Hardening
+  priority: P1_HIGH
+  status: PENDING
+  estimated_hours: 18
+  dependencies: [SPEC-003]
