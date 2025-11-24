@@ -35,30 +35,25 @@ final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor, @unchec
         guard let url = response.url else { return data }
 
         let statusCode = response.statusCode
-        let logLevel: String
 
         switch statusCode {
         case 200..<300:
-            logLevel = "info"
             logger.info("HTTP Response", metadata: [
                 "url": url.path,
                 "status": statusCode.description,
                 "size": data.count.description
             ])
         case 400..<500:
-            logLevel = "warning"
             logger.warning("HTTP Response - Client Error", metadata: [
                 "url": url.path,
                 "status": statusCode.description
             ])
         case 500..<600:
-            logLevel = "error"
             logger.error("HTTP Response - Server Error", metadata: [
                 "url": url.path,
                 "status": statusCode.description
             ])
         default:
-            logLevel = "debug"
             logger.debug("HTTP Response", metadata: [
                 "url": url.path,
                 "status": statusCode.description

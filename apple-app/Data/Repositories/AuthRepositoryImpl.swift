@@ -194,7 +194,7 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
 
             return .success(user)
 
-        } catch let error as JWTError {
+        } catch is JWTError {
             // Si el JWT es inválido o expiró, intentar refresh
             logger.warning("JWT invalid or expired, attempting refresh")
 

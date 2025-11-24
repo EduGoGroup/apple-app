@@ -127,25 +127,10 @@ struct LoginView: View {
     }
 
     private var developmentHint: some View {
-        VStack(spacing: DSSpacing.xs) {
-            Text("🧪 Modo Desarrollo")
-                .font(DSTypography.caption2)
-                .foregroundColor(DSColors.textTertiary)
-
-            Text("Usuario: \(AppConfig.TestCredentials.username)")
-                .font(DSTypography.caption2)
-                .foregroundColor(DSColors.textTertiary)
-
-            Text("Pass: \(AppConfig.TestCredentials.password)")
-                .font(DSTypography.caption2)
-                .foregroundColor(DSColors.textTertiary)
-
-            // SPEC-008: Botón de test removido por seguridad
-            // Para testing: usar credenciales válidas manualmente
-        }
-        .padding(DSSpacing.small)
-        .background(DSColors.backgroundTertiary)
-        .cornerRadius(DSCornerRadius.small)
+        // SPEC-008: Bloque de desarrollo removido por seguridad
+        // Para testing con DummyJSON: emilys / emilyspass
+        // Para testing con API Real: usar credenciales válidas del servidor
+        EmptyView()
     }
 }
 
