@@ -186,7 +186,7 @@ struct HomeView: View {
 
 #Preview("Home - Loaded") {
     let authRepo = AuthRepositoryImpl(
-        apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
+        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
     )
 
     let authState = AuthenticationState()

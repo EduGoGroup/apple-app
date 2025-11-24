@@ -91,7 +91,7 @@ struct SettingsView: View {
             Divider().padding(.leading, DSSpacing.xl)
             infoRow(label: "Build", value: "1")
             Divider().padding(.leading, DSSpacing.xl)
-            infoRow(label: "Ambiente", value: AppConfig.environment.displayName)
+            infoRow(label: "Ambiente", value: AppEnvironment.displayName)
         }
     }
 

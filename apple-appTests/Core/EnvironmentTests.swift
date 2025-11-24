@@ -8,6 +8,7 @@
 
 import Testing
 @testable import apple_app
+typealias AppEnvironment = apple_app.AppEnvironment
 
 /// Tests para el sistema de configuración de ambientes
 ///
@@ -23,7 +24,7 @@ struct EnvironmentTests {
         // Given: La app está corriendo con una configuración de build
 
         // When: Leemos el ambiente actual
-        let environment = Environment.current
+        let environment = AppEnvironment.current
 
         // Then: Debe ser un ambiente válido
         #expect(
@@ -37,7 +38,7 @@ struct EnvironmentTests {
     @Test("El nombre del ambiente es descriptivo")
     func environmentDisplayNameIsDescriptive() {
         // Given: Ambiente actual
-        let environment = Environment.current
+        let environment = AppEnvironment.current
 
         // When: Obtenemos el nombre descriptivo
         let displayName = environment.displayName
@@ -58,7 +59,7 @@ struct EnvironmentTests {
         // Given: Configuración cargada desde build settings
 
         // When: Leemos la URL base del API
-        let url = Environment.apiBaseURL
+        let url = AppEnvironment.apiBaseURL
 
         // Then: Debe ser una URL válida con scheme y host
         #expect(url.scheme != nil, "La URL debe tener scheme (http/https)")
@@ -70,7 +71,7 @@ struct EnvironmentTests {
         // Given: Configuración cargada
 
         // When: Leemos el timeout
-        let timeout = Environment.apiTimeout
+        let timeout = AppEnvironment.apiTimeout
 
         // Then: Debe ser mayor a 0
         #expect(timeout > 0, "El timeout debe ser positivo")
@@ -84,10 +85,10 @@ struct EnvironmentTests {
         // Given: Configuración cargada
 
         // When: Leemos el log level
-        let logLevel = Environment.logLevel
+        let logLevel = AppEnvironment.logLevel
 
         // Then: Debe ser un nivel válido
-        let validLevels: [Environment.LogLevel] = [
+        let validLevels: [AppEnvironment.LogLevel] = [
             .debug, .info, .notice, .warning, .error, .critical
         ]
         #expect(validLevels.contains(logLevel), "Log level debe ser uno de los niveles válidos")
@@ -96,7 +97,7 @@ struct EnvironmentTests {
     @Test("Log Level tiene OSLogType correspondiente")
     func logLevelHasOSLogType() {
         // Given: Todos los niveles de log
-        let levels: [Environment.LogLevel] = [
+        let levels: [AppEnvironment.LogLevel] = [
             .debug, .info, .notice, .warning, .error, .critical
         ]
 
@@ -114,7 +115,7 @@ struct EnvironmentTests {
         // Given: Configuración cargada
 
         // When: Leemos el flag de analytics
-        let enabled = Environment.analyticsEnabled
+        let enabled = AppEnvironment.analyticsEnabled
 
         // Then: Debe ser true o false (siempre pasa, pero documenta el tipo)
         #expect(enabled == true || enabled == false)
@@ -125,7 +126,7 @@ struct EnvironmentTests {
         // Given: Configuración cargada
 
         // When: Leemos el flag de crashlytics
-        let enabled = Environment.crashlyticsEnabled
+        let enabled = AppEnvironment.crashlyticsEnabled
 
         // Then: Debe ser true o false
         #expect(enabled == true || enabled == false)
@@ -136,10 +137,10 @@ struct EnvironmentTests {
     @Test("isProduction coincide con el ambiente")
     func isProductionMatchesEnvironment() {
         // Given: Ambiente actual
-        let current = Environment.current
+        let current = AppEnvironment.current
 
         // When: Verificamos isProduction
-        let isProduction = Environment.isProduction
+        let isProduction = AppEnvironment.isProduction
 
         // Then: Debe coincidir con el ambiente
         #expect(isProduction == (current == .production))
@@ -148,10 +149,10 @@ struct EnvironmentTests {
     @Test("isDevelopment coincide con el ambiente")
     func isDevelopmentMatchesEnvironment() {
         // Given: Ambiente actual
-        let current = Environment.current
+        let current = AppEnvironment.current
 
         // When: Verificamos isDevelopment
-        let isDevelopment = Environment.isDevelopment
+        let isDevelopment = AppEnvironment.isDevelopment
 
         // Then: Debe coincidir con el ambiente
         #expect(isDevelopment == (current == .development))
@@ -160,10 +161,10 @@ struct EnvironmentTests {
     @Test("isStaging coincide con el ambiente")
     func isStagingMatchesEnvironment() {
         // Given: Ambiente actual
-        let current = Environment.current
+        let current = AppEnvironment.current
 
         // When: Verificamos isStaging
-        let isStaging = Environment.isStaging
+        let isStaging = AppEnvironment.isStaging
 
         // Then: Debe coincidir con el ambiente
         #expect(isStaging == (current == .staging))
@@ -177,7 +178,7 @@ struct EnvironmentTests {
         // Given: Sistema de configuración
 
         // When: Validamos la configuración
-        let missing = Environment.validateConfiguration()
+        let missing = AppEnvironment.validateConfiguration()
 
         // Then: No debe haber variables faltantes
         #expect(
@@ -192,7 +193,7 @@ struct EnvironmentTests {
     @Test("URL limpia el workaround de .xcconfig")
     func urlCleansXcconfigWorkaround() {
         // Given: Una URL que puede venir de .xcconfig
-        let url = Environment.apiBaseURL
+        let url = AppEnvironment.apiBaseURL
         let urlString = url.absoluteString
 
         // Then: No debe contener el workaround
@@ -207,7 +208,7 @@ struct EnvironmentTests {
     @Test("EnvironmentType tiene description")
     func environmentTypeHasDescription() {
         // Given: Los tipos de ambiente
-        let types: [Environment.EnvironmentType] = [
+        let types: [AppEnvironment.EnvironmentType] = [
             .development, .staging, .production
         ]
 
@@ -221,7 +222,7 @@ struct EnvironmentTests {
     @Test("LogLevel tiene description")
     func logLevelHasDescription() {
         // Given: Los niveles de log
-        let levels: [Environment.LogLevel] = [
+        let levels: [AppEnvironment.LogLevel] = [
             .debug, .info, .notice, .warning, .error, .critical
         ]
 

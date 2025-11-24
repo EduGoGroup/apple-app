@@ -17,19 +17,19 @@ import OSLog
 /// ## Uso
 /// ```swift
 /// // Obtener ambiente actual
-/// let env = Environment.current  // .development, .staging, .production
+/// let env = AppEnvironment.current  // .development, .staging, .production
 ///
 /// // Acceder a configuración
-/// let apiURL = Environment.apiBaseURL
-/// let timeout = Environment.apiTimeout
-/// let logLevel = Environment.logLevel
+/// let apiURL = AppEnvironment.apiBaseURL
+/// let timeout = AppEnvironment.apiTimeout
+/// let logLevel = AppEnvironment.logLevel
 ///
 /// // Feature flags
-/// if Environment.analyticsEnabled {
+/// if AppEnvironment.analyticsEnabled {
 ///     // Inicializar analytics
 /// }
 /// ```
-enum Environment {
+enum AppEnvironment {
 
     // MARK: - Environment Type
 
@@ -240,13 +240,13 @@ enum Environment {
 
 // MARK: - Convenience Extensions
 
-extension Environment.EnvironmentType: CustomStringConvertible {
+extension AppEnvironment.EnvironmentType: CustomStringConvertible {
     var description: String {
         displayName
     }
 }
 
-extension Environment.LogLevel: CustomStringConvertible {
+extension AppEnvironment.LogLevel: CustomStringConvertible {
     var description: String {
         rawValue
     }
@@ -255,7 +255,7 @@ extension Environment.LogLevel: CustomStringConvertible {
 // MARK: - Testing Support
 
 #if DEBUG
-extension Environment {
+extension AppEnvironment {
     /// Verifica que todas las variables requeridas estén presentes
     /// - Returns: Array de variables faltantes (vacío si todo está bien)
     static func validateConfiguration() -> [String] {

@@ -48,7 +48,7 @@ struct SplashView: View {
 
 #Preview("Splash") {
     SplashView(authRepository: AuthRepositoryImpl(
-        apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
+        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
     ))
     .environment(NavigationCoordinator())
 }

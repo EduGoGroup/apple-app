@@ -42,7 +42,7 @@ struct LoginView: View {
                     }
 
                     // Hint de credenciales (solo en desarrollo)
-                    if AppConfig.environment.isDevelopment {
+                    if AppEnvironment.isDevelopment {
                         developmentHint
                     }
 
@@ -160,7 +160,7 @@ struct LoginView: View {
 #Preview("Login - Idle") {
     LoginView(loginUseCase: DefaultLoginUseCase(
         authRepository: AuthRepositoryImpl(
-            apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
+            apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
         ),
         validator: DefaultInputValidator()
     ))

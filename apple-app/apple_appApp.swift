@@ -95,7 +95,7 @@ struct apple_appApp: App {
         // APIClient - Singleton
         // Comparte URLSession y configuración
         container.register(APIClient.self, scope: .singleton) {
-            DefaultAPIClient(baseURL: AppConfig.baseURL)
+            DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
         }
     }
 
