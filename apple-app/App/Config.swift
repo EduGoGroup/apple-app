@@ -8,6 +8,10 @@
 import Foundation
 
 /// Configuración de la aplicación por ambiente
+///
+/// - Warning: DEPRECADO - Usar `Environment` en su lugar
+/// - Note: Este archivo se mantendrá temporalmente para compatibilidad
+@available(*, deprecated, message: "Usar Environment en lugar de AppConfig. Ver Environment.swift para la nueva API.")
 enum AppConfig {
     /// Ambiente actual de la aplicación
     static let environment: Environment = .development
