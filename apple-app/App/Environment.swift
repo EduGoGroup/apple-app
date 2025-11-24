@@ -96,10 +96,10 @@ enum AppEnvironment {
     /// URL base del API configurada para el ambiente actual
     static var apiBaseURL: URL {
         #if DEBUG
-        // Desarrollo: DummyJSON
-        return URL(string: "https://dummyjson.com")!
+        // Desarrollo: API local
+        return URL(string: "http://localhost:8080")!
         #elseif STAGING
-        // Staging: API de staging cuando esté disponible
+        // Staging: API de staging
         return URL(string: "http://localhost:8080")!
         #else
         // Producción: API real
@@ -136,7 +136,7 @@ enum AppEnvironment {
     /// Modo de autenticación (DummyJSON vs Real API)
     static var authMode: AuthenticationMode {
         #if DEBUG
-        return .dummyJSON  // Desarrollo: DummyJSON
+        return .realAPI    // Desarrollo: API real (localhost:8080)
         #elseif STAGING
         return .realAPI    // Staging: API real
         #else
