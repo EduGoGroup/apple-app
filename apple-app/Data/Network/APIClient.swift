@@ -31,43 +31,46 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     private let decoder: JSONDecoder
     private let logger = LoggerFactory.network
 
+    // SPEC-004: Interceptors
+    private let requestInterceptors: [RequestInterceptor]
+    private let responseInterceptors: [ResponseInterceptor]
+    private let retryPolicy: RetryPolicy
+    private let networkMonitor: NetworkMonitor
+
     init(
         baseURL: URL,
         session: URLSession = .shared,
         encoder: JSONEncoder = JSONEncoder(),
-        decoder: JSONDecoder = JSONDecoder()
+        decoder: JSONDecoder = JSONDecoder(),
+        requestInterceptors: [RequestInterceptor] = [],
+        responseInterceptors: [ResponseInterceptor] = [],
+        retryPolicy: RetryPolicy = .default,
+        networkMonitor: NetworkMonitor? = nil
     ) {
         self.baseURL = baseURL
         self.session = session
         self.encoder = encoder
         self.decoder = decoder
+        self.requestInterceptors = requestInterceptors
+        self.responseInterceptors = responseInterceptors
+        self.retryPolicy = retryPolicy
+        self.networkMonitor = networkMonitor ?? DefaultNetworkMonitor()
     }
 
+    @MainActor
     func execute<T: Decodable>(
         endpoint: Endpoint,
         method: HTTPMethod,
         body: (any Encodable & Sendable)? = nil
     ) async throws -> T {
-        // Construir URL (usando método del endpoint para feature flag)
+        // Construir URL
         let url = endpoint.url(baseURL: baseURL)
 
-        // Crear request
+        // Crear request base
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        // Log del request
-        logger.info("HTTP Request started", metadata: [
-            "method": method.rawValue,
-            "endpoint": endpoint.path
-        ])
-
-        // Agregar token de autenticación si existe
-        if let token = try? DefaultKeychainService.shared.getToken(for: "access_token") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            logger.debug("Authorization header added")
-        }
 
         // Agregar body si existe
         if let body = body {
@@ -81,56 +84,80 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
             }
         }
 
-        // Ejecutar request
-        let (data, response) = try await session.data(for: request)
-
-        // Validar respuesta HTTP
-        guard let httpResponse = response as? HTTPURLResponse else {
-            logger.error("Invalid HTTP response received")
-            throw NetworkError.serverError(0)
+        // SPEC-004: Aplicar request interceptors
+        for interceptor in requestInterceptors {
+            request = try await interceptor.intercept(request)
         }
 
-        // Log response
-        logger.info("HTTP Response received", metadata: [
-            "statusCode": "\(httpResponse.statusCode)",
-            "size": "\(data.count) bytes"
-        ])
-
-        // Manejar códigos de estado
-        try validateStatusCode(httpResponse.statusCode)
-
-        // Decodificar respuesta
-        do {
-            let decoded = try decoder.decode(T.self, from: data)
-            logger.debug("Response decoded successfully")
-            return decoded
-        } catch {
-            logger.error("Failed to decode response", metadata: [
-                "error": error.localizedDescription,
-                "responseType": String(describing: T.self)
-            ])
-            throw NetworkError.decodingError
-        }
+        // SPEC-004: Ejecutar con retry policy
+        return try await executeWithRetry(request: request)
     }
 
-    // MARK: - Private Helpers
+    // MARK: - SPEC-004: Retry Logic
 
-    private func validateStatusCode(_ statusCode: Int) throws {
-        guard (200...299).contains(statusCode) else {
-            switch statusCode {
-            case 400:
-                throw NetworkError.badRequest("Bad request")
-            case 401:
-                throw NetworkError.unauthorized
-            case 403:
-                throw NetworkError.forbidden
-            case 404:
-                throw NetworkError.notFound
-            case 408:
-                throw NetworkError.timeout
-            default:
-                throw NetworkError.serverError(statusCode)
+    @MainActor
+    private func executeWithRetry<T: Decodable>(request: URLRequest, attempt: Int = 0) async throws -> T {
+        do {
+            // Ejecutar request
+            let (data, response) = try await session.data(for: request)
+
+            // Validar respuesta HTTP
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.serverError(0)
             }
+
+            // SPEC-004: Aplicar response interceptors
+            var processedData = data
+            for interceptor in responseInterceptors {
+                processedData = try await interceptor.intercept(httpResponse, data: processedData)
+            }
+
+            // Verificar status code
+            let statusCode = httpResponse.statusCode
+
+            // Si es retryable y tenemos intentos restantes, reintentar
+            if retryPolicy.shouldRetry(statusCode: statusCode, attempt: attempt) {
+                let delay = retryPolicy.backoffStrategy.delay(for: attempt)
+
+                logger.warning("Request failed, retrying", metadata: [
+                    "status": statusCode.description,
+                    "attempt": attempt.description,
+                    "delay": delay.description
+                ])
+
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return try await executeWithRetry(request: request, attempt: attempt + 1)
+            }
+
+            // Validar status code final
+            guard (200..<300).contains(statusCode) else {
+                switch statusCode {
+                case 401:
+                    throw NetworkError.unauthorized
+                case 404:
+                    throw NetworkError.notFound
+                case 500..<600:
+                    throw NetworkError.serverError(statusCode)
+                default:
+                    throw NetworkError.serverError(statusCode)
+                }
+            }
+
+            // Decodificar response
+            do {
+                let decoded = try decoder.decode(T.self, from: processedData)
+                return decoded
+            } catch {
+                logger.error("Failed to decode response", metadata: [
+                    "error": error.localizedDescription
+                ])
+                throw NetworkError.decodingError
+            }
+
+        } catch let error as NetworkError {
+            throw error
+        } catch {
+            throw NetworkError.serverError(0)
         }
     }
 }

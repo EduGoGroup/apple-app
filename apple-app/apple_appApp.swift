@@ -92,10 +92,27 @@ struct apple_appApp: App {
             DefaultKeychainService.shared
         }
 
+        // NetworkMonitor - Singleton (SPEC-004)
+        container.register(NetworkMonitor.self, scope: .singleton) {
+            DefaultNetworkMonitor()
+        }
+
         // APIClient - Singleton
         // Comparte URLSession y configuración
         container.register(APIClient.self, scope: .singleton) {
-            DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+            // SPEC-004: Crear interceptores
+            let authInterceptor = AuthInterceptor(
+                tokenCoordinator: container.resolve(TokenRefreshCoordinator.self)
+            )
+            let loggingInterceptor = LoggingInterceptor()
+
+            return DefaultAPIClient(
+                baseURL: AppEnvironment.apiBaseURL,
+                requestInterceptors: [authInterceptor, loggingInterceptor],
+                responseInterceptors: [loggingInterceptor],
+                retryPolicy: .default,
+                networkMonitor: container.resolve(NetworkMonitor.self)
+            )
         }
     }
 
