@@ -158,9 +158,19 @@ struct LoginView: View {
 // MARK: - Previews
 
 #Preview("Login - Idle") {
+    let apiClient = DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+    let jwtDecoder = DefaultJWTDecoder()
+
     LoginView(loginUseCase: DefaultLoginUseCase(
         authRepository: AuthRepositoryImpl(
-            apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+            apiClient: apiClient,
+            jwtDecoder: jwtDecoder,
+            tokenCoordinator: TokenRefreshCoordinator(
+                apiClient: apiClient,
+                keychainService: DefaultKeychainService.shared,
+                jwtDecoder: jwtDecoder
+            ),
+            biometricService: LocalAuthenticationService()
         ),
         validator: DefaultInputValidator()
     ))

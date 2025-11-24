@@ -185,8 +185,17 @@ struct HomeView: View {
 // MARK: - Previews
 
 #Preview("Home - Loaded") {
+    let apiClient = DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+    let jwtDecoder = DefaultJWTDecoder()
     let authRepo = AuthRepositoryImpl(
-        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+        apiClient: apiClient,
+        jwtDecoder: jwtDecoder,
+        tokenCoordinator: TokenRefreshCoordinator(
+            apiClient: apiClient,
+            keychainService: DefaultKeychainService.shared,
+            jwtDecoder: jwtDecoder
+        ),
+        biometricService: LocalAuthenticationService()
     )
 
     let authState = AuthenticationState()

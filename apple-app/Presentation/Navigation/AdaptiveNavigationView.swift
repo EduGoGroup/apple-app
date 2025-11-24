@@ -238,10 +238,26 @@ private struct AuthenticatedApp: View {
     container.register(APIClient.self, scope: .singleton) {
         DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
     }
+    container.register(JWTDecoder.self, scope: .singleton) {
+        DefaultJWTDecoder()
+    }
+    container.register(BiometricAuthService.self, scope: .singleton) {
+        LocalAuthenticationService()
+    }
+    container.register(TokenRefreshCoordinator.self, scope: .singleton) {
+        TokenRefreshCoordinator(
+            apiClient: container.resolve(APIClient.self),
+            keychainService: container.resolve(KeychainService.self),
+            jwtDecoder: container.resolve(JWTDecoder.self)
+        )
+    }
     container.register(AuthRepository.self, scope: .singleton) {
         AuthRepositoryImpl(
             apiClient: container.resolve(APIClient.self),
-            keychainService: container.resolve(KeychainService.self)
+            keychainService: container.resolve(KeychainService.self),
+            jwtDecoder: container.resolve(JWTDecoder.self),
+            tokenCoordinator: container.resolve(TokenRefreshCoordinator.self),
+            biometricService: container.resolve(BiometricAuthService.self)
         )
     }
     container.register(InputValidator.self, scope: .singleton) {

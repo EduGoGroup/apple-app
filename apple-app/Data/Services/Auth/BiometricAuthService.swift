@@ -84,19 +84,17 @@ final class LocalAuthenticationService: BiometricAuthService, @unchecked Sendabl
     }
 
     func authenticate(reason: String) async throws -> Bool {
-        try await MainActor.run {
-            let context = LAContext()
-            context.localizedCancelTitle = "Cancelar"
-            context.localizedFallbackTitle = "Usar contraseña"
+        let context = LAContext()
+        context.localizedCancelTitle = "Cancelar"
+        context.localizedFallbackTitle = "Usar contraseña"
 
-            do {
-                return try await context.evaluatePolicy(
-                    .deviceOwnerAuthenticationWithBiometrics,
-                    localizedReason: reason
-                )
-            } catch let error as LAError {
-                throw mapLAError(error)
-            }
+        do {
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: reason
+            )
+        } catch let error as LAError {
+            throw mapLAError(error)
         }
     }
 

@@ -114,12 +114,34 @@ struct apple_appApp: App {
 
     /// Registra los repositorios de la aplicación
     private static func registerRepositories(in container: DependencyContainer) {
+        // JWTDecoder - Singleton (SPEC-003)
+        container.register(JWTDecoder.self, scope: .singleton) {
+            DefaultJWTDecoder()
+        }
+
+        // BiometricAuthService - Singleton (SPEC-003)
+        container.register(BiometricAuthService.self, scope: .singleton) {
+            LocalAuthenticationService()
+        }
+
+        // TokenRefreshCoordinator - Singleton (SPEC-003)
+        container.register(TokenRefreshCoordinator.self, scope: .singleton) {
+            TokenRefreshCoordinator(
+                apiClient: container.resolve(APIClient.self),
+                keychainService: container.resolve(KeychainService.self),
+                jwtDecoder: container.resolve(JWTDecoder.self)
+            )
+        }
+
         // AuthRepository - Singleton
         // Cachea estado de sesión y token
         container.register(AuthRepository.self, scope: .singleton) {
             AuthRepositoryImpl(
                 apiClient: container.resolve(APIClient.self),
-                keychainService: container.resolve(KeychainService.self)
+                keychainService: container.resolve(KeychainService.self),
+                jwtDecoder: container.resolve(JWTDecoder.self),
+                tokenCoordinator: container.resolve(TokenRefreshCoordinator.self),
+                biometricService: container.resolve(BiometricAuthService.self)
             )
         }
 

@@ -9,6 +9,16 @@
 import Foundation
 import OSLog
 
+// MARK: - Authentication Mode (SPEC-003)
+
+/// Modo de autenticación soportado
+enum AuthenticationMode: Sendable, Equatable {
+    case dummyJSON  // DummyJSON API (desarrollo/testing)
+    case realAPI    // API Real EduGo (staging/production)
+}
+
+// MARK: - Environment Configuration
+
 /// Sistema de configuración de ambientes basado en archivos .xcconfig
 ///
 /// Lee la configuración desde variables inyectadas en tiempo de compilación
@@ -185,6 +195,28 @@ enum AppEnvironment {
             return false
         }
         return value.lowercased() == "true"
+    }
+
+    // MARK: - Authentication Mode (SPEC-003)
+
+    /// Modo de autenticación (DummyJSON vs Real API)
+    ///
+    /// Por defecto:
+    /// - Development: DummyJSON (para desarrollo rápido)
+    /// - Staging: Real API
+    /// - Production: Real API
+    static var authMode: AuthenticationMode {
+        // Leer de .xcconfig si está configurado
+        if let modeString = infoDictionary["AUTH_MODE"] as? String {
+            return modeString.lowercased() == "real" ? .realAPI : .dummyJSON
+        }
+
+        // Fallback basado en ambiente
+        #if DEBUG
+        return .dummyJSON
+        #else
+        return .realAPI
+        #endif
     }
 
     // MARK: - Helpers
