@@ -117,7 +117,7 @@ enum AppEnvironment {
     ///
     /// - Note: Si la URL no es válida, la app fallará en debug para detectar el error temprano.
     static var apiBaseURL: URL {
-        guard let urlString = infoDictionary["API_BASE_URL"] as? String else {
+        guard let urlString = infoDictionary["INFOPLIST_KEY_API_BASE_URL"] as? String else {
             fatalError("❌ API_BASE_URL no encontrado en configuración de build")
         }
 
@@ -140,7 +140,7 @@ enum AppEnvironment {
     /// - Staging: 45s
     /// - Production: 30s
     static var apiTimeout: TimeInterval {
-        guard let timeoutString = infoDictionary["API_TIMEOUT"] as? String,
+        guard let timeoutString = infoDictionary["INFOPLIST_KEY_API_TIMEOUT"] as? String,
               let timeout = TimeInterval(timeoutString) else {
             #if DEBUG
             assertionFailure("⚠️ API_TIMEOUT no encontrado. Usando 30s por defecto.")
@@ -159,7 +159,7 @@ enum AppEnvironment {
     /// - Staging: `.info`
     /// - Production: `.warning` (solo problemas)
     static var logLevel: LogLevel {
-        guard let levelString = infoDictionary["LOG_LEVEL"] as? String,
+        guard let levelString = infoDictionary["INFOPLIST_KEY_LOG_LEVEL"] as? String,
               let level = LogLevel(rawValue: levelString) else {
             #if DEBUG
             assertionFailure("⚠️ LOG_LEVEL no encontrado. Usando .info por defecto.")
@@ -178,7 +178,7 @@ enum AppEnvironment {
     /// - Staging: `true`
     /// - Production: `true`
     static var analyticsEnabled: Bool {
-        guard let value = infoDictionary["ENABLE_ANALYTICS"] as? String else {
+        guard let value = infoDictionary["INFOPLIST_KEY_ENABLE_ANALYTICS"] as? String else {
             return false
         }
         return value.lowercased() == "true"
@@ -191,7 +191,7 @@ enum AppEnvironment {
     /// - Staging: `true`
     /// - Production: `true`
     static var crashlyticsEnabled: Bool {
-        guard let value = infoDictionary["ENABLE_CRASHLYTICS"] as? String else {
+        guard let value = infoDictionary["INFOPLIST_KEY_ENABLE_CRASHLYTICS"] as? String else {
             return false
         }
         return value.lowercased() == "true"
@@ -207,7 +207,7 @@ enum AppEnvironment {
     /// - Production: Real API
     static var authMode: AuthenticationMode {
         // Leer de .xcconfig si está configurado
-        if let modeString = infoDictionary["AUTH_MODE"] as? String {
+        if let modeString = infoDictionary["INFOPLIST_KEY_AUTH_MODE"] as? String {
             return modeString.lowercased() == "real" ? .realAPI : .dummyJSON
         }
 
