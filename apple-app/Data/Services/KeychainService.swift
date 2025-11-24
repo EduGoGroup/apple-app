@@ -34,10 +34,15 @@ final class DefaultKeychainService: KeychainService {
     /// Instancia compartida del servicio
     static let shared = DefaultKeychainService()
 
+    private let logger = LoggerFactory.data
+
     private init() {}
 
     func saveToken(_ token: String, for key: String) throws {
+        logger.debug("Saving token to Keychain", metadata: ["key": key])
+
         guard let data = token.data(using: .utf8) else {
+            logger.error("Failed to convert token to data", metadata: ["key": key])
             throw KeychainError.invalidData
         }
 
@@ -54,11 +59,19 @@ final class DefaultKeychainService: KeychainService {
         // Agregar nuevo item
         let status = SecItemAdd(query as CFDictionary, nil)
         guard status == errSecSuccess else {
+            logger.error("Failed to save token to Keychain", metadata: [
+                "key": key,
+                "status": "\(status)"
+            ])
             throw KeychainError.unableToSave
         }
+
+        logger.info("Token saved to Keychain successfully", metadata: ["key": key])
     }
 
     func getToken(for key: String) throws -> String? {
+        logger.debug("Retrieving token from Keychain", metadata: ["key": key])
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -71,22 +84,31 @@ final class DefaultKeychainService: KeychainService {
 
         // Si no se encuentra, retornar nil (no es error)
         if status == errSecItemNotFound {
+            logger.debug("Token not found in Keychain", metadata: ["key": key])
             return nil
         }
 
         guard status == errSecSuccess else {
+            logger.error("Failed to retrieve token from Keychain", metadata: [
+                "key": key,
+                "status": "\(status)"
+            ])
             throw KeychainError.unableToRetrieve
         }
 
         guard let data = result as? Data,
               let token = String(data: data, encoding: .utf8) else {
+            logger.error("Invalid token data in Keychain", metadata: ["key": key])
             throw KeychainError.invalidData
         }
 
+        logger.info("Token retrieved from Keychain successfully", metadata: ["key": key])
         return token
     }
 
     func deleteToken(for key: String) throws {
+        logger.debug("Deleting token from Keychain", metadata: ["key": key])
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key
@@ -96,7 +118,17 @@ final class DefaultKeychainService: KeychainService {
 
         // Éxito si se eliminó o si no existía
         guard status == errSecSuccess || status == errSecItemNotFound else {
+            logger.error("Failed to delete token from Keychain", metadata: [
+                "key": key,
+                "status": "\(status)"
+            ])
             throw KeychainError.unableToDelete
+        }
+
+        if status == errSecItemNotFound {
+            logger.debug("Token was not in Keychain", metadata: ["key": key])
+        } else {
+            logger.info("Token deleted from Keychain successfully", metadata: ["key": key])
         }
     }
 }
