@@ -48,8 +48,8 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         method: HTTPMethod,
         body: (any Encodable & Sendable)? = nil
     ) async throws -> T {
-        // Construir URL
-        let url = baseURL.appendingPathComponent(endpoint.path)
+        // Construir URL (usando método del endpoint para feature flag)
+        let url = endpoint.url(baseURL: baseURL)
 
         // Crear request
         var request = URLRequest(url: url)
