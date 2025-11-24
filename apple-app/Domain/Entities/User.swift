@@ -69,7 +69,18 @@ struct User: Codable, Identifiable, Equatable, Sendable {
     }
 }
 
-// MARK: - Testing
+// MARK: - Previews & Testing
+
+extension User {
+    // Mock básico siempre disponible para previews
+    static let mock = User(
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        email: "test@edugo.com",
+        displayName: "Test User",
+        role: .student,
+        isEmailVerified: true
+    )
+}
 
 #if DEBUG
 extension User {
@@ -118,8 +129,7 @@ extension User {
         )
     }
 
-    /// Retrocompatibilidad con código existente
-    static let mock = studentFixture
+    /// Usuario sin verificar para testing
     static let mockUnverified = fixture(isEmailVerified: false)
 }
 #endif

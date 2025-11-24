@@ -185,28 +185,39 @@ struct HomeView: View {
 // MARK: - Previews
 
 #Preview("Home - Loaded") {
-    let apiClient = DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
-    let jwtDecoder = DefaultJWTDecoder()
-    let authRepo = AuthRepositoryImpl(
-        apiClient: apiClient,
-        jwtDecoder: jwtDecoder,
-        tokenCoordinator: TokenRefreshCoordinator(
-            apiClient: apiClient,
-            keychainService: DefaultKeychainService.shared,
-            jwtDecoder: jwtDecoder
-        ),
-        biometricService: LocalAuthenticationService()
-    )
-
-    let authState = AuthenticationState()
-    authState.authenticate(user: User.mock)
+    @Previewable @State var authState = AuthenticationState()
 
     return NavigationStack {
         HomeView(
-            getCurrentUserUseCase: DefaultGetCurrentUserUseCase(authRepository: authRepo),
-            logoutUseCase: DefaultLogoutUseCase(authRepository: authRepo),
+            getCurrentUserUseCase: DefaultGetCurrentUserUseCase(
+                authRepository: AuthRepositoryImpl(
+                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                    jwtDecoder: DefaultJWTDecoder(),
+                    tokenCoordinator: TokenRefreshCoordinator(
+                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                        keychainService: DefaultKeychainService.shared,
+                        jwtDecoder: DefaultJWTDecoder()
+                    ),
+                    biometricService: LocalAuthenticationService()
+                )
+            ),
+            logoutUseCase: DefaultLogoutUseCase(
+                authRepository: AuthRepositoryImpl(
+                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                    jwtDecoder: DefaultJWTDecoder(),
+                    tokenCoordinator: TokenRefreshCoordinator(
+                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                        keychainService: DefaultKeychainService.shared,
+                        jwtDecoder: DefaultJWTDecoder()
+                    ),
+                    biometricService: LocalAuthenticationService()
+                )
+            ),
             authState: authState
         )
     }
     .environment(authState)
+    .onAppear {
+        authState.authenticate(user: User.mock)
+    }
 }
