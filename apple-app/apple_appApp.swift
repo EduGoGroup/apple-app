@@ -5,9 +5,11 @@
 //  Created by Jhoan Medina on 15-11-25.
 //  Updated on 25-11-25 - SPEC-003: AuthInterceptor integration
 //  Updated on 25-11-25 - SPEC-008: Security services integration
+//  Updated on 25-11-25 - SPEC-005: SwiftData integration
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct apple_appApp: App {
@@ -15,9 +17,26 @@ struct apple_appApp: App {
 
     @StateObject private var container: DependencyContainer
 
+    // MARK: - SwiftData Container (SPEC-005)
+
+    private let modelContainer: ModelContainer
+
     // MARK: - Initialization
 
     init() {
+        // SPEC-005: Configurar SwiftData ModelContainer
+        do {
+            modelContainer = try ModelContainer(
+                for: CachedUser.self,
+                CachedHTTPResponse.self,
+                SyncQueueItem.self,
+                AppSettings.self
+            )
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+
+        // Crear DI container
         // Crear container
         let container = DependencyContainer()
         _container = StateObject(wrappedValue: container)
@@ -38,6 +57,7 @@ struct apple_appApp: App {
         WindowGroup {
             AdaptiveNavigationView()
                 .environmentObject(container)
+                .modelContainer(modelContainer)  // SPEC-005: SwiftData container
         }
         .commands {
             appCommands
