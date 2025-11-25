@@ -3,6 +3,7 @@
 //  apple-app
 //
 //  Created on 24-01-25.
+//  Updated on 24-11-25 - Sincronizado con api-admin response
 //  SPEC-003: Authentication Real API Migration - Real API DTOs
 //
 
@@ -56,20 +57,28 @@ struct LoginResponse: Codable, Sendable {
 
 // MARK: - User DTO
 
-/// DTO para usuario del API Real EduGo
+/// DTO para usuario del API Real EduGo (api-admin)
+/// Sincronizado con: internal/auth/dto/auth_dto.go -> UserInfo
 struct UserDTO: Codable, Sendable {
     let id: String
     let email: String
     let firstName: String
     let lastName: String
-    let fullName: String
     let role: String
+    let isActive: Bool
+    let emailVerified: Bool
 
     enum CodingKeys: String, CodingKey {
         case id, email, role
         case firstName = "first_name"
         case lastName = "last_name"
-        case fullName = "full_name"
+        case isActive = "is_active"
+        case emailVerified = "email_verified"
+    }
+
+    /// Nombre completo calculado
+    var fullName: String {
+        "\(firstName) \(lastName)"
     }
 
     /// Convierte el DTO a entidad de dominio User
@@ -79,7 +88,7 @@ struct UserDTO: Codable, Sendable {
             email: email,
             displayName: fullName,
             role: UserRole(rawValue: role) ?? .student,
-            isEmailVerified: true // Asumimos true si login exitoso
+            isEmailVerified: emailVerified
         )
     }
 }
@@ -115,8 +124,9 @@ extension UserDTO {
             email: "test@edugo.com",
             firstName: "Juan",
             lastName: "Pérez",
-            fullName: "Juan Pérez",
-            role: "student"
+            role: "student",
+            isActive: true,
+            emailVerified: true
         )
     }
 
@@ -126,8 +136,9 @@ extension UserDTO {
             email: "profesor@edugo.com",
             firstName: "María",
             lastName: "García",
-            fullName: "María García",
-            role: "teacher"
+            role: "teacher",
+            isActive: true,
+            emailVerified: true
         )
     }
 }
