@@ -9,9 +9,10 @@
 import Foundation
 
 /// Protocolo para cliente API
-/// Con Swift 6 y @MainActor isolation, no necesitamos Sendable explícito
-/// ya que todo se ejecuta en el mismo contexto de actor
-protocol APIClient {
+/// Con Swift 6 strict concurrency, usamos @preconcurrency para diferir
+/// la verificación de isolation a runtime cuando sea necesario
+@MainActor
+protocol APIClient: Sendable {
     /// Ejecuta una request HTTP
     /// - Parameters:
     ///   - endpoint: Endpoint a consumir
@@ -19,6 +20,7 @@ protocol APIClient {
     ///   - body: Body opcional para enviar
     /// - Returns: Objeto decodificado del tipo T
     /// - Throws: NetworkError si algo falla
+    @preconcurrency
     func execute<T: Decodable>(
         endpoint: Endpoint,
         method: HTTPMethod,

@@ -42,7 +42,8 @@ private actor TokenStore {
 /// ## Thread Safety
 /// - TokenStore actor para operaciones concurrentes con tokens
 /// - APIClient ahora es actor, garantiza serialización automática
-/// - Con Swift 6.2 Default MainActor Isolation, esta clase hereda @MainActor
+/// - @MainActor garantiza thread-safety sin locks manuales
+@MainActor
 final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - Dependencies
