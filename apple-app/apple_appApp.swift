@@ -24,6 +24,12 @@ struct apple_appApp: App {
 
         // Configurar dependencias
         Self.setupDependencies(in: container)
+
+        // SPEC-004: Iniciar monitoreo de red para auto-sync
+        Task {
+            let syncCoordinator = container.resolve(NetworkSyncCoordinator.self)
+            await syncCoordinator.startMonitoring()
+        }
     }
 
     // MARK: - Scene
@@ -106,6 +112,24 @@ struct apple_appApp: App {
         // NetworkMonitor - Singleton (SPEC-004)
         container.register(NetworkMonitor.self, scope: .singleton) {
             DefaultNetworkMonitor()
+        }
+
+        // OfflineQueue - Singleton (SPEC-004)
+        container.register(OfflineQueue.self, scope: .singleton) {
+            OfflineQueue(networkMonitor: container.resolve(NetworkMonitor.self))
+        }
+
+        // ResponseCache - Singleton (SPEC-004)
+        container.register(ResponseCache.self, scope: .singleton) {
+            ResponseCache(defaultTTL: 300) // 5 minutos de cache
+        }
+
+        // NetworkSyncCoordinator - Singleton (SPEC-004)
+        container.register(NetworkSyncCoordinator.self, scope: .singleton) {
+            NetworkSyncCoordinator(
+                networkMonitor: container.resolve(NetworkMonitor.self),
+                offlineQueue: container.resolve(OfflineQueue.self)
+            )
         }
     }
 
@@ -195,7 +219,9 @@ struct apple_appApp: App {
                 ],
                 responseInterceptors: [loggingInterceptor],
                 retryPolicy: .default,
-                networkMonitor: container.resolve(NetworkMonitor.self)
+                networkMonitor: container.resolve(NetworkMonitor.self),
+                offlineQueue: container.resolve(OfflineQueue.self),      // SPEC-004: Offline support
+                responseCache: container.resolve(ResponseCache.self)      // SPEC-004: Response caching
             )
         }
     }

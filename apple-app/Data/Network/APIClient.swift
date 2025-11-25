@@ -37,6 +37,7 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     private let retryPolicy: RetryPolicy
     private let networkMonitor: NetworkMonitor
     private let offlineQueue: OfflineQueue?
+    private let responseCache: ResponseCache?
 
     init(
         baseURL: URL,
@@ -48,7 +49,8 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         responseInterceptors: [ResponseInterceptor] = [],
         retryPolicy: RetryPolicy = .default,
         networkMonitor: NetworkMonitor? = nil,
-        offlineQueue: OfflineQueue? = nil  // SPEC-004: Offline support
+        offlineQueue: OfflineQueue? = nil,  // SPEC-004: Offline support
+        responseCache: ResponseCache? = nil  // SPEC-004: Response caching
     ) {
         self.baseURL = baseURL
         self.encoder = encoder
@@ -58,6 +60,7 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.retryPolicy = retryPolicy
         self.networkMonitor = networkMonitor ?? DefaultNetworkMonitor()
         self.offlineQueue = offlineQueue
+        self.responseCache = responseCache
 
         // SPEC-008: Configurar URLSession con certificate pinning si está disponible
         if certificatePinner != nil {
@@ -85,6 +88,14 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     ) async throws -> T {
         // Construir URL
         let url = endpoint.url(baseURL: baseURL)
+
+        // SPEC-004: Verificar cache para requests GET (solo si no hay body)
+        if method == .get, body == nil, let cache = responseCache {
+            if let cachedResponse = cache.get(for: url) {
+                logger.debug("Cache hit", metadata: ["url": url.absoluteString])
+                return try decoder.decode(T.self, from: cachedResponse.data)
+            }
+        }
 
         // Crear request base
         var request = URLRequest(url: url)
@@ -166,6 +177,12 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
             // Decodificar response
             do {
                 let decoded = try decoder.decode(T.self, from: processedData)
+
+                // SPEC-004: Cachear response exitoso (solo para GET requests)
+                if request.httpMethod == "GET", let cache = responseCache {
+                    cache.set(processedData, for: request.url!)
+                }
+
                 return decoded
             } catch {
                 logger.error("Failed to decode response", metadata: [
@@ -175,6 +192,24 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
             }
 
         } catch let error as NetworkError {
+            // SPEC-004: Encolar request si no hay conexión (para retry posterior)
+            if error == .noConnection, let queue = offlineQueue {
+                let queuedRequest = QueuedRequest(
+                    url: request.url!,
+                    method: request.httpMethod ?? "GET",
+                    headers: request.allHTTPHeaderFields ?? [:],
+                    body: request.httpBody
+                )
+
+                Task {
+                    await queue.enqueue(queuedRequest)
+                }
+
+                logger.info("Request enqueued for offline retry", metadata: [
+                    "url": request.url!.absoluteString
+                ])
+            }
+
             throw error
         } catch {
             throw NetworkError.serverError(0)
