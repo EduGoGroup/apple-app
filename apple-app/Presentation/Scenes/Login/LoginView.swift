@@ -196,7 +196,7 @@ struct LoginView: View {
 // MARK: - Previews
 
 #Preview("Login - Idle") {
-    let apiClient = DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+    let apiClient = DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL)
     let jwtDecoder = DefaultJWTDecoder()
 
     LoginView(loginUseCase: DefaultLoginUseCase(

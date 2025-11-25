@@ -45,8 +45,8 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
         // 1. Obtener token actual
         let currentToken = try getCurrentTokenInfo()
 
-        // 2. Si válido, retornar
-        if !currentToken.needsRefresh {
+        // 2. Si válido (no necesita refresh), retornar
+        if !currentToken.shouldRefresh {
             return currentToken
         }
 

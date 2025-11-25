@@ -57,7 +57,7 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.networkMonitor = networkMonitor ?? DefaultNetworkMonitor()
 
         // SPEC-008: Configurar URLSession con certificate pinning si está disponible
-        if let pinner = certificatePinner {
+        if certificatePinner != nil {
             // Extraer hashes del pinner (CertificatePinner tiene los hashes)
             // Creamos SecureSessionDelegate con los hashes directamente para evitar actor boundaries
             let pinnedHashes: Set<String> = []  // TODO: Extraer de pinner cuando tengamos API
