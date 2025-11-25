@@ -2,7 +2,7 @@
 //  MockFactory.swift
 //  apple-appTests
 //
-//  Created on 24-01-25.
+//  Created on 25-11-25.
 //  SPEC-007: Testing Infrastructure - Mock Factory
 //
 
@@ -12,8 +12,9 @@ import Foundation
 /// Factory centralizado para crear mocks y fixtures de testing
 enum MockFactory {
 
-    // MARK: - Users
+    // MARK: - Domain Entities
 
+    /// Crea un User fixture con valores por defecto personalizables
     static func makeUser(
         id: String = "550e8400-e29b-41d4-a716-446655440000",
         email: String = "test@edugo.com",
@@ -30,30 +31,7 @@ enum MockFactory {
         )
     }
 
-    static func makeStudent() -> User {
-        makeUser(role: .student, displayName: "Estudiante Test")
-    }
-
-    static func makeTeacher() -> User {
-        makeUser(
-            id: "550e8400-e29b-41d4-a716-446655440001",
-            email: "profesor@edugo.com",
-            displayName: "Prof. García",
-            role: .teacher
-        )
-    }
-
-    static func makeAdmin() -> User {
-        makeUser(
-            id: "550e8400-e29b-41d4-a716-446655440002",
-            email: "admin@edugo.com",
-            displayName: "Admin Sistema",
-            role: .admin
-        )
-    }
-
-    // MARK: - Tokens
-
+    /// Crea un TokenInfo fixture
     static func makeTokenInfo(
         accessToken: String = "mock_access_token",
         refreshToken: String = "mock_refresh_token",
@@ -66,7 +44,8 @@ enum MockFactory {
         )
     }
 
-    static func makeExpiredToken() -> TokenInfo {
+    /// Crea un TokenInfo expirado
+    static func makeExpiredTokenInfo() -> TokenInfo {
         TokenInfo(
             accessToken: "expired_token",
             refreshToken: "expired_refresh",
@@ -74,16 +53,66 @@ enum MockFactory {
         )
     }
 
-    static func makeRefreshingToken() -> TokenInfo {
+    /// Crea un TokenInfo que necesita refresh
+    static func makeTokenNeedingRefresh() -> TokenInfo {
         TokenInfo(
             accessToken: "soon_to_expire",
             refreshToken: "refresh_token",
-            expiresAt: Date().addingTimeInterval(240) // 4 minutos
+            expiresAt: Date().addingTimeInterval(60) // Expira en 1 min
         )
     }
 
-    // MARK: - JWT Payload
+    // MARK: - DTOs
 
+    /// Crea un LoginResponse fixture
+    static func makeLoginResponse(
+        accessToken: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        refreshToken: String = "550e8400-e29b-41d4-a716-446655440000",
+        expiresIn: Int = 900,
+        user: UserDTO? = nil
+    ) -> LoginResponse {
+        LoginResponse(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expiresIn: expiresIn,
+            tokenType: "Bearer",
+            user: user ?? makeUserDTO()
+        )
+    }
+
+    /// Crea un UserDTO fixture
+    static func makeUserDTO(
+        id: String = "550e8400-e29b-41d4-a716-446655440000",
+        email: String = "test@edugo.com",
+        firstName: String = "Test",
+        lastName: String = "User",
+        role: String = "student"
+    ) -> UserDTO {
+        UserDTO(
+            id: id,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            fullName: "\(firstName) \(lastName)",
+            role: role
+        )
+    }
+
+    /// Crea un RefreshResponse fixture
+    static func makeRefreshResponse(
+        accessToken: String = "new_access_token",
+        expiresIn: Int = 900
+    ) -> RefreshResponse {
+        RefreshResponse(
+            accessToken: accessToken,
+            expiresIn: expiresIn,
+            tokenType: "Bearer"
+        )
+    }
+
+    // MARK: - JWT
+
+    /// Crea un JWTPayload fixture
     static func makeJWTPayload(
         sub: String = "550e8400-e29b-41d4-a716-446655440000",
         email: String = "test@edugo.com",
@@ -96,100 +125,110 @@ enum MockFactory {
             role: role,
             exp: Date().addingTimeInterval(expiresIn),
             iat: Date(),
-            iss: "edugo-mobile"
-        )
-    }
-
-    // MARK: - DTOs
-
-    static func makeLoginRequest(
-        email: String = "test@edugo.com",
-        password: String = "password123"
-    ) -> LoginRequest {
-        LoginRequest(email: email, password: password)
-    }
-
-    static func makeLoginResponse(
-        accessToken: String = "eyJhbGc...",
-        refreshToken: String = "550e8400-...",
-        user: UserDTO? = nil
-    ) -> LoginResponse {
-        LoginResponse(
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            expiresIn: 900,
-            tokenType: "Bearer",
-            user: user ?? makeUserDTO()
-        )
-    }
-
-    static func makeUserDTO(
-        id: String = "550e8400-e29b-41d4-a716-446655440000",
-        email: String = "test@edugo.com",
-        firstName: String = "Juan",
-        lastName: String = "Pérez",
-        fullName: String = "Juan Pérez",
-        role: String = "student"
-    ) -> UserDTO {
-        UserDTO(
-            id: id,
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-            fullName: fullName,
-            role: role
-        )
-    }
-
-    static func makeRefreshRequest(
-        refreshToken: String = "550e8400-e29b-41d4-a716-446655440000"
-    ) -> RefreshRequest {
-        RefreshRequest(refreshToken: refreshToken)
-    }
-
-    static func makeRefreshResponse(
-        accessToken: String = "new_token",
-        expiresIn: Int = 900
-    ) -> RefreshResponse {
-        RefreshResponse(
-            accessToken: accessToken,
-            expiresIn: expiresIn,
-            tokenType: "Bearer"
+            iss: AppEnvironment.jwtIssuer
         )
     }
 
     // MARK: - Errors
 
-    static func makeNetworkError(_ type: NetworkError = .serverError(500)) -> AppError {
-        .network(type)
+    /// Crea un NetworkError común
+    static func makeNetworkError(_ type: NetworkErrorType = .unauthorized) -> NetworkError {
+        switch type {
+        case .noConnection:
+            return .noConnection
+        case .timeout:
+            return .timeout
+        case .unauthorized:
+            return .unauthorized
+        case .serverError:
+            return .serverError(500)
+        }
     }
 
-    static func makeSystemError(_ message: String = "Test error") -> AppError {
-        .system(.system(message))
-    }
-
-    // MARK: - Mocks
-
-    static func makeTestContainer() -> DependencyContainer {
-        let container = DependencyContainer()
-
-        // Register mocks
-        container.register(KeychainService.self, scope: .singleton) {
-            MockKeychainService()
-        }
-
-        container.register(APIClient.self, scope: .singleton) {
-            MockAPIClient()
-        }
-
-        container.register(JWTDecoder.self, scope: .singleton) {
-            MockJWTDecoder()
-        }
-
-        container.register(BiometricAuthService.self, scope: .singleton) {
-            MockBiometricService()
-        }
-
-        return container
+    enum NetworkErrorType {
+        case noConnection, timeout, unauthorized, serverError
     }
 }
+
+// MARK: - Builder Pattern Extensions
+
+extension MockFactory {
+
+    /// Builder para User con API fluida
+    struct UserBuilder {
+        private var id = "550e8400-e29b-41d4-a716-446655440000"
+        private var email = "test@edugo.com"
+        private var displayName = "Test User"
+        private var role: UserRole = .student
+        private var isEmailVerified = true
+
+        func withId(_ id: String) -> UserBuilder {
+            var builder = self
+            builder.id = id
+            return builder
+        }
+
+        func withEmail(_ email: String) -> UserBuilder {
+            var builder = self
+            builder.email = email
+            return builder
+        }
+
+        func withDisplayName(_ displayName: String) -> UserBuilder {
+            var builder = self
+            builder.displayName = displayName
+            return builder
+        }
+
+        func withRole(_ role: UserRole) -> UserBuilder {
+            var builder = self
+            builder.role = role
+            return builder
+        }
+
+        func verified(_ isVerified: Bool = true) -> UserBuilder {
+            var builder = self
+            builder.isEmailVerified = isVerified
+            return builder
+        }
+
+        func build() -> User {
+            User(
+                id: id,
+                email: email,
+                displayName: displayName,
+                role: role,
+                isEmailVerified: isEmailVerified
+            )
+        }
+    }
+
+    /// Inicia un builder de User
+    static func user() -> UserBuilder {
+        UserBuilder()
+    }
+}
+
+// MARK: - Usage Examples
+
+/*
+ // Ejemplo de uso:
+
+ // Simple
+ let user = MockFactory.makeUser()
+ let token = MockFactory.makeTokenInfo()
+
+ // Con builder
+ let teacher = MockFactory.user()
+     .withRole(.teacher)
+     .withDisplayName("Prof. García")
+     .verified()
+     .build()
+
+ // DTOs
+ let loginResponse = MockFactory.makeLoginResponse()
+
+ // Tokens especiales
+ let expired = MockFactory.makeExpiredTokenInfo()
+ let needsRefresh = MockFactory.makeTokenNeedingRefresh()
+ */

@@ -2,122 +2,168 @@
 //  IntegrationTestCase.swift
 //  apple-appTests
 //
-//  Created on 24-01-25.
-//  Updated on 24-11-25 - Fix closure capture semantics
+//  Created on 25-11-25.
 //  SPEC-007: Testing Infrastructure - Integration Test Base
 //
 
-import Testing
 import Foundation
+import Testing
 @testable import apple_app
 
-/// Base class para integration tests con DI container pre-configurado
-@MainActor
-class IntegrationTestCase {
+/// Base para integration tests con DI container configurado
+///
+/// Proporciona un container de testing con todos los servicios mock
+/// configurados y listos para usar en tests de integración.
+///
+/// ## Uso
+/// ```swift
+/// @Test func completeAuthFlow() async throws {
+///     let container = createTestContainer()
+///     let authRepo = container.resolve(AuthRepository.self)
+///
+///     let result = await authRepo.login(email: "test@test.com", password: "pass")
+///     try expectSuccess(result)
+/// }
+/// ```
+struct IntegrationTestCase {
 
-    var container: DependencyContainer!
-    var mockKeychain: MockKeychainService!
-    var mockAPI: MockAPIClient!
-    var mockJWT: MockJWTDecoder!
-    var mockBiometric: MockBiometricService!
-    var mockNetwork: MockNetworkMonitor!
+    // MARK: - Container Creation
 
-    init() {
-        setupContainer()
-    }
+    /// Crea un DependencyContainer configurado para testing
+    static func createTestContainer() -> DependencyContainer {
+        let container = DependencyContainer()
 
-    func setupContainer() {
-        container = DependencyContainer()
-
-        // Create mocks
-        mockKeychain = MockKeychainService()
-        mockAPI = MockAPIClient()
-        mockJWT = MockJWTDecoder()
-        mockBiometric = MockBiometricService()
-        mockNetwork = MockNetworkMonitor()
-
-        // Capture references for closures
-        let keychain = mockKeychain!
-        let api = mockAPI!
-        let jwt = mockJWT!
-        let biometric = mockBiometric!
-        let network = mockNetwork!
-        let containerRef = container!
-
-        // Register mocks
+        // Mock services
         container.register(KeychainService.self, scope: .singleton) {
-            keychain
+            MockKeychainService()
         }
 
         container.register(NetworkMonitor.self, scope: .singleton) {
-            network
-        }
-
-        container.register(APIClient.self, scope: .singleton) {
-            api
+            MockNetworkMonitor()
         }
 
         container.register(JWTDecoder.self, scope: .singleton) {
-            jwt
+            MockJWTDecoder()
         }
 
         container.register(BiometricAuthService.self, scope: .singleton) {
-            biometric
+            MockBiometricService()
         }
 
+        container.register(CertificatePinner.self, scope: .singleton) {
+            MockCertificatePinner()
+        }
+
+        container.register(SecurityValidator.self, scope: .singleton) {
+            MockSecurityValidator()
+        }
+
+        // Mock APIClient
+        container.register(APIClient.self, scope: .singleton) {
+            MockAPIClient()
+        }
+
+        // TokenRefreshCoordinator con mocks
         container.register(TokenRefreshCoordinator.self, scope: .singleton) {
             TokenRefreshCoordinator(
-                apiClient: api,
-                keychainService: keychain,
-                jwtDecoder: jwt
+                apiClient: container.resolve(APIClient.self),
+                keychainService: container.resolve(KeychainService.self),
+                jwtDecoder: container.resolve(JWTDecoder.self)
             )
         }
 
-        container.register(AuthRepository.self, scope: .singleton) {
-            AuthRepositoryImpl(
-                apiClient: api,
-                keychainService: keychain,
-                jwtDecoder: jwt,
-                tokenCoordinator: containerRef.resolve(TokenRefreshCoordinator.self),
-                biometricService: biometric,
-                authMode: .realAPI // Siempre usar Real API en tests
-            )
-        }
-
+        // Validators
         container.register(InputValidator.self, scope: .singleton) {
             DefaultInputValidator()
         }
 
+        // Repositories
+        container.register(AuthRepository.self, scope: .singleton) {
+            AuthRepositoryImpl(
+                apiClient: container.resolve(APIClient.self),
+                keychainService: container.resolve(KeychainService.self),
+                jwtDecoder: container.resolve(JWTDecoder.self),
+                tokenCoordinator: container.resolve(TokenRefreshCoordinator.self),
+                biometricService: container.resolve(BiometricAuthService.self)
+            )
+        }
+
+        container.register(PreferencesRepository.self, scope: .singleton) {
+            PreferencesRepositoryImpl()
+        }
+
         // Use Cases
-        container.register(LoginUseCase.self) {
+        container.register(LoginUseCase.self, scope: .factory) {
             DefaultLoginUseCase(
-                authRepository: containerRef.resolve(AuthRepository.self),
-                validator: containerRef.resolve(InputValidator.self)
+                authRepository: container.resolve(AuthRepository.self),
+                validator: container.resolve(InputValidator.self)
             )
         }
 
-        container.register(LogoutUseCase.self) {
+        container.register(LoginWithBiometricsUseCase.self, scope: .factory) {
+            DefaultLoginWithBiometricsUseCase(
+                authRepository: container.resolve(AuthRepository.self)
+            )
+        }
+
+        container.register(LogoutUseCase.self, scope: .factory) {
             DefaultLogoutUseCase(
-                authRepository: containerRef.resolve(AuthRepository.self)
+                authRepository: container.resolve(AuthRepository.self)
             )
         }
 
-        container.register(GetCurrentUserUseCase.self) {
+        container.register(GetCurrentUserUseCase.self, scope: .factory) {
             DefaultGetCurrentUserUseCase(
-                authRepository: containerRef.resolve(AuthRepository.self)
+                authRepository: container.resolve(AuthRepository.self)
             )
         }
+
+        return container
     }
 
-    func reset() {
-        mockKeychain.tokens.removeAll()
-        mockAPI.executeCallCount = 0
-        mockAPI.mockResponse = nil
-        mockAPI.errorToThrow = nil
-        mockJWT.payloadToReturn = nil
-        mockJWT.errorToThrow = nil
-        mockBiometric.authenticateCallCount = 0
+    // MARK: - Configured Mocks
+
+    /// Configura mocks para un login exitoso
+    static func configureSuccessfulLogin(in container: DependencyContainer) {
+        let mockAPI = container.resolve(APIClient.self) as! MockAPIClient
+        mockAPI.mockResponse = MockFactory.makeLoginResponse()
+
+        let mockJWT = container.resolve(JWTDecoder.self) as! MockJWTDecoder
+        mockJWT.payloadToReturn = MockFactory.makeJWTPayload()
+    }
+
+    /// Configura mocks para un login fallido
+    static func configureFailedLogin(in container: DependencyContainer, error: NetworkError = .unauthorized) {
+        let mockAPI = container.resolve(APIClient.self) as! MockAPIClient
+        mockAPI.errorToThrow = error
+    }
+
+    /// Configura mocks para biometric authentication exitosa
+    static func configureSuccessfulBiometric(in container: DependencyContainer) {
+        let mockBiometric = container.resolve(BiometricAuthService.self) as! MockBiometricService
         mockBiometric.authenticateResult = true
-        mockNetwork.isConnectedValue = true
+
+        let mockKeychain = container.resolve(KeychainService.self) as! MockKeychainService
+        mockKeychain.tokens = [
+            "stored_email": "test@edugo.com",
+            "stored_password": "password123"
+        ]
+
+        configureSuccessfulLogin(in: container)
+    }
+}
+
+// MARK: - Mock Network Monitor
+
+class MockNetworkMonitor: NetworkMonitor {
+    var isConnected: Bool = true
+    var connectionChangedCallCount = 0
+
+    func startMonitoring() {
+        // No-op en tests
+    }
+
+    func stopMonitoring() {
+        // No-op en tests
     }
 }
