@@ -22,9 +22,14 @@ final class LoginViewModel {
 
     private(set) var state: State = .idle
     private let loginUseCase: LoginUseCase
+    private let loginWithBiometricsUseCase: LoginWithBiometricsUseCase?
 
-    init(loginUseCase: LoginUseCase) {
+    init(
+        loginUseCase: LoginUseCase,
+        loginWithBiometricsUseCase: LoginWithBiometricsUseCase? = nil
+    ) {
         self.loginUseCase = loginUseCase
+        self.loginWithBiometricsUseCase = loginWithBiometricsUseCase
     }
 
     /// Ejecuta el login con las credenciales proporcionadas
@@ -44,9 +49,33 @@ final class LoginViewModel {
         }
     }
 
+    /// Ejecuta el login con autenticación biométrica (Face ID / Touch ID)
+    func loginWithBiometrics() async {
+        guard let biometricsUseCase = loginWithBiometricsUseCase else {
+            state = .error("Autenticación biométrica no disponible")
+            return
+        }
+
+        state = .loading
+
+        let result = await biometricsUseCase.execute()
+
+        switch result {
+        case .success(let user):
+            state = .success(user)
+        case .failure(let error):
+            state = .error(error.userMessage)
+        }
+    }
+
     /// Resetea el estado a idle
     func resetState() {
         state = .idle
+    }
+
+    /// Indica si la autenticación biométrica está disponible
+    var isBiometricAvailable: Bool {
+        loginWithBiometricsUseCase != nil
     }
 
     /// Indica si el botón de login debe estar deshabilitado

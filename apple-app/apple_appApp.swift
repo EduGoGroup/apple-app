@@ -3,6 +3,7 @@
 //  apple-app
 //
 //  Created by Jhoan Medina on 15-11-25.
+//  Updated on 25-11-25 - SPEC-003: AuthInterceptor integration
 //
 
 import SwiftUI
@@ -69,8 +70,14 @@ struct apple_appApp: App {
     /// Configura todas las dependencias de la aplicación
     /// - Parameter container: Container donde registrar las dependencias
     private static func setupDependencies(in container: DependencyContainer) {
-        // Servicios base
-        registerServices(in: container)
+        // Servicios base (Keychain, NetworkMonitor)
+        registerBaseServices(in: container)
+
+        // Auth services (JWT, Biometric, TokenCoordinator) - necesarios para APIClient
+        registerAuthServices(in: container)
+
+        // APIClient con todos los interceptores
+        registerAPIClient(in: container)
 
         // Validadores
         registerValidators(in: container)
@@ -82,10 +89,10 @@ struct apple_appApp: App {
         registerUseCases(in: container)
     }
 
-    // MARK: - Services Registration
+    // MARK: - Base Services Registration
 
-    /// Registra los servicios base de la aplicación
-    private static func registerServices(in container: DependencyContainer) {
+    /// Registra servicios base (Keychain, NetworkMonitor)
+    private static func registerBaseServices(in container: DependencyContainer) {
         // KeychainService - Singleton
         // Única instancia para todo el acceso al Keychain
         container.register(KeychainService.self, scope: .singleton) {
@@ -96,15 +103,62 @@ struct apple_appApp: App {
         container.register(NetworkMonitor.self, scope: .singleton) {
             DefaultNetworkMonitor()
         }
+    }
 
-        // APIClient - Singleton (sin interceptores inicialmente para evitar circular dependency)
-        // Los interceptores se configuran después en setupAPIClientInterceptors()
+    // MARK: - Auth Services Registration
+
+    /// Registra servicios de autenticación (JWT, Biometric, TokenCoordinator)
+    /// Deben estar registrados ANTES de APIClient para evitar dependencia circular
+    private static func registerAuthServices(in container: DependencyContainer) {
+        // JWTDecoder - Singleton (SPEC-003)
+        container.register(JWTDecoder.self, scope: .singleton) {
+            DefaultJWTDecoder()
+        }
+
+        // BiometricAuthService - Singleton (SPEC-003)
+        container.register(BiometricAuthService.self, scope: .singleton) {
+            LocalAuthenticationService()
+        }
+
+        // TokenRefreshCoordinator - Singleton (SPEC-003)
+        // IMPORTANTE: Se crea con un APIClient básico sin AuthInterceptor
+        // para evitar dependencia circular (TokenCoordinator -> APIClient -> AuthInterceptor -> TokenCoordinator)
+        container.register(TokenRefreshCoordinator.self, scope: .singleton) {
+            // APIClient básico solo para refresh (sin AuthInterceptor)
+            let refreshAPIClient = DefaultAPIClient(
+                baseURL: AppEnvironment.authAPIBaseURL,
+                requestInterceptors: [LoggingInterceptor()],
+                responseInterceptors: [LoggingInterceptor()],
+                retryPolicy: .default,
+                networkMonitor: container.resolve(NetworkMonitor.self)
+            )
+
+            return TokenRefreshCoordinator(
+                apiClient: refreshAPIClient,
+                keychainService: container.resolve(KeychainService.self),
+                jwtDecoder: container.resolve(JWTDecoder.self)
+            )
+        }
+    }
+
+    // MARK: - API Client Registration
+
+    /// Registra APIClient con todos los interceptores (Auth + Logging)
+    private static func registerAPIClient(in container: DependencyContainer) {
+        // APIClient - Singleton
+        // Configurado con interceptores completos: Auth + Logging (SPEC-003 + SPEC-004)
         container.register(APIClient.self, scope: .singleton) {
+            // Logging interceptor (request + response)
             let loggingInterceptor = LoggingInterceptor()
 
+            // Auth interceptor (auto-refresh de tokens) - SPEC-003
+            let authInterceptor = AuthInterceptor(
+                tokenCoordinator: container.resolve(TokenRefreshCoordinator.self)
+            )
+
             return DefaultAPIClient(
-                baseURL: AppEnvironment.apiBaseURL,
-                requestInterceptors: [loggingInterceptor],
+                baseURL: AppEnvironment.mobileAPIBaseURL, // API móvil por defecto
+                requestInterceptors: [authInterceptor, loggingInterceptor],
                 responseInterceptors: [loggingInterceptor],
                 retryPolicy: .default,
                 networkMonitor: container.resolve(NetworkMonitor.self)
@@ -127,25 +181,6 @@ struct apple_appApp: App {
 
     /// Registra los repositorios de la aplicación
     private static func registerRepositories(in container: DependencyContainer) {
-        // JWTDecoder - Singleton (SPEC-003)
-        container.register(JWTDecoder.self, scope: .singleton) {
-            DefaultJWTDecoder()
-        }
-
-        // BiometricAuthService - Singleton (SPEC-003)
-        container.register(BiometricAuthService.self, scope: .singleton) {
-            LocalAuthenticationService()
-        }
-
-        // TokenRefreshCoordinator - Singleton (SPEC-003)
-        container.register(TokenRefreshCoordinator.self, scope: .singleton) {
-            TokenRefreshCoordinator(
-                apiClient: container.resolve(APIClient.self),
-                keychainService: container.resolve(KeychainService.self),
-                jwtDecoder: container.resolve(JWTDecoder.self)
-            )
-        }
-
         // AuthRepository - Singleton
         // Cachea estado de sesión y token
         container.register(AuthRepository.self, scope: .singleton) {
@@ -175,6 +210,14 @@ struct apple_appApp: App {
             DefaultLoginUseCase(
                 authRepository: container.resolve(AuthRepository.self),
                 validator: container.resolve(InputValidator.self)
+            )
+        }
+
+        // LoginWithBiometricsUseCase - Factory (SPEC-003)
+        // Cada login biométrico es una operación independiente
+        container.register(LoginWithBiometricsUseCase.self, scope: .factory) {
+            DefaultLoginWithBiometricsUseCase(
+                authRepository: container.resolve(AuthRepository.self)
             )
         }
 

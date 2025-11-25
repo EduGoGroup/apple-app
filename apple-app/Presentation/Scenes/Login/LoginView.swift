@@ -14,8 +14,14 @@ struct LoginView: View {
     @State private var password = ""
     @Environment(AuthenticationState.self) private var authState
 
-    init(loginUseCase: LoginUseCase) {
-        self._viewModel = State(initialValue: LoginViewModel(loginUseCase: loginUseCase))
+    init(
+        loginUseCase: LoginUseCase,
+        loginWithBiometricsUseCase: LoginWithBiometricsUseCase? = nil
+    ) {
+        self._viewModel = State(initialValue: LoginViewModel(
+            loginUseCase: loginUseCase,
+            loginWithBiometricsUseCase: loginWithBiometricsUseCase
+        ))
     }
 
     var body: some View {
@@ -35,6 +41,11 @@ struct LoginView: View {
 
                     // Botón de login
                     loginButton
+
+                    // Botón de login biométrico (SPEC-003)
+                    if viewModel.isBiometricAvailable {
+                        biometricLoginButton
+                    }
 
                     // Mensaje de error
                     if case .error(let message) = viewModel.state {
@@ -113,6 +124,27 @@ struct LoginView: View {
         }
     }
 
+    private var biometricLoginButton: some View {
+        VStack(spacing: DSSpacing.small) {
+            Text("o")
+                .font(DSTypography.caption)
+                .foregroundColor(DSColors.textSecondary)
+
+            DSButton(
+                title: "Usar Face ID",
+                style: .secondary,
+                icon: "faceid",
+                isLoading: viewModel.isLoading,
+                isDisabled: viewModel.isLoginDisabled
+            ) {
+                Task {
+                    await viewModel.loginWithBiometrics()
+                }
+            }
+        }
+        .padding(.top, DSSpacing.small)
+    }
+
     private func errorMessage(_ message: String) -> some View {
         HStack(spacing: DSSpacing.small) {
             Image(systemName: "exclamationmark.triangle.fill")
@@ -131,7 +163,7 @@ struct LoginView: View {
             Text("🔧 Modo Desarrollo")
                 .font(DSTypography.caption)
                 .foregroundColor(DSColors.textSecondary)
-            
+
             Button {
                 email = "admin@edugo.test"
                 password = "edugo2024"
