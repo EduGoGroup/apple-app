@@ -24,6 +24,7 @@ struct LoginRequest: Codable, Sendable {
 // MARK: - Login Response
 
 /// DTO para response de login (API Real EduGo)
+/// Compatible con: api-mobile y api-admin
 struct LoginResponse: Codable, Sendable {
     let accessToken: String
     let refreshToken: String
@@ -57,6 +58,7 @@ struct LoginResponse: Codable, Sendable {
 // MARK: - User DTO
 
 /// DTO para usuario del API Real EduGo
+/// Compatible con: api-mobile/internal/application/dto/auth_dto.go -> UserInfo
 struct UserDTO: Codable, Sendable {
     let id: String
     let email: String

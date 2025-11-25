@@ -3,6 +3,7 @@
 //  apple-appTests
 //
 //  Created on 24-01-25.
+//  Updated on 24-11-25 - Fix closure capture semantics
 //  SPEC-007: Testing Infrastructure - Integration Test Base
 //
 
@@ -35,42 +36,50 @@ class IntegrationTestCase {
         mockBiometric = MockBiometricService()
         mockNetwork = MockNetworkMonitor()
 
+        // Capture references for closures
+        let keychain = mockKeychain!
+        let api = mockAPI!
+        let jwt = mockJWT!
+        let biometric = mockBiometric!
+        let network = mockNetwork!
+        let containerRef = container!
+
         // Register mocks
         container.register(KeychainService.self, scope: .singleton) {
-            self.mockKeychain
+            keychain
         }
 
         container.register(NetworkMonitor.self, scope: .singleton) {
-            self.mockNetwork
+            network
         }
 
         container.register(APIClient.self, scope: .singleton) {
-            self.mockAPI
+            api
         }
 
         container.register(JWTDecoder.self, scope: .singleton) {
-            self.mockJWT
+            jwt
         }
 
         container.register(BiometricAuthService.self, scope: .singleton) {
-            self.mockBiometric
+            biometric
         }
 
         container.register(TokenRefreshCoordinator.self, scope: .singleton) {
             TokenRefreshCoordinator(
-                apiClient: self.mockAPI,
-                keychainService: self.mockKeychain,
-                jwtDecoder: self.mockJWT
+                apiClient: api,
+                keychainService: keychain,
+                jwtDecoder: jwt
             )
         }
 
         container.register(AuthRepository.self, scope: .singleton) {
             AuthRepositoryImpl(
-                apiClient: self.mockAPI,
-                keychainService: self.mockKeychain,
-                jwtDecoder: self.mockJWT,
-                tokenCoordinator: container.resolve(TokenRefreshCoordinator.self),
-                biometricService: self.mockBiometric,
+                apiClient: api,
+                keychainService: keychain,
+                jwtDecoder: jwt,
+                tokenCoordinator: containerRef.resolve(TokenRefreshCoordinator.self),
+                biometricService: biometric,
                 authMode: .realAPI // Siempre usar Real API en tests
             )
         }
@@ -82,20 +91,20 @@ class IntegrationTestCase {
         // Use Cases
         container.register(LoginUseCase.self) {
             DefaultLoginUseCase(
-                authRepository: container.resolve(AuthRepository.self),
-                validator: container.resolve(InputValidator.self)
+                authRepository: containerRef.resolve(AuthRepository.self),
+                validator: containerRef.resolve(InputValidator.self)
             )
         }
 
         container.register(LogoutUseCase.self) {
             DefaultLogoutUseCase(
-                authRepository: container.resolve(AuthRepository.self)
+                authRepository: containerRef.resolve(AuthRepository.self)
             )
         }
 
         container.register(GetCurrentUserUseCase.self) {
             DefaultGetCurrentUserUseCase(
-                authRepository: container.resolve(AuthRepository.self)
+                authRepository: containerRef.resolve(AuthRepository.self)
             )
         }
     }

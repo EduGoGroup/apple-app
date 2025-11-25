@@ -66,7 +66,7 @@ enum JWTError: Error, LocalizedError {
         case .missingClaims:
             return "Claims requeridos faltantes en el JWT"
         case .invalidIssuer:
-            return "Issuer del JWT no es 'edugo-mobile'"
+            return "Issuer del JWT no es válido (esperado: edugo-central o edugo-mobile)"
         case .expired:
             return "JWT token expirado"
         }
@@ -78,7 +78,8 @@ enum JWTError: Error, LocalizedError {
 /// Implementación por defecto del decodificador JWT
 final class DefaultJWTDecoder: JWTDecoder {
     private let logger = LoggerFactory.auth
-    private let expectedIssuer = "edugo-mobile"
+    /// Issuers válidos: edugo-central (api-admin) y edugo-mobile (legacy)
+    private let validIssuers = ["edugo-central", "edugo-mobile"]
 
     func decode(_ token: String) throws -> JWTPayload {
         logger.debug("Decoding JWT token")
@@ -105,10 +106,10 @@ final class DefaultJWTDecoder: JWTDecoder {
 
         let dto = try decoder.decode(JWTPayloadDTO.self, from: payloadData)
 
-        // 4. Validar issuer
-        guard dto.iss == expectedIssuer else {
+        // 4. Validar issuer (acepta edugo-central o edugo-mobile)
+        guard let issuer = dto.iss, validIssuers.contains(issuer) else {
             logger.error("Invalid issuer", metadata: [
-                "expected": expectedIssuer,
+                "expected": validIssuers.joined(separator: " o "),
                 "actual": dto.iss ?? "nil"
             ])
             throw JWTError.invalidIssuer

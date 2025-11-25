@@ -3,6 +3,7 @@
 //  apple-appTests
 //
 //  Created on 23-01-25.
+//  Updated on 24-11-25 - Fix concurrency issues
 //
 
 import Foundation
@@ -12,10 +13,10 @@ import Foundation
 ///
 /// Ejemplo de uso:
 /// ```swift
-/// final class LoginViewModelTests: XCTestCase {
+/// @Suite struct LoginViewModelTests {
 ///     var container: TestDependencyContainer!
 ///
-///     override func setUp() {
+///     init() {
 ///         container = TestDependencyContainer()
 ///
 ///         // Registrar mocks
@@ -24,7 +25,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-final class TestDependencyContainer: DependencyContainer {
+final class TestDependencyContainer: DependencyContainer, @unchecked Sendable {
 
     /// Registra un mock con scope factory por defecto
     ///
@@ -34,14 +35,14 @@ final class TestDependencyContainer: DependencyContainer {
     ///
     /// - Note: Siempre usa scope `.factory` para facilitar reset entre tests
     func registerMock<T>(_ type: T.Type, mock: T) {
-        register(type, scope: .factory) { mock }
+        super.register(type, scope: .factory) { mock }
     }
 
     /// Verifica que todas las dependencias necesarias estén registradas
     ///
     /// - Parameter types: Tipos a verificar
     /// - Returns: Array de tipos faltantes (vacío si todos están registrados)
-    func verifyRegistrations(_ types: [Any.Type]) -> [String] {
+    func verifyRegistrations<T>(_ types: [T.Type]) -> [String] {
         var missing: [String] = []
 
         for type in types {
