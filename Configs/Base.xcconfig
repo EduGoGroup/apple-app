@@ -40,6 +40,12 @@ SWIFT_STRICT_CONCURRENCY = complete
 ENABLE_TESTABILITY = YES
 
 // ============================================================================
+// MARK: - Swift 6 Concurrency Configuration
+// ============================================================================
+// Swift 6.0 ya incluye GlobalConcurrency e InferSendableFromCaptures
+// No se necesitan flags adicionales para upcoming features
+
+// ============================================================================
 // MARK: - Code Signing
 // ============================================================================
 

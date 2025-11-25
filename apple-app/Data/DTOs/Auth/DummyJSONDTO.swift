@@ -36,6 +36,7 @@ struct DummyJSONLoginResponse: Codable, Sendable {
     let image: String
 
     /// Convierte el DTO a entidad de dominio User
+    /// Con Swift 6.2 Default MainActor Isolation, structs Sendable son nonisolated implícitamente
     func toDomain() -> User {
         User(
             id: String(id),

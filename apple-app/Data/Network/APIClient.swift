@@ -3,12 +3,15 @@
 //  apple-app
 //
 //  Created on 16-11-25.
+//  Refactored on 25-11-25: Swift 6.2 Approachable Concurrency with @MainActor
 //
 
 import Foundation
 
 /// Protocolo para cliente API
-protocol APIClient: Sendable {
+/// Con Swift 6 y @MainActor isolation, no necesitamos Sendable explícito
+/// ya que todo se ejecuta en el mismo contexto de actor
+protocol APIClient {
     /// Ejecuta una request HTTP
     /// - Parameters:
     ///   - endpoint: Endpoint a consumir
@@ -19,17 +22,19 @@ protocol APIClient: Sendable {
     func execute<T: Decodable>(
         endpoint: Endpoint,
         method: HTTPMethod,
-        body: (any Encodable & Sendable)?
+        body: (any Encodable)?
     ) async throws -> T
 }
 
 /// Implementación por defecto del cliente API usando URLSession
-final class DefaultAPIClient: APIClient, @unchecked Sendable {
+/// Con Swift 6.2 Default MainActor Isolation, @MainActor garantiza thread-safety
+@MainActor
+final class DefaultAPIClient: APIClient {
     private let baseURL: URL
     private let session: URLSession
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
-    private let logger = LoggerFactory.network
+    private let logger: any Logger
 
     // SPEC-004: Interceptors & Network Features
     private let requestInterceptors: [RequestInterceptor]
@@ -37,13 +42,14 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     private let retryPolicy: RetryPolicy
     private let networkMonitor: NetworkMonitor
     private let offlineQueue: OfflineQueue?
-    private let responseCache: ResponseCache?
+    private var responseCache: ResponseCache?
 
     init(
         baseURL: URL,
         session: URLSession = .shared,
         encoder: JSONEncoder = JSONEncoder(),
         decoder: JSONDecoder = JSONDecoder(),
+        logger: any Logger = LoggerFactory.network,
         certificatePinner: CertificatePinner? = nil,  // SPEC-008: SSL Pinning
         requestInterceptors: [RequestInterceptor] = [],
         responseInterceptors: [ResponseInterceptor] = [],
@@ -55,6 +61,7 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.baseURL = baseURL
         self.encoder = encoder
         self.decoder = decoder
+        self.logger = logger
         self.requestInterceptors = requestInterceptors
         self.responseInterceptors = responseInterceptors
         self.retryPolicy = retryPolicy
@@ -62,28 +69,9 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.offlineQueue = offlineQueue
         self.responseCache = responseCache
 
-        // SPEC-004: Configurar executor de OfflineQueue
-        if let queue = offlineQueue {
-            Task { [weak queue] in
-                await queue?.executeRequest = { [weak self] queuedRequest in
-                    guard let self = self else { return }
-
-                    // Reconstruir URLRequest desde QueuedRequest
-                    var request = URLRequest(url: queuedRequest.url)
-                    request.httpMethod = queuedRequest.method
-                    request.allHTTPHeaderFields = queuedRequest.headers
-                    request.httpBody = queuedRequest.body
-
-                    // Ejecutar request (ignorar response - best effort)
-                    _ = try await self.session.data(for: request)
-                }
-            }
-        }
-
         // SPEC-008: Configurar URLSession con certificate pinning si está disponible
+        // IMPORTANTE: Debe ir ANTES de usar self.session
         if certificatePinner != nil {
-            // Extraer hashes del pinner (CertificatePinner tiene los hashes)
-            // Creamos SecureSessionDelegate con los hashes directamente para evitar actor boundaries
             let pinnedHashes: Set<String> = []  // TODO: Extraer de pinner cuando tengamos API
             let delegate = SecureSessionDelegate(pinnedPublicKeyHashes: pinnedHashes)
             let configuration = URLSessionConfiguration.default
@@ -96,13 +84,30 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         } else {
             self.session = session
         }
+
+        // SPEC-004: Configurar executor de OfflineQueue
+        // Debe ir DESPUÉS de inicializar self.session
+        if let queue = offlineQueue {
+            let capturedSession = self.session
+            Task { [weak queue] in
+                await queue?.configure { @Sendable queuedRequest in
+                    // Reconstruir URLRequest desde QueuedRequest
+                    var request = URLRequest(url: queuedRequest.url)
+                    request.httpMethod = queuedRequest.method
+                    request.allHTTPHeaderFields = queuedRequest.headers
+                    request.httpBody = queuedRequest.body
+
+                    // Ejecutar request (ignorar response - best effort)
+                    _ = try await capturedSession.data(for: request)
+                }
+            }
+        }
     }
 
-    @MainActor
     func execute<T: Decodable>(
         endpoint: Endpoint,
         method: HTTPMethod,
-        body: (any Encodable & Sendable)? = nil
+        body: (any Encodable)? = nil
     ) async throws -> T {
         // Construir URL
         let url = endpoint.url(baseURL: baseURL)
@@ -144,7 +149,6 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
 
     // MARK: - SPEC-004: Retry Logic
 
-    @MainActor
     private func executeWithRetry<T: Decodable>(request: URLRequest, attempt: Int = 0) async throws -> T {
         do {
             // Ejecutar request
@@ -198,9 +202,8 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
 
                 // SPEC-004: Cachear response exitoso (solo para GET requests)
                 if request.httpMethod == "GET",
-                   let cache = responseCache,
                    let url = request.url {
-                    cache.set(processedData, for: url)
+                    responseCache?.set(processedData, for: url)
                 }
 
                 return decoded

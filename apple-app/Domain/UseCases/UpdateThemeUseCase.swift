@@ -8,7 +8,8 @@
 import Foundation
 
 /// Protocolo para el caso de uso de actualizar tema
-protocol UpdateThemeUseCase: Sendable {
+/// Con Swift 6.2 Default MainActor Isolation, Sendable es implícito
+protocol UpdateThemeUseCase {
     /// Actualiza el tema de la aplicación
     /// - Parameter theme: Nuevo tema a aplicar
     func execute(_ theme: Theme) async

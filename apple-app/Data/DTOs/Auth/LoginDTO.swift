@@ -41,6 +41,7 @@ struct LoginResponse: Codable, Sendable {
     }
 
     /// Convierte a TokenInfo de dominio
+    /// Con Swift 6.2 Default MainActor Isolation, structs Sendable son nonisolated implícitamente
     func toTokenInfo() -> TokenInfo {
         TokenInfo(
             accessToken: accessToken,
