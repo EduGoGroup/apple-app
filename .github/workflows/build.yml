@@ -29,7 +29,8 @@ jobs:
           if [ "${{ matrix.platform }}" == "macOS" ]; then
             DESTINATION="platform=macOS"
           else
-            DESTINATION="platform=iOS Simulator,name=Any iOS Simulator Device"
+            # Usar destino genérico para build (no requiere simulador específico)
+            DESTINATION="generic/platform=iOS Simulator"
           fi
 
           xcodebuild build \
