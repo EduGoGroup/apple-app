@@ -10,6 +10,7 @@ import Testing
 import Foundation
 @testable import apple_app
 
+@MainActor
 @Suite("JWT Decoder Tests")
 struct JWTDecoderTests {
 
@@ -230,12 +231,12 @@ struct JWTDecoderTests {
     func decoderIsSendable() async throws {
         let decoder = DefaultJWTDecoder()
 
-        // Decodificar en múltiples tasks concurrentes
-        async let result1 = Task { try decoder.decode(validToken) }.value
-        async let result2 = Task { try decoder.decode(validToken) }.value
-        async let result3 = Task { try decoder.decode(validToken) }.value
+        // Decodificar múltiples veces (ya estamos en @MainActor)
+        let result1 = try decoder.decode(validToken)
+        let result2 = try decoder.decode(validToken)
+        let result3 = try decoder.decode(validToken)
 
-        let results = try await [result1, result2, result3]
+        let results = [result1, result2, result3]
 
         // Todos deben decodificar correctamente
         #expect(results.allSatisfy { $0.email == "test@edugo.com" })

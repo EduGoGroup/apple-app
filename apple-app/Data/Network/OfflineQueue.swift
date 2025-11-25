@@ -54,6 +54,13 @@ actor OfflineQueue {
         Task { await loadQueue() }
     }
 
+    // MARK: - Configuration
+
+    /// Configura el callback para ejecutar requests
+    func configure(executor: @escaping (QueuedRequest) async throws -> Void) {
+        self.executeRequest = executor
+    }
+
     // MARK: - Public API
 
     /// Encola un request para ejecución posterior

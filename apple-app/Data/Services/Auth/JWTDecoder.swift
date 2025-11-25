@@ -198,11 +198,15 @@ extension JWTPayload {
 }
 
 /// Mock JWT Decoder para testing
-final class MockJWTDecoder: JWTDecoder {
+final class MockJWTDecoder: JWTDecoder, @unchecked Sendable {
     var payloadToReturn: JWTPayload?
     var errorToThrow: Error?
+    private let lock = NSLock()
 
     func decode(_ token: String) throws -> JWTPayload {
+        lock.lock()
+        defer { lock.unlock() }
+
         if let error = errorToThrow {
             throw error
         }

@@ -12,6 +12,7 @@ import Foundation
 // MARK: - UserBuilder
 
 /// Builder para crear usuarios de test con builder pattern
+@MainActor
 final class UserBuilder {
     private var id: String = "550e8400-e29b-41d4-a716-446655440000"
     private var email: String = "test@edugo.com"
@@ -73,6 +74,7 @@ final class UserBuilder {
 // MARK: - TokenInfoBuilder
 
 /// Builder para crear tokens de test
+@MainActor
 final class TokenInfoBuilder {
     private var accessToken: String = "mock_access_token"
     private var refreshToken: String = "mock_refresh_token"
@@ -115,12 +117,14 @@ final class TokenInfoBuilder {
 // MARK: - Convenience Extensions
 
 extension User {
+    @MainActor
     static func build(_ configure: (UserBuilder) -> UserBuilder) -> User {
         configure(UserBuilder()).build()
     }
 }
 
 extension TokenInfo {
+    @MainActor
     static func build(_ configure: (TokenInfoBuilder) -> TokenInfoBuilder) -> TokenInfo {
         configure(TokenInfoBuilder()).build()
     }

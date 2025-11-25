@@ -10,6 +10,7 @@ import Testing
 import Foundation
 @testable import apple_app
 
+@MainActor
 @Suite("LoginDTO Tests")
 struct LoginDTOTests {
 

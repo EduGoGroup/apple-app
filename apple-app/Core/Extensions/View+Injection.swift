@@ -11,6 +11,7 @@ import SwiftUI
 
 /// Environment key para acceder al DependencyContainer
 private struct DependencyContainerKey: EnvironmentKey {
+    @MainActor
     static let defaultValue = DependencyContainer()
 }
 
@@ -39,4 +40,3 @@ extension View {
         self.environment(\.dependencyContainer, container)
     }
 }
-

@@ -10,6 +10,7 @@ import Testing
 import Foundation
 @testable import apple_app
 
+@MainActor
 @Suite("TokenInfo Tests")
 struct TokenInfoTests {
 
@@ -46,10 +47,11 @@ struct TokenInfoTests {
         #expect(token.timeUntilExpiration <= 900)
     }
 
-    @Test("Expired token has negative time until expiration")
-    func expiredTokenHasNegativeTime() {
+    @Test("Expired token has zero time until expiration")
+    func expiredTokenHasZeroTime() {
         let token = TokenInfo.expired
-        #expect(token.timeUntilExpiration < 0)
+        // timeUntilExpiration usa max(0, ...) por lo que nunca es negativo
+        #expect(token.timeUntilExpiration == 0)
     }
 
     @Test("Remaining life percentage for fresh token is near 100%")
@@ -96,9 +98,13 @@ struct TokenInfoTests {
 
     @Test("TokenInfo is Equatable")
     func equatable() {
-        let token1 = TokenInfo.fixture(accessToken: "token1")
-        let token2 = TokenInfo.fixture(accessToken: "token1")
-        let token3 = TokenInfo.fixture(accessToken: "token2")
+        // Para que sean iguales, deben tener las mismas fechas
+        let fixedDate = Date()
+        let expiresAt = fixedDate.addingTimeInterval(900)
+
+        let token1 = TokenInfo(accessToken: "token1", refreshToken: "refresh", expiresAt: expiresAt, createdAt: fixedDate)
+        let token2 = TokenInfo(accessToken: "token1", refreshToken: "refresh", expiresAt: expiresAt, createdAt: fixedDate)
+        let token3 = TokenInfo(accessToken: "token2", refreshToken: "refresh", expiresAt: expiresAt, createdAt: fixedDate)
 
         #expect(token1 == token2)
         #expect(token1 != token3)

@@ -6,6 +6,7 @@
 //  SPEC-007: Testing Infrastructure - Custom Assertions
 //
 
+import Foundation
 import Testing
 @testable import apple_app
 
@@ -86,7 +87,7 @@ func expectNotEmpty<C: Collection>(
     _ message: String = "Collection should not be empty",
     sourceLocation: SourceLocation = #_sourceLocation
 ) {
-    #expect(!collection.isEmpty, message, sourceLocation: sourceLocation)
+    #expect(!collection.isEmpty, Comment(rawValue: message), sourceLocation: sourceLocation)
 }
 
 /// Verifica que una colección contenga un elemento específico

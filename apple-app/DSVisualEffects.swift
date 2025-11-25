@@ -113,6 +113,7 @@ struct DSVisualEffectModern: DSVisualEffect {
 
     // MARK: - Configuración de Liquid Glass para iOS 26+/macOS 26+
 
+    @available(iOS 26.0, macOS 26.0, *)
     private var glassStyle: Glass {
         var glass: Glass = .regular
 

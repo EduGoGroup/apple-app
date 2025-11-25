@@ -10,6 +10,7 @@ import Foundation
 @testable import apple_app
 
 /// Factory centralizado para crear mocks y fixtures de testing
+@MainActor
 enum MockFactory {
 
     // MARK: - Domain Entities
@@ -155,6 +156,7 @@ enum MockFactory {
 extension MockFactory {
 
     /// Builder para User con API fluida
+    @MainActor
     struct UserBuilder {
         private var id = "550e8400-e29b-41d4-a716-446655440000"
         private var email = "test@edugo.com"

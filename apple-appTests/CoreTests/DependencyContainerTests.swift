@@ -28,6 +28,7 @@ private final class TestImplementation: TestProtocol {
 
 // MARK: - Tests
 
+@MainActor
 @Suite("DependencyContainer Tests")
 struct DependencyContainerTests {
 
