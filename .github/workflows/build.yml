@@ -1,0 +1,37 @@
+name: Build Verification
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  build:
+    name: Build ${{ matrix.scheme }} (${{ matrix.platform }})
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        scheme: [EduGo-Dev]
+        platform: [macOS, iOS]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build ${{ matrix.scheme }} for ${{ matrix.platform }}
+        run: |
+          if [ "${{ matrix.platform }}" == "macOS" ]; then
+            DESTINATION="platform=macOS"
+          else
+            DESTINATION="platform=iOS Simulator,name=iPhone 15 Pro"
+          fi
+
+          xcodebuild build \
+            -scheme ${{ matrix.scheme }} \
+            -destination "$DESTINATION"

@@ -88,13 +88,7 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
 
         // Cargar tokens cacheados del Keychain (async, fire-and-forget en init)
         Task {
-            do {
-                await loadCachedTokens()
-            } catch {
-                logger.error("Failed to load cached tokens during initialization", metadata: [
-                    "error": error.localizedDescription
-                ])
-            }
+            await loadCachedTokens()
         }
     }
 
@@ -189,33 +183,23 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
     func logout() async -> Result<Void, AppError> {
         logger.info("Logout attempt started")
 
-        do {
-            // Llamar API de logout solo en modo Real API
-            if authMode == .realAPI {
-                if let refreshToken = try? keychainService.getToken(for: refreshTokenKey) {
-                    // Llamar endpoint de logout (ignorar errores)
-                    let _: String? = try? await apiClient.execute(
-                        endpoint: .logout,
-                        method: .post,
-                        body: LogoutRequest(refreshToken: refreshToken)
-                    )
-                }
+        // Llamar API de logout solo en modo Real API
+        if authMode == .realAPI {
+            if let refreshToken = try? keychainService.getToken(for: refreshTokenKey) {
+                // Llamar endpoint de logout (ignorar errores - best effort)
+                let _: String? = try? await apiClient.execute(
+                    endpoint: .logout,
+                    method: .post,
+                    body: LogoutRequest(refreshToken: refreshToken)
+                )
             }
-
-            // Limpiar datos locales
-            clearLocalAuthData()
-
-            logger.info("Logout successful")
-            return .success(())
-
-        } catch {
-            logger.error("Logout failed - Unknown error", metadata: [
-                "error": error.localizedDescription
-            ])
-            // Limpiar de todos modos
-            clearLocalAuthData()
-            return .failure(.system(.unknown))
         }
+
+        // Limpiar datos locales siempre
+        clearLocalAuthData()
+
+        logger.info("Logout successful")
+        return .success(())
     }
 
     @MainActor
@@ -234,9 +218,11 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
 
             return .success(user)
 
-        } catch is JWTError {
-            // Si el JWT es inválido o expiró, intentar refresh
-            logger.warning("JWT invalid or expired, attempting refresh")
+        } catch {
+            // Si hay cualquier error (JWT inválido, keychain, etc), intentar refresh
+            logger.warning("Error retrieving current user, attempting refresh", metadata: [
+                "error": error.localizedDescription
+            ])
 
             let refreshResult = await refreshSession()
             switch refreshResult {
@@ -245,11 +231,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
             case .failure(let error):
                 return .failure(error)
             }
-
-        } catch let error as KeychainError {
-            return .failure(.system(.system(error.localizedDescription)))
-        } catch {
-            return .failure(.system(.unknown))
         }
     }
 

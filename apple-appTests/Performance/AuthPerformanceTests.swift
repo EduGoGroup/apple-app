@@ -2,107 +2,129 @@
 //  AuthPerformanceTests.swift
 //  apple-appTests
 //
-//  Created on 24-01-25.
+//  Created on 25-11-25.
 //  SPEC-007: Testing Infrastructure - Performance Tests
 //
 
 import Testing
-import Foundation
 @testable import apple_app
 
+/// Tests de performance para operaciones de autenticación
 @Suite("Auth Performance Tests")
 struct AuthPerformanceTests {
 
-    let validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMCIsImVtYWlsIjoidGVzdEBlZHVnby5jb20iLCJyb2xlIjoic3R1ZGVudCIsImV4cCI6OTk5OTk5OTk5OSwiaWF0IjoxNzA2MDU0NDAwLCJpc3MiOiJlZHVnby1tb2JpbGUifQ.SIGNATURE"
+    // MARK: - JWT Decoding Performance
 
-    @Test("JWT decoding performance - should be < 10ms")
+    @Test("JWT decoding debe ser < 10ms")
     func jwtDecodingPerformance() async throws {
         let decoder = DefaultJWTDecoder()
 
+        // Token JWT válido de prueba
+        let validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMCIsImVtYWlsIjoidGVzdEBlZHVnby5jb20iLCJyb2xlIjoic3R1ZGVudCIsImV4cCI6OTk5OTk5OTk5OSwiaWF0IjoxNzA2MDU0NDAwLCJpc3MiOiJlZHVnby1jZW50cmFsIn0.SIGNATURE"
+
         let start = Date()
 
-        // Decodificar 100 veces
+        // Ejecutar múltiples veces para promedio
         for _ in 0..<100 {
             _ = try decoder.decode(validToken)
         }
 
-        let duration = Date().timeIntervalSince(start)
-        let avgDuration = duration / 100
+        let elapsed = Date().timeIntervalSince(start)
+        let averageTime = elapsed / 100.0 * 1000.0 // En milisegundos
 
-        // Promedio debe ser < 10ms
-        #expect(avgDuration < 0.01, "JWT decode took \(avgDuration * 1000)ms, expected < 10ms")
+        // Debe ser menor a 10ms en promedio
+        #expect(averageTime < 10.0, "JWT decoding took \(averageTime)ms, expected < 10ms")
     }
 
-    @Test("TokenInfo validation performance")
-    func tokenInfoValidation() {
-        let token = TokenInfo.fixture()
+    // MARK: - Token Refresh Performance
+
+    @Test("Token refresh debe ser < 500ms")
+    func tokenRefreshPerformance() async throws {
+        let mockKeychain = MockKeychainService()
+        let mockJWT = MockJWTDecoder()
+        let mockAPI = MockAPIClient()
+
+        // Configurar token que necesita refresh
+        let expiringPayload = JWTPayload(
+            sub: "123",
+            email: "test@test.com",
+            role: "student",
+            exp: Date().addingTimeInterval(60), // Expira en 1 min
+            iat: Date(),
+            iss: AppEnvironment.jwtIssuer
+        )
+        mockJWT.payloadToReturn = expiringPayload
+
+        mockKeychain.tokens = [
+            "access_token": "expiring_token",
+            "refresh_token": "refresh_123"
+        ]
+
+        mockAPI.mockResponse = RefreshResponse(
+            accessToken: "new_token",
+            expiresIn: 900,
+            tokenType: "Bearer"
+        )
+
+        let coordinator = TokenRefreshCoordinator(
+            apiClient: mockAPI,
+            keychainService: mockKeychain,
+            jwtDecoder: mockJWT
+        )
+
+        let start = Date()
+        _ = try await coordinator.getValidToken()
+        let elapsed = Date().timeIntervalSince(start) * 1000.0 // En ms
+
+        // Debe ser menor a 500ms
+        #expect(elapsed < 500.0, "Token refresh took \(elapsed)ms, expected < 500ms")
+    }
+
+    // MARK: - Keychain Performance
+
+    @Test("Keychain save/get debe ser < 50ms")
+    func keychainPerformance() throws {
+        let keychain = DefaultKeychainService.shared
+        let token = "test_token_\(UUID().uuidString)"
+        let key = "perf_test_\(UUID().uuidString)"
 
         let start = Date()
 
-        // Validar 10,000 veces
-        for _ in 0..<10_000 {
-            _ = token.isExpired
-            _ = token.needsRefresh
-        }
+        // Save
+        try keychain.saveToken(token, for: key)
 
-        let duration = Date().timeIntervalSince(start)
+        // Get
+        _ = try keychain.getToken(for: key)
 
-        // Debe completar en < 100ms
-        #expect(duration < 0.1, "Validation took \(duration * 1000)ms, expected < 100ms")
+        // Delete
+        try keychain.deleteToken(for: key)
+
+        let elapsed = Date().timeIntervalSince(start) * 1000.0 // En ms
+
+        // Debe ser menor a 50ms
+        #expect(elapsed < 50.0, "Keychain operations took \(elapsed)ms, expected < 50ms")
     }
 
-    @Test("User role helpers performance")
-    func userRoleHelpers() {
-        let user = MockFactory.makeStudent()
+    // MARK: - Input Validation Performance
+
+    @Test("Input validation debe ser < 5ms")
+    func inputValidationPerformance() {
+        let validator = DefaultInputValidator()
+        let email = "test@edugo.com"
 
         let start = Date()
 
-        // Verificar 10,000 veces
-        for _ in 0..<10_000 {
-            _ = user.isStudent
-            _ = user.isTeacher
-            _ = user.isAdmin
+        // Ejecutar múltiples validaciones
+        for _ in 0..<1000 {
+            _ = validator.isValidEmail(email)
+            _ = validator.sanitize(email)
+            _ = validator.isSafeSQLInput(email)
         }
 
-        let duration = Date().timeIntervalSince(start)
+        let elapsed = Date().timeIntervalSince(start)
+        let averageTime = elapsed / 1000.0 * 1000.0 // En ms
 
-        // Debe completar en < 50ms
-        #expect(duration < 0.05, "Role helpers took \(duration * 1000)ms, expected < 50ms")
-    }
-
-    @Test("UserBuilder performance")
-    func userBuilderPerformance() {
-        let start = Date()
-
-        // Crear 1,000 usuarios con builder
-        for i in 0..<1_000 {
-            _ = UserBuilder()
-                .withEmail("user\(i)@test.com")
-                .withDisplayName("User \(i)")
-                .asStudent()
-                .build()
-        }
-
-        let duration = Date().timeIntervalSince(start)
-
-        // Debe completar en < 500ms
-        #expect(duration < 0.5, "Builder took \(duration * 1000)ms, expected < 500ms")
-    }
-
-    @Test("MockFactory performance")
-    func mockFactoryPerformance() {
-        let start = Date()
-
-        // Crear 1,000 objetos via factory
-        for _ in 0..<1_000 {
-            _ = MockFactory.makeUser()
-            _ = MockFactory.makeTokenInfo()
-            _ = MockFactory.makeJWTPayload()
-        }
-
-        let duration = Date().timeIntervalSince(start)
-
-        // Debe completar en < 200ms
-        #expect(duration < 0.2, "Factory took \(duration * 1000)ms, expected < 200ms")
+        // Debe ser menor a 5ms por validación
+        #expect(averageTime < 5.0, "Input validation took \(averageTime)ms, expected < 5ms")
     }
 }

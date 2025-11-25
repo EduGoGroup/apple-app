@@ -191,10 +191,10 @@ struct HomeView: View {
         HomeView(
             getCurrentUserUseCase: DefaultGetCurrentUserUseCase(
                 authRepository: AuthRepositoryImpl(
-                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL),
                     jwtDecoder: DefaultJWTDecoder(),
                     tokenCoordinator: TokenRefreshCoordinator(
-                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL),
                         keychainService: DefaultKeychainService.shared,
                         jwtDecoder: DefaultJWTDecoder()
                     ),
@@ -203,10 +203,10 @@ struct HomeView: View {
             ),
             logoutUseCase: DefaultLogoutUseCase(
                 authRepository: AuthRepositoryImpl(
-                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL),
                     jwtDecoder: DefaultJWTDecoder(),
                     tokenCoordinator: TokenRefreshCoordinator(
-                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL),
                         keychainService: DefaultKeychainService.shared,
                         jwtDecoder: DefaultJWTDecoder()
                     ),

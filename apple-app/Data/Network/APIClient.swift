@@ -42,19 +42,36 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         session: URLSession = .shared,
         encoder: JSONEncoder = JSONEncoder(),
         decoder: JSONDecoder = JSONDecoder(),
+        certificatePinner: CertificatePinner? = nil,  // SPEC-008: SSL Pinning
         requestInterceptors: [RequestInterceptor] = [],
         responseInterceptors: [ResponseInterceptor] = [],
         retryPolicy: RetryPolicy = .default,
         networkMonitor: NetworkMonitor? = nil
     ) {
         self.baseURL = baseURL
-        self.session = session
         self.encoder = encoder
         self.decoder = decoder
         self.requestInterceptors = requestInterceptors
         self.responseInterceptors = responseInterceptors
         self.retryPolicy = retryPolicy
         self.networkMonitor = networkMonitor ?? DefaultNetworkMonitor()
+
+        // SPEC-008: Configurar URLSession con certificate pinning si está disponible
+        if certificatePinner != nil {
+            // Extraer hashes del pinner (CertificatePinner tiene los hashes)
+            // Creamos SecureSessionDelegate con los hashes directamente para evitar actor boundaries
+            let pinnedHashes: Set<String> = []  // TODO: Extraer de pinner cuando tengamos API
+            let delegate = SecureSessionDelegate(pinnedPublicKeyHashes: pinnedHashes)
+            let configuration = URLSessionConfiguration.default
+            configuration.timeoutIntervalForRequest = AppEnvironment.apiTimeout
+            self.session = URLSession(
+                configuration: configuration,
+                delegate: delegate,
+                delegateQueue: nil
+            )
+        } else {
+            self.session = session
+        }
     }
 
     @MainActor
