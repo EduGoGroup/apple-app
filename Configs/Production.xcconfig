@@ -1,0 +1,33 @@
+// Production.xcconfig
+// Configuración para ambiente de Producción
+// SPEC-001: Environment Configuration System (Modern Approach)
+
+#include "Base.xcconfig"
+
+// ============================================================================
+// MARK: - Environment Info
+// ============================================================================
+
+ENVIRONMENT_NAME = Production
+ENVIRONMENT_DISPLAY_NAME = Production
+
+// ============================================================================
+// MARK: - App Display
+// ============================================================================
+
+// Display name in home screen
+INFOPLIST_KEY_CFBundleDisplayName = EduGo
+
+// Icon asset name
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+
+// ============================================================================
+// MARK: - Build Settings (Conditional Compilation)
+// ============================================================================
+
+// Define PRODUCTION para conditional compilation en Swift
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) PRODUCTION RELEASE
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) PRODUCTION=1 RELEASE=1
+
+// Disable testability in production
+ENABLE_TESTABILITY = NO

@@ -8,6 +8,7 @@
 import Foundation
 
 /// Protocolo para el caso de uso de actualizar tema
+@MainActor
 protocol UpdateThemeUseCase: Sendable {
     /// Actualiza el tema de la aplicación
     /// - Parameter theme: Nuevo tema a aplicar
@@ -15,6 +16,7 @@ protocol UpdateThemeUseCase: Sendable {
 }
 
 /// Implementación por defecto del caso de uso de actualizar tema
+@MainActor
 final class DefaultUpdateThemeUseCase: UpdateThemeUseCase {
     private let preferencesRepository: PreferencesRepository
     

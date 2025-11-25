@@ -48,10 +48,10 @@ struct SplashView: View {
 
 #Preview("Splash") {
     SplashView(authRepository: AuthRepositoryImpl(
-        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+        apiClient: DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL),
         jwtDecoder: DefaultJWTDecoder(),
         tokenCoordinator: TokenRefreshCoordinator(
-            apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+            apiClient: DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL),
             keychainService: DefaultKeychainService.shared,
             jwtDecoder: DefaultJWTDecoder()
         ),

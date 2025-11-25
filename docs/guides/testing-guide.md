@@ -1,14 +1,24 @@
-# 🧪 Guía de Testing - EduGo App
+# 🧪 Guía de Testing - EduGo Apple App
 
 **Versión**: 1.0  
-**Fecha**: 2025-01-24  
-**SPEC**: SPEC-007
+**Fecha**: 2025-11-25  
+**SPEC-007**: Testing Infrastructure
 
 ---
 
-## 📋 Introducción
+## 🎯 Objetivo
 
-Esta guía cubre el sistema de testing completo de la app EduGo, incluyendo helpers, mocks, integration tests y performance tests.
+Esta guía documenta cómo escribir y ejecutar tests en el proyecto, usando el framework Swift Testing (moderno, iOS 18+).
+
+---
+
+## 📚 Stack de Testing
+
+| Framework | Uso | Versión |
+|-----------|-----|---------|
+| **Swift Testing** | Tests unitarios | iOS 18+ |
+| **XCTest** | Tests UI (legacy) | iOS 15+ |
+| **MockServices** | Mocks integrados | Custom |
 
 ---
 
@@ -16,428 +26,406 @@ Esta guía cubre el sistema de testing completo de la app EduGo, incluyendo help
 
 ```
 apple-appTests/
-├── Domain/                    # Tests de entidades y lógica
-│   ├── Entities/
-│   └── Models/
-├── Data/                      # Tests de repositorios y servicios
-│   ├── Services/
-│   ├── DTOs/
-│   └── Repositories/
-├── Integration/               # Tests end-to-end
-│   ├── IntegrationTestCase.swift
-│   └── AuthFlowIntegrationTests.swift
-├── Performance/               # Benchmarks
-│   └── AuthPerformanceTests.swift
-└── Helpers/                   # Utilities de testing
-    ├── TestHelpers.swift      # Custom assertions
-    ├── MockFactory.swift      # Factory de mocks
-    ├── FixtureBuilder.swift   # Builder pattern
-    └── MockServices.swift     # Mocks de servicios
+├── Helpers/
+│   ├── TestHelpers.swift           # Custom assertions
+│   └── MockFactory.swift            # Factory de mocks
+├── Integration/
+│   └── IntegrationTestCase.swift   # Base para integration tests
+├── Performance/
+│   └── AuthPerformanceTests.swift  # Performance benchmarks
+├── CoreTests/
+├── DomainTests/
+├── DataTests/
+└── PresentationTests/
 ```
 
 ---
 
-## 🎯 Tipos de Tests
+## ✅ Escribir Tests Unitarios
 
-### 1. Unit Tests
+### Sintaxis Básica (Swift Testing)
 
-Tests de componentes individuales aislados.
-
-**Ejemplo**:
 ```swift
-@Test("UserRole has correct display name")
-func roleDisplayName() {
-    #expect(UserRole.student.displayName == "Estudiante")
+import Testing
+@testable import apple_app
+
+@Suite("Login Use Case Tests")
+struct LoginUseCaseTests {
+    
+    @Test("Login exitoso con credenciales válidas")
+    func loginSuccess() async {
+        // Given: Configurar mocks
+        let mockRepo = MockAuthRepository()
+        mockRepo.loginResult = .success(MockFactory.makeUser())
+        
+        let sut = DefaultLoginUseCase(
+            authRepository: mockRepo,
+            validator: DefaultInputValidator()
+        )
+        
+        // When: Ejecutar
+        let result = await sut.execute(
+            email: "test@edugo.com",
+            password: "password123"
+        )
+        
+        // Then: Verificar
+        let user = try expectSuccess(result)
+        #expect(user.email == "test@edugo.com")
+    }
+    
+    @Test("Login falla con email inválido")
+    func loginInvalidEmail() async {
+        let sut = DefaultLoginUseCase(
+            authRepository: MockAuthRepository(),
+            validator: DefaultInputValidator()
+        )
+        
+        let result = await sut.execute(email: "invalid", password: "pass")
+        
+        expectFailure(result, expectedError: .validation(.invalidEmailFormat))
+    }
 }
 ```
 
-**Ubicación**: `Domain/`, `Data/`  
-**Cantidad actual**: 112+ tests
-
 ---
 
-### 2. Integration Tests
-
-Tests de flujos completos end-to-end.
-
-**Ejemplo**:
-```swift
-@Test("Complete login flow")
-@MainActor
-func fullLoginFlow() async {
-    let testCase = IntegrationTestCase()
-    testCase.mockAPI.mockResponse = MockFactory.makeLoginResponse()
-    
-    let loginUseCase = testCase.container.resolve(LoginUseCase.self)
-    let result = await loginUseCase.execute(email: "...", password: "...")
-    
-    expectSuccess(result)
-}
-```
-
-**Ubicación**: `Integration/`  
-**Cantidad actual**: 8 tests E2E
-
----
-
-### 3. Performance Tests
-
-Benchmarks de operaciones críticas.
-
-**Ejemplo**:
-```swift
-@Test("JWT decoding should be < 10ms")
-func jwtPerformance() {
-    let start = Date()
-    _ = try! decoder.decode(token)
-    let duration = Date().timeIntervalSince(start)
-    
-    #expect(duration < 0.01)
-}
-```
-
-**Ubicación**: `Performance/`  
-**Cantidad actual**: 5 benchmarks
-
----
-
-## 🛠️ Testing Helpers
+## 🔧 Usar Helpers y Factories
 
 ### Custom Assertions
 
 ```swift
-// Result assertions
-let user = expectSuccess(result)  // Verifica .success y retorna valor
-let error = expectFailure(result) // Verifica .failure y retorna error
+// Verificar success
+let user = try expectSuccess(result)
 
-// Async assertions
-let value = await expectNoThrow(try await asyncOperation())
-await expectThrows(ExpectedError.self, try await failingOperation())
+// Verificar failure específico
+expectFailure(result, expectedError: .network(.unauthorized))
 
-// Collections
-expectNotEmpty(array)
-expectCount(array, 5)
+// Async sin errores
+let data = await expectNoThrow {
+    try await fetchData()
+}
 
-// Time
-let result = await expectCompletes(within: 0.5) {
+// Async con error esperado
+await expectThrows(NetworkError.timeout) {
     try await slowOperation()
 }
 ```
 
----
-
-### MockFactory
-
-Factory centralizado para crear objetos de test:
+### Mock Factory
 
 ```swift
-// Users
-let student = MockFactory.makeStudent()
-let teacher = MockFactory.makeTeacher()
-let admin = MockFactory.makeAdmin()
-let custom = MockFactory.makeUser(role: .parent, email: "custom@test.com")
-
-// Tokens
+// Simple
+let user = MockFactory.makeUser()
 let token = MockFactory.makeTokenInfo()
-let expired = MockFactory.makeExpiredToken()
-let refreshing = MockFactory.makeRefreshingToken()
 
-// JWT
-let payload = MockFactory.makeJWTPayload(role: "teacher")
+// Con builder (fluent API)
+let teacher = MockFactory.user()
+    .withRole(.teacher)
+    .withEmail("teacher@edugo.com")
+    .verified()
+    .build()
 
 // DTOs
-let loginReq = MockFactory.makeLoginRequest()
-let loginRes = MockFactory.makeLoginResponse()
+let response = MockFactory.makeLoginResponse()
 
-// Container
-let container = MockFactory.makeTestContainer()
+// Tokens especiales
+let expired = MockFactory.makeExpiredTokenInfo()
+let needsRefresh = MockFactory.makeTokenNeedingRefresh()
 ```
 
 ---
 
-### Fixture Builders
+## 🔗 Integration Tests
 
-Builder pattern para construcción fluida:
-
-```swift
-// UserBuilder
-let user = UserBuilder()
-    .withEmail("custom@test.com")
-    .withDisplayName("Custom User")
-    .asTeacher()
-    .build()
-
-// Convenience
-let student = User.build { $0.asStudent() }
-let unverifiedTeacher = User.build { $0.asTeacher().unverified() }
-
-// TokenInfoBuilder
-let token = TokenInfoBuilder()
-    .withAccessToken("custom_token")
-    .expiresIn(300) // 5 minutos
-    .build()
-
-// Convenience
-let expired = TokenInfo.build { $0.expired() }
-let refreshing = TokenInfo.build { $0.needsRefresh() }
-```
-
----
-
-## 📝 Escribiendo Tests
-
-### Unit Test Template
+### Setup
 
 ```swift
-import Testing
-@testable import apple_app
-
-@Suite("Component Tests")
-struct ComponentTests {
+@Test func completeAuthFlow() async throws {
+    // Crear container de testing
+    let container = IntegrationTestCase.createTestContainer()
     
-    @Test("Description of test")
-    func testName() {
-        // Given: Setup
-        let sut = SystemUnderTest()
-        
-        // When: Action
-        let result = sut.doSomething()
-        
-        // Then: Verification
-        #expect(result == expected)
-    }
+    // Configurar mocks para scenario
+    IntegrationTestCase.configureSuccessfulLogin(in: container)
+    
+    // Resolver use case
+    let loginUseCase = container.resolve(LoginUseCase.self)
+    
+    // Ejecutar flow completo
+    let result = await loginUseCase.execute(
+        email: "test@edugo.com",
+        password: "password123"
+    )
+    
+    // Verificar
+    let user = try expectSuccess(result)
+    #expect(user.email == "test@edugo.com")
 }
 ```
 
 ---
 
-### Integration Test Template
+## ⚡ Performance Tests
+
+### Baselines
+
+| Operación | Baseline | Test |
+|-----------|----------|------|
+| JWT Decoding | < 10ms | `jwtDecodingPerformance()` |
+| Token Refresh | < 500ms | `tokenRefreshPerformance()` |
+| Keychain Ops | < 50ms | `keychainPerformance()` |
+| Input Validation | < 5ms | `inputValidationPerformance()` |
+
+### Ejemplo
 
 ```swift
-import Testing
-@testable import apple_app
-
-@Suite("Feature Integration Tests")
-@MainActor
-struct FeatureIntegrationTests {
-    
-    @Test("End-to-end flow")
-    func e2eFlow() async {
-        // Given: Setup container
-        let testCase = IntegrationTestCase()
-        testCase.mockAPI.mockResponse = MockFactory.makeResponse()
-        
-        // When: Execute use case
-        let useCase = testCase.container.resolve(UseCase.self)
-        let result = await useCase.execute()
-        
-        // Then: Verify
-        expectSuccess(result)
-    }
-}
-```
-
----
-
-### Performance Test Template
-
-```swift
-@Test("Operation performance benchmark")
-func operationPerformance() {
+@Test("Operación debe ser < XXms")
+func operationPerformance() async throws {
     let start = Date()
     
-    // Ejecutar N veces
-    for _ in 0..<1_000 {
-        performOperation()
+    // Ejecutar operación
+    for _ in 0..<100 {
+        await operation()
     }
     
-    let duration = Date().timeIntervalSince(start)
-    let avg = duration / 1_000
+    let elapsed = Date().timeIntervalSince(start)
+    let avgTime = elapsed / 100.0 * 1000.0 // ms
     
-    #expect(avg < 0.001, "Avg: \(avg * 1000)ms")
+    #expect(avgTime < 10.0)
 }
 ```
 
 ---
 
-## 🚀 Ejecutando Tests
+## 🚀 Ejecutar Tests
 
 ### Desde Xcode
 
 ```
-⌘ + U  - Ejecutar todos los tests
-⌘ + Control + U  - Ejecutar último test
-⌘ + Click en ícono de test - Ejecutar test individual
+⌘ + U  - Run all tests
+⌘ + Control + U - Run last test
+Click ◇ junto a test - Run test individual
 ```
 
 ### Desde Terminal
 
 ```bash
 # Todos los tests
-xcodebuild test -scheme EduGo-Dev -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
+xcodebuild test -scheme EduGo-Dev -destination 'platform=macOS'
 
-# Solo unit tests
-xcodebuild test -scheme EduGo-Dev -only-testing:apple-appTests/Domain
+# Solo tests específicos
+xcodebuild test \
+  -scheme EduGo-Dev \
+  -destination 'platform=macOS' \
+  -only-testing:apple-appTests/LoginUseCaseTests
 
-# Solo integration tests
-xcodebuild test -scheme EduGo-Dev -only-testing:apple-appTests/Integration
-
-# Solo performance tests
-xcodebuild test -scheme EduGo-Dev -only-testing:apple-appTests/Performance
+# Con coverage
+xcodebuild test \
+  -scheme EduGo-Dev \
+  -destination 'platform=macOS' \
+  -enableCodeCoverage YES
 ```
 
 ---
 
 ## 📊 Code Coverage
 
-### Habilitar en Xcode (Manual)
+### Configurar en Xcode
 
-1. Edit Scheme `EduGo-Dev`
-2. Test → Options
-3. ✅ Code Coverage
-4. Seleccionar targets: `apple-app`
+1. Edit Scheme → Test → Options
+2. ✅ Code Coverage
+3. Seleccionar targets: `apple-app`
 
 ### Ver Reports
 
-1. Product → Show Build Folder in Finder
-2. Navegar a `Logs/Test/*.xcresult`
-3. Abrir con Xcode
-4. Tab "Coverage"
+```
+Xcode → Report Navigator (⌘ + 9) → Coverage
+```
 
 ### Targets de Coverage
 
-| Componente | Target Mínimo |
-|------------|---------------|
-| Domain Layer | 90% |
-| Use Cases | 85% |
-| Repositories | 80% |
-| Services | 80% |
-| DTOs | 70% |
+| Componente | Target |
+|------------|--------|
+| Domain Layer | > 90% |
+| Data Layer | > 80% |
+| Presentation | > 70% |
+| Total | > 75% |
 
 ---
 
-## 🤖 CI/CD (Configuración Manual)
-
-### GitHub Actions Setup
-
-**Archivo**: `.github/workflows/tests.yml`
-
-```yaml
-name: Tests
-on:
-  pull_request:
-    branches: [dev, main]
-  push:
-    branches: [dev]
-
-jobs:
-  test:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.0.app
-      
-      - name: Build and Test
-        run: |
-          xcodebuild test \
-            -scheme EduGo-Dev \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            -enableCodeCoverage YES
-      
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            build/Logs/Test/*.xcresult
-```
-
-### Pasos de Configuración
-
-1. Crear carpeta `.github/workflows/` en la raíz del proyecto
-2. Crear archivo `tests.yml` con contenido arriba
-3. Commit y push
-4. Verificar en GitHub → Actions
-
----
-
-## 📚 Best Practices
+## 🎯 Best Practices
 
 ### 1. Naming
 
 ```swift
-// ✅ Bueno
-@Test("Login with valid credentials returns user")
-func loginWithValidCredentials() { }
+// ✅ CORRECTO: Descriptivo
+@Test("Login exitoso con credenciales válidas")
 
-// ❌ Malo
+// ❌ INCORRECTO: Vago
 @Test("test1")
-func test1() { }
 ```
 
 ### 2. AAA Pattern
 
 ```swift
-// Given (Arrange)
-let user = MockFactory.makeStudent()
+// Given: Setup
+let mock = MockAuthRepository()
+mock.loginResult = .success(user)
 
-// When (Act)
-let result = user.isStudent
+// When: Ejecutar
+let result = await useCase.execute(...)
 
-// Then (Assert)
-#expect(result == true)
+// Then: Verificar
+let user = try expectSuccess(result)
+#expect(user.email == "test@edugo.com")
 ```
 
-### 3. One Assertion Per Test
+### 3. Independencia
 
 ```swift
-// ✅ Bueno
-@Test("User is student")
-func userIsStudent() {
-    #expect(user.isStudent == true)
+// ✅ CORRECTO: Cada test crea sus propios mocks
+@Test func test1() {
+    let mock = MockAuthRepository()
+    // ...
 }
 
-@Test("User is not teacher")
-func userIsNotTeacher() {
-    #expect(user.isTeacher == false)
-}
-
-// ❌ Malo (múltiples assertions no relacionadas)
-@Test("User properties")
-func userProperties() {
-    #expect(user.isStudent == true)
-    #expect(user.email == "...")
-    #expect(user.displayName == "...")
-}
+// ❌ INCORRECTO: Compartir mocks entre tests
+var sharedMock: MockAuthRepository
 ```
 
-### 4. Usar Helpers
+### 4. Async/Await
 
 ```swift
-// ✅ Bueno
-let user = expectSuccess(result)
+// ✅ CORRECTO: async func para tests async
+@Test func loginAsync() async {
+    let result = await useCase.execute(...)
+}
 
-// ❌ Malo
-guard case .success(let user) = result else {
-    XCTFail("Expected success")
-    return
+// ❌ INCORRECTO: Task dentro de test síncrono
+@Test func login() {
+    Task {
+        await useCase.execute(...)
+    }
 }
 ```
 
 ---
 
-## 🎓 Próximos Pasos
+## 🔍 Debugging Tests
 
-1. **Ahora**: Usar helpers en tests existentes
-2. **Siguiente**: Configurar GitHub Actions (ver arriba)
-3. **Después**: Habilitar code coverage en Xcode
-4. **Futuro**: Agregar UI tests (SPEC futura)
+### Print en Tests
+
+```swift
+@Test func debug() async {
+    let result = await operation()
+    print("Result: \(result)")  // Visible en console
+    #expect(...)
+}
+```
+
+### Breakpoints
+
+1. Click en línea del test
+2. Agregar breakpoint
+3. Run test con ⌘ + U
+4. Debugger se detiene
+
+### Test Tags
+
+```swift
+@Test(.tags(.slow))
+func slowTest() async {
+    // Test que tarda mucho
+}
+
+// Correr solo tests rápidos
+// Xcode → Test Plan → Filter by tags
+```
 
 ---
 
-**Tests actuales**: 125+ (112 unit + 8 integration + 5 performance)  
-**Coverage target**: 80% mínimo  
-**CI/CD**: Pendiente configuración manual
+## 🤖 CI/CD
+
+### GitHub Actions
+
+**Workflows configurados**:
+- `.github/workflows/tests.yml` - Corre en cada PR
+- `.github/workflows/build.yml` - Verifica builds
+
+**Triggers**:
+- Pull Requests a `dev` o `main`
+- Push a `dev` o `main`
+
+**Plataformas**:
+- ✅ macOS
+- ✅ iOS Simulator
+
+### Verificar en PR
+
+```
+GitHub → Pull Request → Checks
+✅ Tests / Run Tests
+✅ Build Verification / Build All Schemes
+```
+
+---
+
+## 📈 Métricas de Testing
+
+### Actuales
+
+| Métrica | Valor |
+|---------|-------|
+| Tests unitarios | 42+ archivos |
+| Coverage estimado | 60-70% |
+| Performance tests | 4 tests |
+| Integration tests | 1+ tests |
+
+### Targets
+
+| Métrica | Target |
+|---------|--------|
+| Coverage total | > 75% |
+| Tests pasando | 100% |
+| Performance | Todos < baseline |
+
+---
+
+## 🛠️ Troubleshooting
+
+### "Test no aparece en Xcode"
+
+**Solución**: 
+1. Limpiar build (`⌘ + Shift + K`)
+2. Rebuild (`⌘ + B`)
+3. Refresh test navigator
+
+### "Mock no funciona"
+
+**Verificar**:
+```swift
+// Mock debe ser configurado ANTES de usar
+mock.loginResult = .success(user)  // Configurar
+let result = await repo.login(...) // Usar
+```
+
+### "Performance test falla"
+
+**Opciones**:
+1. Aumentar baseline si es realista
+2. Optimizar código si es lento
+3. Verificar que no hay overhead de testing
+
+---
+
+## 📚 Referencias
+
+- [Swift Testing Documentation](https://developer.apple.com/documentation/testing)
+- [XCTest Framework](https://developer.apple.com/documentation/xctest)
+- [Testing in Xcode WWDC](https://developer.apple.com/videos/play/wwdc2024/10179/)
+
+---
+
+**Próxima actualización**: Al agregar nuevos tipos de tests  
+**Mantenedor**: Tech Lead  
+**Versión**: 1.0

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- ============================================ -->
+    <!-- App Transport Security (SPEC-008)            -->
+    <!-- ============================================ -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <!-- Bloquear HTTP (solo HTTPS permitido en producción) -->
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+
+        <!-- Excepciones para desarrollo local -->
+        <key>NSExceptionDomains</key>
+        <dict>
+            <!-- localhost para desarrollo -->
+            <key>localhost</key>
+            <dict>
+                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+
+    <!-- ============================================ -->
+    <!-- Permissions (SPEC-003 + SPEC-008)            -->
+    <!-- ============================================ -->
+
+    <!-- Face ID Permission -->
+    <key>NSFaceIDUsageDescription</key>
+    <string>Usa Face ID para acceder rápidamente a tu cuenta de EduGo</string>
+
+    <!-- Touch ID Permission (iPad/Mac con Touch Bar) -->
+    <key>NSBiometricAuthenticationUsageDescription</key>
+    <string>Usa autenticación biométrica para acceder a tu cuenta</string>
+
+    <!-- ============================================ -->
+    <!-- NOTAS IMPORTANTES                            -->
+    <!-- ============================================ -->
+    <!--
+    Este Info.plist usa APPROACH HÍBRIDO:
+
+    - Keys simples (String, Boolean, Number):
+      → Configuradas en .xcconfig con INFOPLIST_KEY_*
+      → Ejemplo: INFOPLIST_KEY_CFBundleDisplayName = EduGo
+
+    - Diccionarios complejos (ATS, Permissions):
+      → Configurados AQUÍ en este archivo
+      → Razón: INFOPLIST_KEY_* no soporta diccionarios anidados
+
+    NO duplicar keys que ya están en .xcconfig:
+    ❌ CFBundleDisplayName (ya en .xcconfig)
+    ❌ CFBundleVersion (ya en .xcconfig)
+    ❌ UILaunchScreen_Generation (ya en .xcconfig)
+
+    Ver: docs/ESTANDARES-TECNICOS-2025.md
+    -->
+</dict>
+</plist>

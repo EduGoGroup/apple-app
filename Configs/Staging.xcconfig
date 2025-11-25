@@ -1,0 +1,30 @@
+// Staging.xcconfig
+// Configuración para ambiente de Staging (Pre-producción)
+// SPEC-001: Environment Configuration System (Modern Approach)
+
+#include "Base.xcconfig"
+
+// ============================================================================
+// MARK: - Environment Info
+// ============================================================================
+
+ENVIRONMENT_NAME = Staging
+ENVIRONMENT_DISPLAY_NAME = Staging
+
+// ============================================================================
+// MARK: - App Display
+// ============================================================================
+
+// Display name in home screen
+INFOPLIST_KEY_CFBundleDisplayName = EduGo β
+
+// Icon asset name
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+
+// ============================================================================
+// MARK: - Build Settings (Conditional Compilation)
+// ============================================================================
+
+// Define STAGING para conditional compilation en Swift
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) STAGING
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) STAGING=1

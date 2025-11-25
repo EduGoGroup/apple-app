@@ -3,7 +3,12 @@
     "additionalDirectories": [
       "/Users/jhoanmedina/source/Documentation/GuideDesign/Design/Apple",
       "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-api-mobile",
-      "/Users/jhoanmedina/source/EduGo/repos-separados"
+      "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-api-administracion",
+      "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-worker",
+      "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-shared",
+      "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-dev-environment",
+      "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-infrastructure",
+      "/Users/jhoanmedina/source/EduGo/Analisys"
     ]
   }
 }

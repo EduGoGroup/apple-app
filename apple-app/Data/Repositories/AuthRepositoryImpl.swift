@@ -40,8 +40,11 @@ private actor TokenStore {
 /// - Refresh automático cuando `shouldRefresh = true`
 ///
 /// ## Thread Safety
-/// Usa `TokenStore` actor para operaciones concurrentes con tokens.
-final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Sendable {
+/// - TokenStore actor para operaciones concurrentes con tokens
+/// - APIClient ahora es actor, garantiza serialización automática
+/// - @MainActor garantiza thread-safety sin locks manuales
+@MainActor
+final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - Dependencies
 
@@ -88,13 +91,7 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
 
         // Cargar tokens cacheados del Keychain (async, fire-and-forget en init)
         Task {
-            do {
-                await loadCachedTokens()
-            } catch {
-                logger.error("Failed to load cached tokens during initialization", metadata: [
-                    "error": error.localizedDescription
-                ])
-            }
+            await loadCachedTokens()
         }
     }
 
@@ -145,7 +142,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         }
     }
 
-    @MainActor
     func loginWithBiometrics() async -> Result<User, AppError> {
         logger.info("Biometric login attempt")
 
@@ -185,41 +181,31 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         }
     }
 
-    @MainActor
     func logout() async -> Result<Void, AppError> {
         logger.info("Logout attempt started")
 
-        do {
-            // Llamar API de logout solo en modo Real API
-            if authMode == .realAPI {
-                if let refreshToken = try? keychainService.getToken(for: refreshTokenKey) {
-                    // Llamar endpoint de logout (ignorar errores)
-                    let _: String? = try? await apiClient.execute(
-                        endpoint: .logout,
-                        method: .post,
-                        body: LogoutRequest(refreshToken: refreshToken)
-                    )
-                }
+        // Llamar API de logout solo en modo Real API
+        if authMode == .realAPI {
+            if let refreshToken = try? keychainService.getToken(for: refreshTokenKey) {
+                // Llamar endpoint de logout (ignorar errores - best effort)
+                let _: String? = try? await apiClient.execute(
+                    endpoint: .logout,
+                    method: .post,
+                    body: LogoutRequest(refreshToken: refreshToken)
+                )
             }
-
-            // Limpiar datos locales
-            clearLocalAuthData()
-
-            logger.info("Logout successful")
-            return .success(())
-
-        } catch {
-            logger.error("Logout failed - Unknown error", metadata: [
-                "error": error.localizedDescription
-            ])
-            // Limpiar de todos modos
-            clearLocalAuthData()
-            return .failure(.system(.unknown))
         }
+
+        // Limpiar datos locales siempre
+        clearLocalAuthData()
+
+        logger.info("Logout successful")
+        return .success(())
     }
 
-    @MainActor
     func getCurrentUser() async -> Result<User, AppError> {
+        logger.info("Get current user attempt")
+
         do {
             // Obtener access token
             guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
@@ -234,9 +220,11 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
 
             return .success(user)
 
-        } catch is JWTError {
-            // Si el JWT es inválido o expiró, intentar refresh
-            logger.warning("JWT invalid or expired, attempting refresh")
+        } catch {
+            // Si hay cualquier error (JWT inválido, keychain, etc), intentar refresh
+            logger.warning("Error retrieving current user, attempting refresh", metadata: [
+                "error": error.localizedDescription
+            ])
 
             let refreshResult = await refreshSession()
             switch refreshResult {
@@ -245,17 +233,11 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
             case .failure(let error):
                 return .failure(error)
             }
-
-        } catch let error as KeychainError {
-            return .failure(.system(.system(error.localizedDescription)))
-        } catch {
-            return .failure(.system(.unknown))
         }
     }
 
     // MARK: - Token Management
 
-    @MainActor
     func refreshToken() async -> Result<AuthTokens, AppError> {
         logger.info("Token refresh attempt started")
 
@@ -336,7 +318,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         return await processTokenForAccess(tokens)
     }
 
-    @MainActor
     private func processTokenForAccess(_ tokens: TokenInfo) async -> String? {
         // Si el token está expirado, no intentar refresh aquí
         if tokens.isExpired {
@@ -368,7 +349,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         await getValidAccessToken() != nil
     }
 
-    @MainActor
     func refreshSession() async -> Result<User, AppError> {
         logger.info("Session refresh attempt started")
 
@@ -478,7 +458,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         try? keychainService.saveToken(tokens.refreshToken, for: refreshTokenKey)
     }
 
-    @MainActor
     private func loginWithDummyJSON(email: String, password: String) async throws -> (User, TokenInfo) {
         let username = email.components(separatedBy: "@").first ?? email
 
@@ -497,7 +476,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         return (response.toDomain(), response.toTokenInfo())
     }
 
-    @MainActor
     private func loginWithRealAPI(email: String, password: String) async throws -> (User, TokenInfo) {
         let request = LoginRequest(email: email, password: password)
 

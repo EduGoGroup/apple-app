@@ -10,7 +10,10 @@ import SwiftUI
 // MARK: - Environment Key
 
 /// Environment key para acceder al DependencyContainer
-private struct DependencyContainerKey: EnvironmentKey {
+/// @preconcurrency permite defer isolation checking a runtime para compatibilidad
+/// con Swift 6 strict concurrency
+private struct DependencyContainerKey: @preconcurrency EnvironmentKey {
+    @MainActor
     static let defaultValue = DependencyContainer()
 }
 
@@ -39,4 +42,3 @@ extension View {
         self.environment(\.dependencyContainer, container)
     }
 }
-

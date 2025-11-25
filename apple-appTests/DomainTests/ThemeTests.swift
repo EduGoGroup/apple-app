@@ -11,6 +11,7 @@ import Foundation
 import SwiftUI
 @testable import apple_app
 
+@MainActor
 @Suite("Theme Entity Tests")
 struct ThemeTests {
     

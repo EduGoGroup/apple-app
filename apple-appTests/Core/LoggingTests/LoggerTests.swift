@@ -10,6 +10,7 @@ import Testing
 @testable import apple_app
 
 /// Tests para el sistema de logging
+@MainActor
 @Suite("Logger System Tests")
 struct LoggerTests {
 
@@ -118,7 +119,7 @@ struct LoggerTests {
         let entry = logger.lastEntry
         #expect(entry?.file.contains("LoggerTests.swift") == true)
         #expect(entry?.function.contains("mockLoggerStoresContext") == true)
-        #expect(entry?.line > 0)
+        #expect((entry?.line ?? 0) > 0)
     }
 
     // MARK: - LogCategory Tests

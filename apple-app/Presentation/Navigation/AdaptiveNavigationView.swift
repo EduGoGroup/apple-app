@@ -236,7 +236,7 @@ private struct AuthenticatedApp: View {
         DefaultKeychainService.shared
     }
     container.register(APIClient.self, scope: .singleton) {
-        DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+        DefaultAPIClient(baseURL: AppEnvironment.authAPIBaseURL)
     }
     container.register(JWTDecoder.self, scope: .singleton) {
         DefaultJWTDecoder()

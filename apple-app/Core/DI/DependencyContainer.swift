@@ -11,6 +11,10 @@ import SwiftUI
 
 /// Contenedor de inyección de dependencias type-safe
 ///
+/// Con Swift 6.2 Approachable Concurrency, usamos @MainActor para serialización
+/// automática en lugar de locks manuales. Esto simplifica el código y garantiza
+/// thread-safety por el modelo de actores.
+///
 /// Permite registrar y resolver dependencias con diferentes scopes:
 /// - `.singleton`: Una única instancia compartida
 /// - `.factory`: Nueva instancia cada vez
@@ -26,6 +30,7 @@ import SwiftUI
 /// // Resolver
 /// let authRepo = container.resolve(AuthRepository.self)
 /// ```
+@MainActor
 public class DependencyContainer: ObservableObject {
 
     // MARK: - Storage
@@ -39,12 +44,8 @@ public class DependencyContainer: ObservableObject {
     /// Almacena el scope de cada tipo registrado
     private var scopes: [String: DependencyScope] = [:]
 
-    // MARK: - Thread Safety
-
-    /// Lock para acceso concurrente seguro
-    private let lock = NSLock()
-
     // MARK: - Initialization
+    // Thread safety garantizada por @MainActor - no se necesitan locks
 
     public init() {}
 
@@ -72,15 +73,11 @@ public class DependencyContainer: ObservableObject {
     ) {
         let key = String(describing: type)
 
-        lock.lock()
-        defer { lock.unlock() }
-
-        // Guardar factory y scope
+        // Thread safety garantizada por @MainActor - no se necesitan locks
         factories[key] = factory
         scopes[key] = scope
 
-        // Si ya existía un singleton, limpiarlo
-        // (permitir re-registro)
+        // Si ya existía un singleton, limpiarlo (permitir re-registro)
         if singletons[key] != nil {
             singletons.removeValue(forKey: key)
         }
@@ -103,51 +100,37 @@ public class DependencyContainer: ObservableObject {
     public func resolve<T>(_ type: T.Type) -> T {
         let key = String(describing: type)
 
-        // Obtener factory y scope con lock, pero liberar antes de ejecutar factory
-        let (factory, scope, existingSingleton): (() -> T, DependencyScope, T?) = {
-            lock.lock()
-            defer { lock.unlock() }
+        // Thread safety garantizada por @MainActor - no se necesitan locks
+        guard let factory = factories[key] as? () -> T else {
+            fatalError("""
+                ⚠️ DependencyContainer Error:
+                No se encontró registro para '\(key)'.
 
-            guard let factory = factories[key] as? () -> T else {
-                fatalError("""
-                    ⚠️ DependencyContainer Error:
-                    No se encontró registro para '\(key)'.
+                ¿Olvidaste registrarlo en setupDependencies()?
 
-                    ¿Olvidaste registrarlo en setupDependencies()?
+                Ejemplo:
+                container.register(\(key).self, scope: .singleton) {
+                    // Tu implementación aquí
+                }
+                """)
+        }
 
-                    Ejemplo:
-                    container.register(\(key).self, scope: .singleton) {
-                        // Tu implementación aquí
-                    }
-                    """)
-            }
+        let scope = scopes[key] ?? .factory
 
-            let scope = scopes[key] ?? .factory
-            let singleton = singletons[key] as? T
-
-            return (factory, scope, singleton)
-        }()
-
-        // Resolver según scope SIN el lock activo (evitar deadlock)
         switch scope {
         case .singleton:
             // Si ya existe singleton, retornarlo
-            if let singleton = existingSingleton {
+            if let singleton = singletons[key] as? T {
                 return singleton
             }
 
-            // Si no existe, crear SIN lock (para permitir nested resolves)
+            // Crear nueva instancia y guardarla
             let instance = factory()
-
-            // Guardar con lock
-            lock.lock()
             singletons[key] = instance
-            lock.unlock()
-
             return instance
 
         case .factory, .transient:
-            // Siempre crear nueva instancia SIN lock
+            // Siempre crear nueva instancia
             return factory()
         }
     }
@@ -159,9 +142,6 @@ public class DependencyContainer: ObservableObject {
     public func unregister<T>(_ type: T.Type) {
         let key = String(describing: type)
 
-        lock.lock()
-        defer { lock.unlock() }
-
         factories.removeValue(forKey: key)
         singletons.removeValue(forKey: key)
         scopes.removeValue(forKey: key)
@@ -169,9 +149,6 @@ public class DependencyContainer: ObservableObject {
 
     /// Elimina todos los registros (útil para reset en tests)
     public func unregisterAll() {
-        lock.lock()
-        defer { lock.unlock() }
-
         factories.removeAll()
         singletons.removeAll()
         scopes.removeAll()
@@ -182,10 +159,6 @@ public class DependencyContainer: ObservableObject {
     /// - Returns: `true` si el tipo está registrado
     public func isRegistered<T>(_ type: T.Type) -> Bool {
         let key = String(describing: type)
-
-        lock.lock()
-        defer { lock.unlock() }
-
         return factories[key] != nil
     }
 }

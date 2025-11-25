@@ -8,6 +8,7 @@
 import Foundation
 
 /// Protocolo para el caso de uso de obtener usuario actual
+@MainActor
 protocol GetCurrentUserUseCase: Sendable {
     /// Obtiene el usuario actualmente autenticado
     /// - Returns: Result con el User actual o AppError
@@ -15,6 +16,7 @@ protocol GetCurrentUserUseCase: Sendable {
 }
 
 /// Implementación por defecto del caso de uso de obtener usuario actual
+@MainActor
 final class DefaultGetCurrentUserUseCase: GetCurrentUserUseCase {
     private let authRepository: AuthRepository
     

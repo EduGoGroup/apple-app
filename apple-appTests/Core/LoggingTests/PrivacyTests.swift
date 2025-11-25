@@ -10,6 +10,7 @@ import Testing
 @testable import apple_app
 
 /// Tests para funcionalidad de privacy y redaction de datos sensibles
+@MainActor
 @Suite("Privacy & Redaction Tests")
 struct PrivacyTests {
 
@@ -196,7 +197,7 @@ struct PrivacyTests {
         let entry = logger.lastEntry
         #expect(entry?.file.contains("PrivacyTests.swift") == true)
         #expect(entry?.function.contains("loggerCapturesContext") == true)
-        #expect(entry?.line > 0)
+        #expect((entry?.line ?? 0) > 0)
     }
 
     // MARK: - All Log Levels Test

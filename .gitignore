@@ -27,5 +27,6 @@ playground.xcworkspace
 .env.*.local
 
 # Environment Configuration (SPEC-001)
-Configs/*.xcconfig
-!Configs/Base.xcconfig
+# Los archivos xcconfig ahora se versionan para CI/CD
+# Configs/*.xcconfig
+# !Configs/Base.xcconfig

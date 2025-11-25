@@ -106,9 +106,36 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
 // MARK: - Testing
 
 #if DEBUG
-final class MockSecurityValidator: SecurityValidator {
-    var isJailbrokenValue = false
-    var isDebuggerAttachedValue = false
+final class MockSecurityValidator: SecurityValidator, @unchecked Sendable {
+    private var _isJailbrokenValue = false
+    private var _isDebuggerAttachedValue = false
+    private let lock = NSLock()
+
+    var isJailbrokenValue: Bool {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _isJailbrokenValue
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _isJailbrokenValue = newValue
+        }
+    }
+
+    var isDebuggerAttachedValue: Bool {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _isDebuggerAttachedValue
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _isDebuggerAttachedValue = newValue
+        }
+    }
 
     var isJailbroken: Bool {
         get async { isJailbrokenValue }

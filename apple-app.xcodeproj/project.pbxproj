@@ -42,6 +42,16 @@
 		A9C965292EC967ED0041EB9B /* apple-appUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "apple-appUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A94E02FD2ED5EDC2001E03FC /* Exceptions for "apple-app" folder in "apple-app" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Config/Info.plist,
+			);
+			target = A9C965112EC967EB0041EB9B /* apple-app */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A90B28392ECA378500C044C9 /* docs */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -50,6 +60,9 @@
 		};
 		A9C965142EC967EB0041EB9B /* apple-app */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A94E02FD2ED5EDC2001E03FC /* Exceptions for "apple-app" folder in "apple-app" target */,
+			);
 			path = "apple-app";
 			sourceTree = "<group>";
 		};
