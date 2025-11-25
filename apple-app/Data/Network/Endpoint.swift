@@ -76,8 +76,13 @@ enum Endpoint: Sendable {
 
     /// URL completa del endpoint
     ///
+    /// NOTA: Este método ahora ignora el parámetro `baseURL` y usa la URL correcta
+    /// según el tipo de endpoint (authAPIBaseURL o mobileAPIBaseURL).
+    ///
     /// - En modo DummyJSON: Usa dummyjson.com
     /// - En modo Real API: Usa authAPIBaseURL para auth, mobileAPIBaseURL para contenido
+    ///
+    /// @available(*, deprecated, message: "Usar la propiedad fullURL en su lugar")
     func url(baseURL: URL) -> URL {
         // Ignorar el baseURL pasado y usar el correcto según el tipo de endpoint
         return self.baseURL.appendingPathComponent(path)

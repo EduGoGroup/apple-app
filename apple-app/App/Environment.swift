@@ -143,7 +143,7 @@ enum AppEnvironment {
     }
 
     /// URL base genérica del API (retrocompatibilidad)
-    /// @deprecated Usar authAPIBaseURL, mobileAPIBaseURL o adminAPIBaseURL según el servicio
+    @available(*, deprecated, message: "Usar authAPIBaseURL, mobileAPIBaseURL o adminAPIBaseURL según el servicio")
     static var apiBaseURL: URL {
         mobileAPIBaseURL
     }

@@ -10,6 +10,13 @@
 import Foundation
 
 /// Actor para manejo thread-safe de tokens
+///
+/// Este actor garantiza acceso thread-safe a los tokens en memoria mediante el modelo
+/// de concurrencia de Swift. Los actores serializan el acceso a su estado mutable,
+/// previniendo data races cuando múltiples tareas intentan leer/escribir tokens
+/// concurrentemente (ej: refresh automático vs logout simultáneo).
+///
+/// - Note: Complementa el almacenamiento persistente en Keychain, actuando como caché rápido
 private actor TokenStore {
     private var tokens: TokenInfo?
 
@@ -79,9 +86,15 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         self.biometricService = biometricService
         self.authMode = authMode ?? AppEnvironment.authMode
 
-        // Cargar tokens cacheados del Keychain (sync, en init)
+        // Cargar tokens cacheados del Keychain (async, fire-and-forget en init)
         Task {
-            await loadCachedTokens()
+            do {
+                await loadCachedTokens()
+            } catch {
+                logger.error("Failed to load cached tokens during initialization", metadata: [
+                    "error": error.localizedDescription
+                ])
+            }
         }
     }
 
@@ -341,6 +354,9 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
                 return newTokens.accessToken
             case .failure:
                 // Retornar el token actual aunque esté próximo a expirar
+                logger.warning("Token refresh failed, returning token close to expiration", metadata: [
+                    "timeRemaining": "\(Int(tokens.timeRemaining))s"
+                ])
                 return tokens.accessToken
             }
         }
@@ -418,7 +434,9 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
     // MARK: - Local Data Management
 
     func clearLocalAuthData() {
-        // Limpiar store (fire and forget)
+        // Limpiar store de manera asíncrona (fire-and-forget)
+        // Este patrón es intencional: no esperamos el resultado porque clearLocalAuthData
+        // debe ser inmediato. El Task se ejecutará en background sin bloquear.
         Task {
             await tokenStore.setTokens(nil)
         }

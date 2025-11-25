@@ -70,6 +70,9 @@ protocol AuthRepository: Sendable {
 
     /// Verifica si hay una sesión activa con tokens válidos
     ///
+    /// IMPORTANTE: Esta función puede realizar una llamada de red para refrescar
+    /// tokens expirados automáticamente si es necesario.
+    ///
     /// - Returns: true si hay sesión activa con tokens no expirados
     func isAuthenticated() async -> Bool
 
@@ -103,6 +106,7 @@ protocol AuthRepository: Sendable {
 
     /// Verifica si hay una sesión activa (alias para isAuthenticated)
     ///
+    /// @deprecated Usar isAuthenticated() en su lugar
     /// - Returns: true si hay un usuario autenticado
     func hasActiveSession() async -> Bool
 

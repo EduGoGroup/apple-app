@@ -63,6 +63,7 @@ struct TokenInfo: Codable, Sendable, Equatable {
     }
 
     /// Indica si el token necesita refresh (alias para compatibilidad)
+    @available(*, deprecated, message: "Usar shouldRefresh en su lugar")
     var needsRefresh: Bool {
         shouldRefresh
     }
@@ -73,6 +74,7 @@ struct TokenInfo: Codable, Sendable, Equatable {
     }
 
     /// Tiempo restante hasta expiración (alias para compatibilidad)
+    @available(*, deprecated, message: "Usar timeRemaining en su lugar")
     var timeUntilExpiration: TimeInterval {
         timeRemaining
     }
