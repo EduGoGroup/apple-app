@@ -9,14 +9,18 @@
 import Foundation
 
 /// Caso de uso para login con autenticación biométrica (Face ID / Touch ID)
-/// Con Swift 6.2 Default MainActor Isolation, Sendable es implícito
-protocol LoginWithBiometricsUseCase {
+///
+/// Aislado a MainActor porque depende de AuthRepository que es @MainActor
+/// y es usado por ViewModels que también son @MainActor.
+@MainActor
+protocol LoginWithBiometricsUseCase: Sendable {
     /// Ejecuta login usando las credenciales almacenadas y autenticación biométrica
     /// - Returns: Usuario autenticado o error
     func execute() async -> Result<User, AppError>
 }
 
 /// Implementación del caso de uso de login biométrico
+@MainActor
 final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
 
     private let authRepository: AuthRepository
@@ -39,7 +43,7 @@ final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
 
 #if DEBUG
 /// Mock para testing
-/// Con Swift 6.2 Default MainActor Isolation, no se necesitan locks manuales
+@MainActor
 final class MockLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
     var result: Result<User, AppError> = .success(.fixture())
     var executeCallCount = 0

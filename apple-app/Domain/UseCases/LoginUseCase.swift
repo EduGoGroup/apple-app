@@ -8,8 +8,11 @@
 import Foundation
 
 /// Protocolo para el caso de uso de login
-/// Con Swift 6.2 Default MainActor Isolation, Sendable es implícito
-protocol LoginUseCase {
+///
+/// Aislado a MainActor porque depende de AuthRepository que es @MainActor
+/// y es usado por ViewModels que también son @MainActor.
+@MainActor
+protocol LoginUseCase: Sendable {
     /// Ejecuta el proceso de login con validaciones
     /// - Parameters:
     ///   - email: Email del usuario
@@ -19,6 +22,7 @@ protocol LoginUseCase {
 }
 
 /// Implementación por defecto del caso de uso de login
+@MainActor
 final class DefaultLoginUseCase: LoginUseCase {
     private let authRepository: AuthRepository
     private let validator: InputValidator

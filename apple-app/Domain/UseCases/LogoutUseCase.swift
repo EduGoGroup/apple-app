@@ -8,14 +8,18 @@
 import Foundation
 
 /// Protocolo para el caso de uso de logout
-/// Con Swift 6.2 Default MainActor Isolation, Sendable es implícito
-protocol LogoutUseCase {
+///
+/// Aislado a MainActor porque depende de AuthRepository que es @MainActor
+/// y es usado por ViewModels que también son @MainActor.
+@MainActor
+protocol LogoutUseCase: Sendable {
     /// Ejecuta el proceso de cierre de sesión
     /// - Returns: Result con Void en éxito o AppError
     func execute() async -> Result<Void, AppError>
 }
 
 /// Implementación por defecto del caso de uso de logout
+@MainActor
 final class DefaultLogoutUseCase: LogoutUseCase {
     private let authRepository: AuthRepository
     
