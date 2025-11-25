@@ -29,6 +29,10 @@ import Foundation
 ///     // Manejar error
 /// }
 /// ```
+///
+/// - Note: Este protocolo está aislado a MainActor para garantizar
+///   thread-safety en operaciones con Keychain y estado de UI.
+@MainActor
 protocol AuthRepository: Sendable {
 
     // MARK: - Authentication
@@ -149,6 +153,7 @@ extension AuthRepository {
 /// Protocolo para proveer tokens a otros componentes (APIClient, etc.)
 ///
 /// Permite desacoplar la obtención de tokens de la implementación del repositorio.
+@MainActor
 protocol AuthTokenProvider: Sendable {
     /// Obtiene un access token válido para usar en requests
     func getValidAccessToken() async -> String?
