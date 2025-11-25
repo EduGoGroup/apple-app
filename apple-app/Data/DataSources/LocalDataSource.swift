@@ -18,7 +18,9 @@ protocol LocalDataSource: Sendable {
 }
 
 /// Implementación con SwiftData
-final class SwiftDataLocalDataSource: LocalDataSource, @unchecked Sendable {
+/// ModelContext debe usarse en MainActor para thread-safety
+@MainActor
+final class SwiftDataLocalDataSource: LocalDataSource {
 
     private let modelContext: ModelContext
 

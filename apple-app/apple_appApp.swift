@@ -36,13 +36,12 @@ struct apple_appApp: App {
             fatalError("Failed to create ModelContainer: \(error)")
         }
 
-        // Crear DI container
         // Crear container
         let container = DependencyContainer()
         _container = StateObject(wrappedValue: container)
 
-        // Configurar dependencias
-        Self.setupDependencies(in: container)
+        // Configurar dependencias (pasando modelContainer para LocalDataSource)
+        Self.setupDependencies(in: container, modelContainer: modelContainer)
 
         // SPEC-004: Iniciar monitoreo de red para auto-sync
         Task {
@@ -95,10 +94,12 @@ struct apple_appApp: App {
     // MARK: - Dependency Setup
 
     /// Configura todas las dependencias de la aplicación
-    /// - Parameter container: Container donde registrar las dependencias
-    private static func setupDependencies(in container: DependencyContainer) {
-        // Servicios base (Keychain, NetworkMonitor)
-        registerBaseServices(in: container)
+    /// - Parameters:
+    ///   - container: Container donde registrar las dependencias
+    ///   - modelContainer: ModelContainer de SwiftData (para LocalDataSource)
+    private static func setupDependencies(in container: DependencyContainer, modelContainer: ModelContainer) {
+        // Servicios base (Keychain, NetworkMonitor, LocalDataSource)
+        registerBaseServices(in: container, modelContainer: modelContainer)
 
         // Security services (Certificate Pinning, Jailbreak Detection) - SPEC-008
         registerSecurityServices(in: container)
@@ -121,8 +122,8 @@ struct apple_appApp: App {
 
     // MARK: - Base Services Registration
 
-    /// Registra servicios base (Keychain, NetworkMonitor)
-    private static func registerBaseServices(in container: DependencyContainer) {
+    /// Registra servicios base (Keychain, NetworkMonitor, LocalDataSource)
+    private static func registerBaseServices(in container: DependencyContainer, modelContainer: ModelContainer) {
         // KeychainService - Singleton
         // Única instancia para todo el acceso al Keychain
         container.register(KeychainService.self, scope: .singleton) {
@@ -132,6 +133,11 @@ struct apple_appApp: App {
         // NetworkMonitor - Singleton (SPEC-004)
         container.register(NetworkMonitor.self, scope: .singleton) {
             DefaultNetworkMonitor()
+        }
+
+        // LocalDataSource - Singleton (SPEC-005)
+        container.register(LocalDataSource.self, scope: .singleton) {
+            SwiftDataLocalDataSource(modelContext: modelContainer.mainContext)
         }
 
         // OfflineQueue - Singleton (SPEC-004)

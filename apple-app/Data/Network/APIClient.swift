@@ -62,6 +62,24 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.offlineQueue = offlineQueue
         self.responseCache = responseCache
 
+        // SPEC-004: Configurar executor de OfflineQueue
+        if let queue = offlineQueue {
+            Task { [weak queue] in
+                await queue?.executeRequest = { [weak self] queuedRequest in
+                    guard let self = self else { return }
+
+                    // Reconstruir URLRequest desde QueuedRequest
+                    var request = URLRequest(url: queuedRequest.url)
+                    request.httpMethod = queuedRequest.method
+                    request.allHTTPHeaderFields = queuedRequest.headers
+                    request.httpBody = queuedRequest.body
+
+                    // Ejecutar request (ignorar response - best effort)
+                    _ = try await self.session.data(for: request)
+                }
+            }
+        }
+
         // SPEC-008: Configurar URLSession con certificate pinning si está disponible
         if certificatePinner != nil {
             // Extraer hashes del pinner (CertificatePinner tiene los hashes)
@@ -179,8 +197,10 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
                 let decoded = try decoder.decode(T.self, from: processedData)
 
                 // SPEC-004: Cachear response exitoso (solo para GET requests)
-                if request.httpMethod == "GET", let cache = responseCache {
-                    cache.set(processedData, for: request.url!)
+                if request.httpMethod == "GET",
+                   let cache = responseCache,
+                   let url = request.url {
+                    cache.set(processedData, for: url)
                 }
 
                 return decoded
@@ -193,20 +213,22 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
 
         } catch let error as NetworkError {
             // SPEC-004: Encolar request si no hay conexión (para retry posterior)
-            if error == .noConnection, let queue = offlineQueue {
+            if error == .noConnection,
+               let queue = offlineQueue,
+               let url = request.url,
+               let method = request.httpMethod {
+
                 let queuedRequest = QueuedRequest(
-                    url: request.url!,
-                    method: request.httpMethod ?? "GET",
+                    url: url,
+                    method: method,
                     headers: request.allHTTPHeaderFields ?? [:],
                     body: request.httpBody
                 )
 
-                Task {
-                    await queue.enqueue(queuedRequest)
-                }
+                await queue.enqueue(queuedRequest)
 
                 logger.info("Request enqueued for offline retry", metadata: [
-                    "url": request.url!.absoluteString
+                    "url": url.absoluteString
                 ])
             }
 
