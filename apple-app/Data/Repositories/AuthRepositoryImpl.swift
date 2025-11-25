@@ -97,6 +97,7 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - AuthRepository Implementation
 
+    @MainActor
     func login(email: String, password: String) async -> Result<User, AppError> {
         logger.info("Login attempt started")
         logger.logEmail(email)
@@ -202,7 +203,10 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
         return .success(())
     }
 
-    func getCurrentUser() async -> Result<User, AppError> {
+    @MainActor
+    func logout() async -> Result<Void, AppError> {
+        logger.info("Logout attempt started")
+
         do {
             // Obtener access token
             guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
@@ -346,6 +350,80 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
         await getValidAccessToken() != nil
     }
 
+    func refreshSession() async -> Result<User, AppError> {
+        logger.info("Session refresh attempt started")
+
+        // Primero refrescar tokens
+        let tokenResult = await refreshToken()
+
+        switch tokenResult {
+        case .success(let tokens):
+            // Obtener user del nuevo JWT
+            do {
+                let payload = try jwtDecoder.decode(tokens.accessToken)
+                let user = payload.toDomainUser
+                logger.info("Session refresh successful")
+                return .success(user)
+            } catch {
+                logger.error("Failed to decode refreshed token")
+                return .failure(.system(.unknown))
+            }
+
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+
+    func getValidAccessToken() async -> String? {
+        // Obtener tokens del store
+        var tokens = await tokenStore.getTokens()
+
+        if tokens == nil {
+            // Intentar cargar del Keychain
+            await loadCachedTokens()
+            tokens = await tokenStore.getTokens()
+        }
+
+        guard let tokens = tokens else {
+            return nil
+        }
+
+        return await processTokenForAccess(tokens)
+    }
+
+    @MainActor
+    private func processTokenForAccess(_ tokens: TokenInfo) async -> String? {
+        // Si el token está expirado, no intentar refresh aquí
+        if tokens.isExpired {
+            logger.warning("Access token expired")
+            return nil
+        }
+
+        // Si debe refrescarse, hacerlo
+        if tokens.shouldRefresh {
+            logger.info("Access token needs refresh, attempting...")
+            let refreshResult = await refreshToken()
+
+            switch refreshResult {
+            case .success(let newTokens):
+                return newTokens.accessToken
+            case .failure:
+                // Retornar el token actual aunque esté próximo a expirar
+                logger.warning("Token refresh failed, returning token close to expiration", metadata: [
+                    "timeRemaining": "\(Int(tokens.timeRemaining))s"
+                ])
+                return tokens.accessToken
+            }
+        }
+
+        return tokens.accessToken
+    }
+
+    func isAuthenticated() async -> Bool {
+        await getValidAccessToken() != nil
+    }
+
+    @MainActor
     func refreshSession() async -> Result<User, AppError> {
         logger.info("Session refresh attempt started")
 
