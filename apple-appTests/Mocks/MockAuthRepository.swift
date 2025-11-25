@@ -121,6 +121,7 @@ final class MockAuthRepository: AuthRepository, @unchecked Sendable {
 
     // MARK: - Convenience setters para tests
 
+    @MainActor
     func setAuthenticatedUser(_ user: User, tokens: TokenInfo? = nil) {
         loginResult = .success(user)
         getCurrentUserResult = .success(user)

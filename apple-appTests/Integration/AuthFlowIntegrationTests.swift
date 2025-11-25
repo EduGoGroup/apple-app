@@ -33,9 +33,8 @@ struct AuthFlowIntegrationTests {
         )
 
         // Then: Login exitoso
-        let user = expectSuccess(result)
-        #expect(user != nil)
-        #expect(user?.email == "test@edugo.com")
+        let user = try expectSuccess(result)
+        #expect(user.email == "test@edugo.com")
 
         // Verify: Tokens guardados
         let savedToken = try? testCase.mockKeychain.getToken(for: "access_token")
@@ -43,7 +42,7 @@ struct AuthFlowIntegrationTests {
     }
 
     @Test("Login flow handles network error")
-    func loginWithNetworkError() async {
+    func loginWithNetworkError() async throws {
         // Given
         let testCase = IntegrationTestCase()
         testCase.mockAPI.errorToThrow = NetworkError.serverError(500)
@@ -54,8 +53,8 @@ struct AuthFlowIntegrationTests {
         let result = await loginUseCase.execute(email: "test@test.com", password: "123")
 
         // Then
-        let error = expectFailure(result)
-        #expect(error != nil)
+        let error = try expectFailure(result)
+        #expect(error != .system(.unknown))
     }
 
     // MARK: - Token Refresh Flow
@@ -109,14 +108,14 @@ struct AuthFlowIntegrationTests {
         let result = await logoutUseCase.execute()
 
         // Then: Tokens eliminados
-        expectSuccess(result)
+        _ = try expectSuccess(result)
         #expect(testCase.mockKeychain.tokens.isEmpty)
     }
 
     // MARK: - Biometric Auth Flow
 
     @Test("Biometric login flow success")
-    func biometricLoginFlow() async {
+    func biometricLoginFlow() async throws {
         // Given: Biometric disponible y credentials guardadas
         let testCase = IntegrationTestCase()
 
@@ -137,13 +136,13 @@ struct AuthFlowIntegrationTests {
         let result = await authRepo.loginWithBiometrics()
 
         // Then: Exitoso
-        let user = expectSuccess(result)
-        #expect(user != nil)
+        let user = try expectSuccess(result)
+        #expect(user.id.isEmpty == false)
         #expect(testCase.mockBiometric.authenticateCallCount == 1)
     }
 
     @Test("Biometric login fails when not available")
-    func biometricNotAvailable() async {
+    func biometricNotAvailable() async throws {
         // Given
         let testCase = IntegrationTestCase()
         testCase.mockBiometric.isAvailableValue = false
@@ -154,7 +153,7 @@ struct AuthFlowIntegrationTests {
         let result = await authRepo.loginWithBiometrics()
 
         // Then
-        expectFailure(result)
+        _ = try expectFailure(result)
     }
 
     // MARK: - Full User Journey
@@ -168,23 +167,26 @@ struct AuthFlowIntegrationTests {
         testCase.mockJWT.payloadToReturn = MockFactory.makeJWTPayload()
 
         let loginUseCase = testCase.container.resolve(LoginUseCase.self)
-        let loginResult = await loginUseCase.execute(email: "test@test.com", password: "123")
+        let loginResult = await loginUseCase.execute(email: "test@test.com", password: "password123")
 
-        let user = expectSuccess(loginResult)
-        #expect(user != nil)
+        let user = try expectSuccess(loginResult)
+        #expect(user.id.isEmpty == false)
 
         // 2. Get Current User
         let getUserUseCase = testCase.container.resolve(GetCurrentUserUseCase.self)
         let getUserResult = await getUserUseCase.execute()
 
-        let currentUser = expectSuccess(getUserResult)
-        #expect(currentUser?.email == user?.email)
+        let currentUser = try expectSuccess(getUserResult)
+        #expect(currentUser.email == user.email)
 
         // 3. Logout
         let logoutUseCase = testCase.container.resolve(LogoutUseCase.self)
         let logoutResult = await logoutUseCase.execute()
 
-        expectSuccess(logoutResult)
-        #expect(testCase.mockKeychain.tokens.isEmpty)
+        _ = try expectSuccess(logoutResult)
+        // Logout elimina tokens de auth (access_token, refresh_token)
+        // pero no credenciales de Remember Me (stored_email, stored_password)
+        #expect(testCase.mockKeychain.tokens["access_token"] == nil)
+        #expect(testCase.mockKeychain.tokens["refresh_token"] == nil)
     }
 }

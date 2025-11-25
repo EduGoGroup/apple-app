@@ -28,7 +28,7 @@ import Foundation
 ///     #expect(mockLogger.count(level: "error") == 0)
 /// }
 /// ```
-final class MockLogger: Logger {
+final class MockLogger: Logger, @unchecked Sendable {
     // MARK: - LogEntry
 
     /// Representa un entry de log almacenado
@@ -62,10 +62,14 @@ final class MockLogger: Logger {
     // MARK: - Properties
 
     /// Entries de log almacenados
-    private(set) var entries: [LogEntry] = []
-
-    /// Lock para thread-safety
+    private var _entries: [LogEntry] = []
     private let lock = NSLock()
+
+    var entries: [LogEntry] {
+        lock.lock()
+        defer { lock.unlock() }
+        return _entries
+    }
 
     // MARK: - Logger Implementation
 
@@ -135,7 +139,7 @@ final class MockLogger: Logger {
     func clear() {
         lock.lock()
         defer { lock.unlock() }
-        entries.removeAll()
+        _entries.removeAll()
     }
 
     /// Verifica si existe un entry con el nivel y mensaje especificados
@@ -146,7 +150,7 @@ final class MockLogger: Logger {
     func contains(level: String, message: String) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        return entries.contains { $0.level == level && $0.message.contains(message) }
+        return _entries.contains { $0.level == level && $0.message.contains(message) }
     }
 
     /// Cuenta cuántos entries hay de un nivel específico
@@ -155,14 +159,14 @@ final class MockLogger: Logger {
     func count(level: String) -> Int {
         lock.lock()
         defer { lock.unlock() }
-        return entries.filter { $0.level == level }.count
+        return _entries.filter { $0.level == level }.count
     }
 
     /// Obtiene el último entry loggeado
     var lastEntry: LogEntry? {
         lock.lock()
         defer { lock.unlock() }
-        return entries.last
+        return _entries.last
     }
 
     /// Obtiene todos los entries de un nivel específico
@@ -171,7 +175,7 @@ final class MockLogger: Logger {
     func entries(forLevel level: String) -> [LogEntry] {
         lock.lock()
         defer { lock.unlock() }
-        return entries.filter { $0.level == level }
+        return _entries.filter { $0.level == level }
     }
 
     // MARK: - Private Helpers
@@ -186,7 +190,7 @@ final class MockLogger: Logger {
     ) {
         lock.lock()
         defer { lock.unlock() }
-        entries.append(LogEntry(
+        _entries.append(LogEntry(
             level: level,
             message: message,
             metadata: metadata,

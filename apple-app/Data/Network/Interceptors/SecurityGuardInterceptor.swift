@@ -73,7 +73,7 @@ final class SecurityGuardInterceptor: RequestInterceptor, @unchecked Sendable {
 
 #if DEBUG
 /// Mock interceptor para testing
-final class MockSecurityGuardInterceptor: RequestInterceptor {
+actor MockSecurityGuardInterceptor: RequestInterceptor {
     var shouldBlock = false
     var interceptCallCount = 0
 

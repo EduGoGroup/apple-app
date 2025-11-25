@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 @testable import apple_app
 
+@MainActor
 @Suite("GetCurrentUserUseCase Tests")
 struct GetCurrentUserUseCaseTests {
     

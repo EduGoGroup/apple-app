@@ -8,6 +8,10 @@
 import Foundation
 
 /// Protocolo para el caso de uso de logout
+///
+/// Aislado a MainActor porque depende de AuthRepository que es @MainActor
+/// y es usado por ViewModels que también son @MainActor.
+@MainActor
 protocol LogoutUseCase: Sendable {
     /// Ejecuta el proceso de cierre de sesión
     /// - Returns: Result con Void en éxito o AppError
@@ -15,6 +19,7 @@ protocol LogoutUseCase: Sendable {
 }
 
 /// Implementación por defecto del caso de uso de logout
+@MainActor
 final class DefaultLogoutUseCase: LogoutUseCase {
     private let authRepository: AuthRepository
     

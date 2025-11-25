@@ -5,9 +5,11 @@
 //  Created by Jhoan Medina on 15-11-25.
 //  Updated on 25-11-25 - SPEC-003: AuthInterceptor integration
 //  Updated on 25-11-25 - SPEC-008: Security services integration
+//  Updated on 25-11-25 - SPEC-005: SwiftData integration
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct apple_appApp: App {
@@ -15,15 +17,37 @@ struct apple_appApp: App {
 
     @StateObject private var container: DependencyContainer
 
+    // MARK: - SwiftData Container (SPEC-005)
+
+    private let modelContainer: ModelContainer
+
     // MARK: - Initialization
 
     init() {
+        // SPEC-005: Configurar SwiftData ModelContainer
+        do {
+            modelContainer = try ModelContainer(
+                for: CachedUser.self,
+                CachedHTTPResponse.self,
+                SyncQueueItem.self,
+                AppSettings.self
+            )
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+
         // Crear container
         let container = DependencyContainer()
         _container = StateObject(wrappedValue: container)
 
-        // Configurar dependencias
-        Self.setupDependencies(in: container)
+        // Configurar dependencias (pasando modelContainer para LocalDataSource)
+        Self.setupDependencies(in: container, modelContainer: modelContainer)
+
+        // SPEC-004: Iniciar monitoreo de red para auto-sync
+        Task {
+            let syncCoordinator = container.resolve(NetworkSyncCoordinator.self)
+            await syncCoordinator.startMonitoring()
+        }
     }
 
     // MARK: - Scene
@@ -32,6 +56,7 @@ struct apple_appApp: App {
         WindowGroup {
             AdaptiveNavigationView()
                 .environmentObject(container)
+                .modelContainer(modelContainer)  // SPEC-005: SwiftData container
         }
         .commands {
             appCommands
@@ -69,10 +94,12 @@ struct apple_appApp: App {
     // MARK: - Dependency Setup
 
     /// Configura todas las dependencias de la aplicación
-    /// - Parameter container: Container donde registrar las dependencias
-    private static func setupDependencies(in container: DependencyContainer) {
-        // Servicios base (Keychain, NetworkMonitor)
-        registerBaseServices(in: container)
+    /// - Parameters:
+    ///   - container: Container donde registrar las dependencias
+    ///   - modelContainer: ModelContainer de SwiftData (para LocalDataSource)
+    private static func setupDependencies(in container: DependencyContainer, modelContainer: ModelContainer) {
+        // Servicios base (Keychain, NetworkMonitor, LocalDataSource)
+        registerBaseServices(in: container, modelContainer: modelContainer)
 
         // Security services (Certificate Pinning, Jailbreak Detection) - SPEC-008
         registerSecurityServices(in: container)
@@ -95,8 +122,8 @@ struct apple_appApp: App {
 
     // MARK: - Base Services Registration
 
-    /// Registra servicios base (Keychain, NetworkMonitor)
-    private static func registerBaseServices(in container: DependencyContainer) {
+    /// Registra servicios base (Keychain, NetworkMonitor, LocalDataSource)
+    private static func registerBaseServices(in container: DependencyContainer, modelContainer: ModelContainer) {
         // KeychainService - Singleton
         // Única instancia para todo el acceso al Keychain
         container.register(KeychainService.self, scope: .singleton) {
@@ -106,6 +133,29 @@ struct apple_appApp: App {
         // NetworkMonitor - Singleton (SPEC-004)
         container.register(NetworkMonitor.self, scope: .singleton) {
             DefaultNetworkMonitor()
+        }
+
+        // LocalDataSource - Singleton (SPEC-005)
+        container.register(LocalDataSource.self, scope: .singleton) {
+            SwiftDataLocalDataSource(modelContext: modelContainer.mainContext)
+        }
+
+        // OfflineQueue - Singleton (SPEC-004)
+        container.register(OfflineQueue.self, scope: .singleton) {
+            OfflineQueue(networkMonitor: container.resolve(NetworkMonitor.self))
+        }
+
+        // ResponseCache - Singleton (SPEC-004)
+        container.register(ResponseCache.self, scope: .singleton) {
+            ResponseCache(defaultTTL: 300) // 5 minutos de cache
+        }
+
+        // NetworkSyncCoordinator - Singleton (SPEC-004)
+        container.register(NetworkSyncCoordinator.self, scope: .singleton) {
+            NetworkSyncCoordinator(
+                networkMonitor: container.resolve(NetworkMonitor.self),
+                offlineQueue: container.resolve(OfflineQueue.self)
+            )
         }
     }
 
@@ -195,7 +245,9 @@ struct apple_appApp: App {
                 ],
                 responseInterceptors: [loggingInterceptor],
                 retryPolicy: .default,
-                networkMonitor: container.resolve(NetworkMonitor.self)
+                networkMonitor: container.resolve(NetworkMonitor.self),
+                offlineQueue: container.resolve(OfflineQueue.self),      // SPEC-004: Offline support
+                responseCache: container.resolve(ResponseCache.self)      // SPEC-004: Response caching
             )
         }
     }

@@ -27,6 +27,9 @@ import Foundation
 /// ```
 final class TestDependencyContainer: DependencyContainer, @unchecked Sendable {
 
+    /// Tipos registrados para verificación
+    private var registeredTypeKeys: Set<String> = []
+
     /// Registra un mock con scope factory por defecto
     ///
     /// - Parameters:
@@ -35,6 +38,8 @@ final class TestDependencyContainer: DependencyContainer, @unchecked Sendable {
     ///
     /// - Note: Siempre usa scope `.factory` para facilitar reset entre tests
     func registerMock<T>(_ type: T.Type, mock: T) {
+        let key = String(describing: type)
+        registeredTypeKeys.insert(key)
         super.register(type, scope: .factory) { mock }
     }
 
@@ -42,16 +47,22 @@ final class TestDependencyContainer: DependencyContainer, @unchecked Sendable {
     ///
     /// - Parameter types: Tipos a verificar
     /// - Returns: Array de tipos faltantes (vacío si todos están registrados)
-    func verifyRegistrations<T>(_ types: [T.Type]) -> [String] {
+    func verifyRegistrations(_ types: [any Any.Type]) -> [String] {
         var missing: [String] = []
 
         for type in types {
             let key = String(describing: type)
-            if !isRegistered(type) {
+            if !registeredTypeKeys.contains(key) && !isRegistered(type) {
                 missing.append(key)
             }
         }
 
         return missing
+    }
+
+    /// Verifica si un tipo arbitrario está registrado
+    private func isRegistered(_ type: any Any.Type) -> Bool {
+        let key = String(describing: type)
+        return registeredTypeKeys.contains(key)
     }
 }

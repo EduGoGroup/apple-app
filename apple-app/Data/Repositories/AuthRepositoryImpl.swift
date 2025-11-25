@@ -40,8 +40,11 @@ private actor TokenStore {
 /// - Refresh automático cuando `shouldRefresh = true`
 ///
 /// ## Thread Safety
-/// Usa `TokenStore` actor para operaciones concurrentes con tokens.
-final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Sendable {
+/// - TokenStore actor para operaciones concurrentes con tokens
+/// - APIClient ahora es actor, garantiza serialización automática
+/// - @MainActor garantiza thread-safety sin locks manuales
+@MainActor
+final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - Dependencies
 
@@ -94,7 +97,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
 
     // MARK: - AuthRepository Implementation
 
-    @MainActor
     func login(email: String, password: String) async -> Result<User, AppError> {
         logger.info("Login attempt started")
         logger.logEmail(email)
@@ -139,7 +141,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         }
     }
 
-    @MainActor
     func loginWithBiometrics() async -> Result<User, AppError> {
         logger.info("Biometric login attempt")
 
@@ -179,7 +180,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         }
     }
 
-    @MainActor
     func logout() async -> Result<Void, AppError> {
         logger.info("Logout attempt started")
 
@@ -202,7 +202,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         return .success(())
     }
 
-    @MainActor
     func getCurrentUser() async -> Result<User, AppError> {
         do {
             // Obtener access token
@@ -236,7 +235,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
 
     // MARK: - Token Management
 
-    @MainActor
     func refreshToken() async -> Result<AuthTokens, AppError> {
         logger.info("Token refresh attempt started")
 
@@ -317,7 +315,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         return await processTokenForAccess(tokens)
     }
 
-    @MainActor
     private func processTokenForAccess(_ tokens: TokenInfo) async -> String? {
         // Si el token está expirado, no intentar refresh aquí
         if tokens.isExpired {
@@ -349,7 +346,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         await getValidAccessToken() != nil
     }
 
-    @MainActor
     func refreshSession() async -> Result<User, AppError> {
         logger.info("Session refresh attempt started")
 
@@ -459,7 +455,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         try? keychainService.saveToken(tokens.refreshToken, for: refreshTokenKey)
     }
 
-    @MainActor
     private func loginWithDummyJSON(email: String, password: String) async throws -> (User, TokenInfo) {
         let username = email.components(separatedBy: "@").first ?? email
 
@@ -478,7 +473,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Se
         return (response.toDomain(), response.toTokenInfo())
     }
 
-    @MainActor
     private func loginWithRealAPI(email: String, password: String) async throws -> (User, TokenInfo) {
         let request = LoginRequest(email: email, password: password)
 

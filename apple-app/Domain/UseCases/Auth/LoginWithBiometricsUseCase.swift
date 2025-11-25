@@ -9,6 +9,10 @@
 import Foundation
 
 /// Caso de uso para login con autenticación biométrica (Face ID / Touch ID)
+///
+/// Aislado a MainActor porque depende de AuthRepository que es @MainActor
+/// y es usado por ViewModels que también son @MainActor.
+@MainActor
 protocol LoginWithBiometricsUseCase: Sendable {
     /// Ejecuta login usando las credenciales almacenadas y autenticación biométrica
     /// - Returns: Usuario autenticado o error
@@ -16,6 +20,7 @@ protocol LoginWithBiometricsUseCase: Sendable {
 }
 
 /// Implementación del caso de uso de login biométrico
+@MainActor
 final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
 
     private let authRepository: AuthRepository
@@ -38,6 +43,7 @@ final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
 
 #if DEBUG
 /// Mock para testing
+@MainActor
 final class MockLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
     var result: Result<User, AppError> = .success(.fixture())
     var executeCallCount = 0

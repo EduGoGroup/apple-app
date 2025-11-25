@@ -8,6 +8,7 @@
 import Foundation
 
 /// Protocolo que define las operaciones para gestionar preferencias del usuario
+@MainActor
 protocol PreferencesRepository: Sendable {
     /// Obtiene las preferencias actuales del usuario
     /// - Returns: UserPreferences configuradas (nunca falla, retorna default si no existen)

@@ -18,57 +18,66 @@ import Testing
 /// ## Uso
 /// ```swift
 /// @Test func completeAuthFlow() async throws {
-///     let container = createTestContainer()
-///     let authRepo = container.resolve(AuthRepository.self)
+///     let testCase = IntegrationTestCase()
+///     testCase.mockAPI.mockResponse = MockFactory.makeLoginResponse()
 ///
-///     let result = await authRepo.login(email: "test@test.com", password: "pass")
+///     let result = await testCase.container.resolve(AuthRepository.self).login(...)
 ///     try expectSuccess(result)
 /// }
 /// ```
-struct IntegrationTestCase {
+@MainActor
+final class IntegrationTestCase {
 
-    // MARK: - Container Creation
+    // MARK: - Properties
 
-    /// Crea un DependencyContainer configurado para testing
-    static func createTestContainer() -> DependencyContainer {
+    let container: DependencyContainer
+    let mockAPI: MockAPIClient
+    let mockKeychain: MockKeychainService
+    let mockJWT: MockJWTDecoder
+    let mockBiometric: MockBiometricService
+    let mockNetworkMonitor: MockNetworkMonitor
+    let mockCertPinner: MockCertificatePinner
+    let mockSecurityValidator: MockSecurityValidator
+
+    // MARK: - Initialization
+
+    init() {
+        // Crear mocks primero
+        let api = MockAPIClient()
+        let keychain = MockKeychainService()
+        let jwt = MockJWTDecoder()
+        let biometric = MockBiometricService()
+        let networkMonitor = MockNetworkMonitor()
+        let certPinner = MockCertificatePinner()
+        let securityValidator = MockSecurityValidator()
+
+        // Guardar referencias
+        self.mockAPI = api
+        self.mockKeychain = keychain
+        self.mockJWT = jwt
+        self.mockBiometric = biometric
+        self.mockNetworkMonitor = networkMonitor
+        self.mockCertPinner = certPinner
+        self.mockSecurityValidator = securityValidator
+
+        // Crear container
         let container = DependencyContainer()
 
-        // Mock services
-        container.register(KeychainService.self, scope: .singleton) {
-            MockKeychainService()
-        }
-
-        container.register(NetworkMonitor.self, scope: .singleton) {
-            MockNetworkMonitor()
-        }
-
-        container.register(JWTDecoder.self, scope: .singleton) {
-            MockJWTDecoder()
-        }
-
-        container.register(BiometricAuthService.self, scope: .singleton) {
-            MockBiometricService()
-        }
-
-        container.register(CertificatePinner.self, scope: .singleton) {
-            MockCertificatePinner()
-        }
-
-        container.register(SecurityValidator.self, scope: .singleton) {
-            MockSecurityValidator()
-        }
-
-        // Mock APIClient
-        container.register(APIClient.self, scope: .singleton) {
-            MockAPIClient()
-        }
+        // Registrar mocks en container
+        container.register(KeychainService.self, scope: .singleton) { keychain }
+        container.register(NetworkMonitor.self, scope: .singleton) { networkMonitor }
+        container.register(JWTDecoder.self, scope: .singleton) { jwt }
+        container.register(BiometricAuthService.self, scope: .singleton) { biometric }
+        container.register(CertificatePinner.self, scope: .singleton) { certPinner }
+        container.register(SecurityValidator.self, scope: .singleton) { securityValidator }
+        container.register(APIClient.self, scope: .singleton) { api }
 
         // TokenRefreshCoordinator con mocks
         container.register(TokenRefreshCoordinator.self, scope: .singleton) {
             TokenRefreshCoordinator(
-                apiClient: container.resolve(APIClient.self),
-                keychainService: container.resolve(KeychainService.self),
-                jwtDecoder: container.resolve(JWTDecoder.self)
+                apiClient: api,
+                keychainService: keychain,
+                jwtDecoder: jwt
             )
         }
 
@@ -80,11 +89,11 @@ struct IntegrationTestCase {
         // Repositories
         container.register(AuthRepository.self, scope: .singleton) {
             AuthRepositoryImpl(
-                apiClient: container.resolve(APIClient.self),
-                keychainService: container.resolve(KeychainService.self),
-                jwtDecoder: container.resolve(JWTDecoder.self),
+                apiClient: api,
+                keychainService: keychain,
+                jwtDecoder: jwt,
                 tokenCoordinator: container.resolve(TokenRefreshCoordinator.self),
-                biometricService: container.resolve(BiometricAuthService.self)
+                biometricService: biometric
             )
         }
 
@@ -118,52 +127,51 @@ struct IntegrationTestCase {
             )
         }
 
-        return container
+        self.container = container
     }
 
-    // MARK: - Configured Mocks
+    // MARK: - Convenience Configuration
 
     /// Configura mocks para un login exitoso
-    static func configureSuccessfulLogin(in container: DependencyContainer) {
-        let mockAPI = container.resolve(APIClient.self) as! MockAPIClient
+    func configureSuccessfulLogin() {
         mockAPI.mockResponse = MockFactory.makeLoginResponse()
-
-        let mockJWT = container.resolve(JWTDecoder.self) as! MockJWTDecoder
         mockJWT.payloadToReturn = MockFactory.makeJWTPayload()
     }
 
     /// Configura mocks para un login fallido
-    static func configureFailedLogin(in container: DependencyContainer, error: NetworkError = .unauthorized) {
-        let mockAPI = container.resolve(APIClient.self) as! MockAPIClient
+    func configureFailedLogin(error: NetworkError = .unauthorized) {
         mockAPI.errorToThrow = error
     }
 
     /// Configura mocks para biometric authentication exitosa
-    static func configureSuccessfulBiometric(in container: DependencyContainer) {
-        let mockBiometric = container.resolve(BiometricAuthService.self) as! MockBiometricService
+    func configureSuccessfulBiometric() {
         mockBiometric.authenticateResult = true
-
-        let mockKeychain = container.resolve(KeychainService.self) as! MockKeychainService
         mockKeychain.tokens = [
             "stored_email": "test@edugo.com",
             "stored_password": "password123"
         ]
-
-        configureSuccessfulLogin(in: container)
+        configureSuccessfulLogin()
     }
 }
 
 // MARK: - Mock Network Monitor
 
-class MockNetworkMonitor: NetworkMonitor {
-    var isConnected: Bool = true
-    var connectionChangedCallCount = 0
+@MainActor
+final class MockNetworkMonitor: NetworkMonitor {
+    var isConnectedValue: Bool = true
+    var connectionTypeValue: ConnectionType = .wifi
 
-    func startMonitoring() {
-        // No-op en tests
+    var isConnected: Bool {
+        get async { isConnectedValue }
     }
 
-    func stopMonitoring() {
-        // No-op en tests
+    var connectionType: ConnectionType {
+        get async { connectionTypeValue }
+    }
+
+    func connectionStream() -> AsyncStream<Bool> {
+        AsyncStream { continuation in
+            continuation.yield(isConnectedValue)
+        }
     }
 }

@@ -6,9 +6,11 @@
 //  SPEC-003: Authentication Real API Migration
 //
 
+import Foundation
 import Testing
 @testable import apple_app
 
+@MainActor
 @Suite("User Tests")
 struct UserTests {
 

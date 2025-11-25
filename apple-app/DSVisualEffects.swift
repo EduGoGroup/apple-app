@@ -85,8 +85,14 @@ struct DSVisualEffectLegacy: DSVisualEffect {
     }
 }
 
+// MARK: - Placeholder para iOS 26+ / macOS 26+
+// El código de Liquid Glass está deshabilitado hasta que iOS 26 SDK esté disponible.
+// Cuando Apple lance iOS 26, descomentar DSVisualEffectModern y agregar las APIs reales.
+
+/*
 /// Implementación de efectos visuales para iOS 26+ / macOS 26+
 /// Usa Liquid Glass (disponible desde iOS 26.0 / macOS 26.0)
+/// TODO: Habilitar cuando iOS 26 SDK esté disponible
 @available(iOS 26.0, macOS 26.0, *)
 struct DSVisualEffectModern: DSVisualEffect {
     let style: DSVisualEffectStyle
@@ -113,6 +119,7 @@ struct DSVisualEffectModern: DSVisualEffect {
 
     // MARK: - Configuración de Liquid Glass para iOS 26+/macOS 26+
 
+    @available(iOS 26.0, macOS 26.0, *)
     private var glassStyle: Glass {
         var glass: Glass = .regular
 
@@ -129,6 +136,7 @@ struct DSVisualEffectModern: DSVisualEffect {
         return glass
     }
 }
+*/
 
 // MARK: - Tipos de Soporte
 
@@ -157,18 +165,21 @@ enum DSEffectShape {
 /// Factory que detecta la versión del OS y devuelve la implementación adecuada
 struct DSVisualEffectFactory {
     /// Crea el efecto visual apropiado según la versión del OS
+    ///
+    /// - Note: Actualmente solo usa DSVisualEffectLegacy (Materials).
+    ///   Cuando iOS 26 SDK esté disponible, se habilitará DSVisualEffectModern (Liquid Glass).
     static func createEffect(
         style: DSVisualEffectStyle = .regular,
         shape: DSEffectShape = .roundedRectangle(cornerRadius: DSCornerRadius.large),
         isInteractive: Bool = false
     ) -> DSVisualEffect {
-        // Verifica si estamos en iOS 26+ o macOS 26+
-        if #available(iOS 26.0, macOS 26.0, *) {
-            return DSVisualEffectModern(style: style, shape: shape, isInteractive: isInteractive)
-        } else {
-            // Fallback para iOS 18+ / macOS 15+
-            return DSVisualEffectLegacy(style: style, shape: shape, isInteractive: isInteractive)
-        }
+        // TODO: Habilitar DSVisualEffectModern cuando iOS 26 SDK esté disponible
+        // if #available(iOS 26.0, macOS 26.0, *) {
+        //     return DSVisualEffectModern(style: style, shape: shape, isInteractive: isInteractive)
+        // }
+
+        // Usa Materials (iOS 18+ / macOS 15+)
+        return DSVisualEffectLegacy(style: style, shape: shape, isInteractive: isInteractive)
     }
 }
 

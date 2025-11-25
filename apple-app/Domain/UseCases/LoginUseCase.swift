@@ -8,6 +8,10 @@
 import Foundation
 
 /// Protocolo para el caso de uso de login
+///
+/// Aislado a MainActor porque depende de AuthRepository que es @MainActor
+/// y es usado por ViewModels que también son @MainActor.
+@MainActor
 protocol LoginUseCase: Sendable {
     /// Ejecuta el proceso de login con validaciones
     /// - Parameters:
@@ -18,6 +22,7 @@ protocol LoginUseCase: Sendable {
 }
 
 /// Implementación por defecto del caso de uso de login
+@MainActor
 final class DefaultLoginUseCase: LoginUseCase {
     private let authRepository: AuthRepository
     private let validator: InputValidator

@@ -24,7 +24,7 @@ final class MockKeychainService: KeychainService {
 
     func getToken(for key: String) throws -> String? {
         if shouldThrowError {
-            throw KeychainError.unableToRead
+            throw KeychainError.unableToRetrieve
         }
         return tokens[key]
     }
@@ -39,7 +39,8 @@ final class MockKeychainService: KeychainService {
 
 // MARK: - MockAPIClient
 
-final class MockAPIClient: APIClient, @unchecked Sendable {
+@MainActor
+final class MockAPIClient: APIClient {
     var mockResponse: Any?
     var errorToThrow: Error?
     var executeCallCount = 0
@@ -47,10 +48,10 @@ final class MockAPIClient: APIClient, @unchecked Sendable {
     var lastMethod: HTTPMethod?
     var delay: TimeInterval = 0
 
-    func execute<T: Decodable, U: Encodable>(
+    func execute<T: Decodable>(
         endpoint: Endpoint,
         method: HTTPMethod,
-        body: U?
+        body: (any Encodable)?
     ) async throws -> T {
         executeCallCount += 1
         lastEndpoint = endpoint
@@ -66,7 +67,7 @@ final class MockAPIClient: APIClient, @unchecked Sendable {
         }
 
         guard let response = mockResponse as? T else {
-            throw NetworkError.decodingError(NSError(domain: "MockAPIClient", code: -1))
+            throw NetworkError.decodingError
         }
 
         return response
