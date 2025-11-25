@@ -42,9 +42,9 @@ struct LoginView: View {
                     }
 
                     // Hint de credenciales (solo en desarrollo)
-                    if AppEnvironment.isDevelopment {
-                        developmentHint
-                    }
+                    #if DEBUG
+                    developmentHint
+                    #endif
 
                     Spacer()
                 }
@@ -127,10 +127,29 @@ struct LoginView: View {
     }
 
     private var developmentHint: some View {
-        // SPEC-008: Bloque de desarrollo removido por seguridad
-        // Para testing con DummyJSON: emilys / emilyspass
-        // Para testing con API Real: usar credenciales válidas del servidor
-        EmptyView()
+        VStack(spacing: DSSpacing.small) {
+            Text("🔧 Modo Desarrollo")
+                .font(DSTypography.caption)
+                .foregroundColor(DSColors.textSecondary)
+            
+            Button {
+                email = "admin@edugo.test"
+                password = "edugo2024"
+            } label: {
+                HStack(spacing: DSSpacing.small) {
+                    Image(systemName: "person.fill.checkmark")
+                    Text("Rellenar credenciales de prueba")
+                }
+                .font(DSTypography.caption)
+                .foregroundColor(DSColors.accent)
+                .padding(.horizontal, DSSpacing.medium)
+                .padding(.vertical, DSSpacing.small)
+                .background(DSColors.accent.opacity(0.1))
+                .cornerRadius(DSCornerRadius.small)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.top, DSSpacing.large)
     }
 }
 
