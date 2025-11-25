@@ -31,11 +31,12 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
     private let decoder: JSONDecoder
     private let logger = LoggerFactory.network
 
-    // SPEC-004: Interceptors
+    // SPEC-004: Interceptors & Network Features
     private let requestInterceptors: [RequestInterceptor]
     private let responseInterceptors: [ResponseInterceptor]
     private let retryPolicy: RetryPolicy
     private let networkMonitor: NetworkMonitor
+    private let offlineQueue: OfflineQueue?
 
     init(
         baseURL: URL,
@@ -46,7 +47,8 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         requestInterceptors: [RequestInterceptor] = [],
         responseInterceptors: [ResponseInterceptor] = [],
         retryPolicy: RetryPolicy = .default,
-        networkMonitor: NetworkMonitor? = nil
+        networkMonitor: NetworkMonitor? = nil,
+        offlineQueue: OfflineQueue? = nil  // SPEC-004: Offline support
     ) {
         self.baseURL = baseURL
         self.encoder = encoder
@@ -55,6 +57,7 @@ final class DefaultAPIClient: APIClient, @unchecked Sendable {
         self.responseInterceptors = responseInterceptors
         self.retryPolicy = retryPolicy
         self.networkMonitor = networkMonitor ?? DefaultNetworkMonitor()
+        self.offlineQueue = offlineQueue
 
         // SPEC-008: Configurar URLSession con certificate pinning si está disponible
         if certificatePinner != nil {
