@@ -1,0 +1,784 @@
+# Dependency Container - Task Tracker
+# =====================================
+#
+# Este archivo mantiene el estado de las tareas del proyecto
+# Dependency Container para el sistema de inyección de dependencias.
+#
+# Estados posibles:
+#   - pending: Tarea pendiente por iniciar
+#   - in_progress: Tarea actualmente en progreso
+#   - completed: Tarea completada exitosamente
+#   - blocked: Tarea bloqueada por dependencias o problemas
+#
+# Uso:
+#   - Actualizar 'estado' cuando cambies el estado de una tarea
+#   - Rellenar 'completedAt' con timestamp cuando completes
+#   - Usar 'notas' para agregar contexto o issues encontrados
+#
+
+metadata:
+  project: dependency-container
+  version: 1.0
+  created: 2025-01-23
+  lastUpdated: 2025-01-23T13:30:00Z
+  estimatedTotal: "6-9 horas"
+  description: "Implementación de Dependency Container para inyección de dependencias"
+  docs:
+    - docs/specs/dependency-container/01-analisis-requerimiento.md
+    - docs/specs/dependency-container/02-analisis-diseno.md
+    - docs/specs/dependency-container/03-tareas.md
+
+progress:
+  totalTasks: 28
+  completed: 28
+  inProgress: 0
+  pending: 0
+  blocked: 0
+  percentage: 100
+  currentEtapa: 5
+  currentTask: "Proyecto completado"
+
+# ============================================================================
+# TAREAS POR ETAPA
+# ============================================================================
+
+tasks:
+  # ==========================================================================
+  # ETAPA 1: SETUP INICIAL (7 tareas)
+  # ==========================================================================
+
+  - id: T1.1
+    etapa: 1
+    titulo: "Crear carpeta Core/DI"
+    descripcion: "Crear estructura de carpetas para Dependency Injection"
+    estado: pending
+    estimacion: 5min
+    prioridad: alta
+    dependencias: []
+    archivos:
+      - "apple-app/Core/DI/"
+      - "apple-app/Core/Extensions/"
+    comandos:
+      - "mkdir -p apple-app/Core/DI"
+      - "mkdir -p apple-app/Core/Extensions"
+    validacion:
+      - "Carpeta apple-app/Core/DI existe"
+      - "Carpeta apple-app/Core/Extensions existe"
+    completedAt: null
+    notas: null
+
+  - id: T1.2
+    etapa: 1
+    titulo: "Crear DependencyScope.swift"
+    descripcion: "Enum para definir ciclos de vida de dependencias"
+    estado: pending
+    estimacion: 10min
+    prioridad: alta
+    dependencias:
+      - T1.1
+    archivos:
+      - "apple-app/Core/DI/DependencyScope.swift"
+    validacion:
+      - "Archivo creado con contenido correcto"
+      - "Build exitoso: make build"
+    completedAt: null
+    notas: null
+
+  - id: T1.3
+    etapa: 1
+    titulo: "Crear DependencyContainer.swift - Parte 1: Estructura Base"
+    descripcion: "Clase contenedora con diccionarios de registro y properties básicas"
+    estado: pending
+    estimacion: 15min
+    prioridad: alta
+    dependencias:
+      - T1.2
+    archivos:
+      - "apple-app/Core/DI/DependencyContainer.swift"
+    validacion:
+      - "Archivo creado con estructura base"
+      - "Build exitoso"
+    completedAt: null
+    notas: null
+
+  - id: T1.4
+    etapa: 1
+    titulo: "Crear DependencyContainer.swift - Parte 2: Método register"
+    descripcion: "Implementar método para registrar dependencias"
+    estado: pending
+    estimacion: 15min
+    prioridad: alta
+    dependencias:
+      - T1.3
+    archivos:
+      - "apple-app/Core/DI/DependencyContainer.swift"
+    validacion:
+      - "Código agregado correctamente"
+      - "Build exitoso"
+      - "No hay warnings"
+    completedAt: null
+    notas: null
+
+  - id: T1.5
+    etapa: 1
+    titulo: "Crear DependencyContainer.swift - Parte 3: Método resolve"
+    descripcion: "Implementar método para resolver dependencias"
+    estado: pending
+    estimacion: 20min
+    prioridad: alta
+    dependencias:
+      - T1.4
+    archivos:
+      - "apple-app/Core/DI/DependencyContainer.swift"
+    validacion:
+      - "Código agregado correctamente"
+      - "Build exitoso"
+      - "No hay warnings de compilación"
+    completedAt: null
+    notas: null
+
+  - id: T1.6
+    etapa: 1
+    titulo: "Crear TestDependencyContainer.swift"
+    descripcion: "Container especializado para testing con helpers adicionales"
+    estado: pending
+    estimacion: 15min
+    prioridad: alta
+    dependencias:
+      - T1.5
+    archivos:
+      - "apple-app/Core/DI/TestDependencyContainer.swift"
+    target: "apple-appTests"
+    validacion:
+      - "Archivo creado en target de tests"
+      - "Build exitoso"
+      - "Tests compilan sin errores"
+    completedAt: null
+    notas: "IMPORTANTE: Debe ir en el target de tests"
+
+  - id: T1.7
+    etapa: 1
+    titulo: "Crear View+Injection.swift"
+    descripcion: "Extension de View para facilitar uso del container"
+    estado: pending
+    estimacion: 10min
+    prioridad: alta
+    dependencias:
+      - T1.5
+    archivos:
+      - "apple-app/Core/Extensions/View+Injection.swift"
+    validacion:
+      - "Archivo creado correctamente"
+      - "Build exitoso"
+      - "Extension disponible en vistas"
+    completedAt: null
+    notas: null
+
+  # Checkpoint Etapa 1
+  - id: CHECKPOINT_E1
+    etapa: 1
+    titulo: "✅ Checkpoint Etapa 1"
+    descripcion: "Verificar que todos los archivos fueron creados y el proyecto compila"
+    estado: pending
+    estimacion: 5min
+    prioridad: critica
+    dependencias:
+      - T1.1
+      - T1.2
+      - T1.3
+      - T1.4
+      - T1.5
+      - T1.6
+      - T1.7
+    comandos:
+      - "make build"
+      - "ls -la apple-app/Core/DI/"
+      - "ls -la apple-app/Core/Extensions/"
+    validacion:
+      - "Build exitoso"
+      - "Todos los archivos creados"
+      - "Archivos agregados al target en Xcode"
+    completedAt: null
+    notas: "IMPORTANTE: Después de esto, abrir Xcode y agregar archivos al proyecto"
+
+  # ==========================================================================
+  # ETAPA 2: REGISTRO DE DEPENDENCIAS (7 tareas)
+  # ==========================================================================
+
+  - id: T2.1
+    etapa: 2
+    titulo: "Modificar apple_appApp.swift - Setup Container"
+    descripcion: "Crear instancia de DependencyContainer y configurar en App"
+    estado: pending
+    estimacion: 15min
+    prioridad: alta
+    dependencias:
+      - CHECKPOINT_E1
+    archivos:
+      - "apple-app/apple_appApp.swift"
+    validacion:
+      - "Container creado como @StateObject"
+      - "Método setupDependencies creado"
+      - "Container inyectado en AdaptiveNavigationView"
+      - "Build exitoso"
+    completedAt: null
+    notas: null
+
+  - id: T2.2
+    etapa: 2
+    titulo: "Registrar Services"
+    descripcion: "Registrar KeychainService y APIClient como singletons"
+    estado: pending
+    estimacion: 10min
+    prioridad: alta
+    dependencias:
+      - T2.1
+    archivos:
+      - "apple-app/apple_appApp.swift"
+    validacion:
+      - "KeychainService registrado"
+      - "APIClient registrado con dependencia de KeychainService"
+      - "Build exitoso"
+    completedAt: null
+    notas: null
+
+  - id: T2.3
+    etapa: 2
+    titulo: "Registrar Validators"
+    descripcion: "Registrar InputValidator como singleton"
+    estado: pending
+    estimacion: 5min
+    prioridad: media
+    dependencias:
+      - T2.1
+    archivos:
+      - "apple-app/apple_appApp.swift"
+    validacion:
+      - "InputValidator registrado"
+      - "Build exitoso"
+    completedAt: null
+    notas: null
+
+  - id: T2.4
+    etapa: 2
+    titulo: "Registrar Repositories"
+    descripcion: "Registrar AuthRepository y PreferencesRepository como singletons"
+    estado: pending
+    estimacion: 10min
+    prioridad: alta
+    dependencias:
+      - T2.2
+    archivos:
+      - "apple-app/apple_appApp.swift"
+    validacion:
+      - "AuthRepository registrado con sus dependencias"
+      - "PreferencesRepository registrado"
+      - "Build exitoso"
+    completedAt: null
+    notas: null
+
+  - id: T2.5
+    etapa: 2
+    titulo: "Registrar Use Cases"
+    descripcion: "Registrar todos los Use Cases como factories"
+    estado: pending
+    estimacion: 15min
+    prioridad: alta
+    dependencias:
+      - T2.4
+      - T2.3
+    archivos:
+      - "apple-app/apple_appApp.swift"
+    validacion:
+      - "Todos los Use Cases registrados"
+      - "Dependencias correctamente resueltas"
+      - "Build exitoso"
+    completedAt: null
+    notas: "LoginUseCase, LogoutUseCase, GetCurrentUserUseCase, UpdateThemeUseCase"
+
+  # Checkpoint Etapa 2
+  - id: CHECKPOINT_E2
+    etapa: 2
+    titulo: "✅ Checkpoint Etapa 2"
+    descripcion: "Verificar que todas las dependencias están registradas"
+    estado: pending
+    estimacion: 10min
+    prioridad: critica
+    dependencias:
+      - T2.1
+      - T2.2
+      - T2.3
+      - T2.4
+      - T2.5
+    comandos:
+      - "make build"
+      - "make run"
+    validacion:
+      - "Build exitoso"
+      - "App arranca sin crashes"
+      - "Todas las dependencias registradas"
+    completedAt: null
+    notas: null
+
+  # ==========================================================================
+  # ETAPA 3: REFACTORIZACIÓN DE VISTAS (5 tareas)
+  # ==========================================================================
+
+  - id: T3.1
+    etapa: 3
+    titulo: "Refactorizar AdaptiveNavigationView.swift"
+    descripcion: "Eliminar parámetros de init y resolver desde container"
+    estado: pending
+    estimacion: 30min
+    prioridad: critica
+    dependencias:
+      - CHECKPOINT_E2
+    archivos:
+      - "apple-app/Presentation/Navigation/AdaptiveNavigationView.swift"
+    validacion:
+      - "Parámetros de init removidos"
+      - "Container inyectado como @EnvironmentObject"
+      - "Todas las dependencias resueltas desde container"
+      - "Build exitoso"
+      - "App ejecuta correctamente"
+    completedAt: null
+    notas: "Esta es la tarea más crítica - toda la navegación depende de esto"
+
+  - id: T3.2
+    etapa: 3
+    titulo: "Actualizar Previews de SwiftUI"
+    descripcion: "Actualizar todos los previews para usar container"
+    estado: pending
+    estimacion: 30min
+    prioridad: media
+    dependencias:
+      - T3.1
+    archivos:
+      - "apple-app/Presentation/Scenes/Login/LoginView.swift"
+      - "apple-app/Presentation/Scenes/Home/HomeView.swift"
+      - "apple-app/Presentation/Scenes/Settings/SettingsView.swift"
+      - "apple-app/Presentation/Scenes/Splash/SplashView.swift"
+    validacion:
+      - "Todos los previews actualizados"
+      - "Previews funcionan en Xcode"
+      - "No hay errores de compilación"
+    completedAt: null
+    notas: "Previews necesitan setup de container con dependencias mínimas"
+
+  # Checkpoint Etapa 3
+  - id: CHECKPOINT_E3
+    etapa: 3
+    titulo: "✅ Checkpoint Etapa 3"
+    descripcion: "Verificar flujo completo de la aplicación"
+    estado: pending
+    estimacion: 20min
+    prioridad: critica
+    dependencias:
+      - T3.1
+      - T3.2
+    comandos:
+      - "make build"
+      - "make run"
+    validacion:
+      - "Build exitoso"
+      - "SplashView carga"
+      - "Navega a Login"
+      - "Login funciona"
+      - "Navega a Home"
+      - "Settings funciona"
+      - "Logout funciona"
+      - "No hay crashes"
+    completedAt: null
+    notas: "Validación manual completa del flujo"
+
+  # ==========================================================================
+  # ETAPA 4: TESTING INFRASTRUCTURE (3 tareas)
+  # ==========================================================================
+
+  - id: T4.1
+    etapa: 4
+    titulo: "Crear Tests del DependencyContainer"
+    descripcion: "Tests unitarios para el container"
+    estado: pending
+    estimacion: 45min
+    prioridad: alta
+    dependencias:
+      - CHECKPOINT_E1
+    archivos:
+      - "apple-appTests/CoreTests/DependencyContainerTests.swift"
+    validacion:
+      - "Archivo creado en apple-appTests/CoreTests/"
+      - "Todos los tests pasan: make test"
+      - "Coverage ≥ 80% para DependencyContainer"
+    completedAt: null
+    notas: "Tests de singleton, factory, transient, protocols"
+
+  - id: T4.2
+    etapa: 4
+    titulo: "Crear Tests del TestDependencyContainer"
+    descripcion: "Tests para el container de testing"
+    estado: pending
+    estimacion: 30min
+    prioridad: media
+    dependencias:
+      - T4.1
+    archivos:
+      - "apple-appTests/CoreTests/TestDependencyContainerTests.swift"
+    validacion:
+      - "Tests creados y pasan"
+      - "make test exitoso"
+    completedAt: null
+    notas: null
+
+  - id: T4.3
+    etapa: 4
+    titulo: "Ejemplo de Uso en Tests de ViewModels"
+    descripcion: "Actualizar un test existente como ejemplo"
+    estado: pending
+    estimacion: 15min
+    prioridad: media
+    dependencias:
+      - T4.1
+      - T4.2
+    archivos:
+      - "apple-appTests/PresentationTests/LoginViewModelTests.swift"
+    validacion:
+      - "Test creado y pasa"
+      - "Patrón documentado para futuros tests"
+    completedAt: null
+    notas: "Crear si no existe, usar como ejemplo para otros tests"
+
+  # Checkpoint Etapa 4
+  - id: CHECKPOINT_E4
+    etapa: 4
+    titulo: "✅ Checkpoint Etapa 4"
+    descripcion: "Verificar que todos los tests pasan"
+    estado: pending
+    estimacion: 10min
+    prioridad: critica
+    dependencias:
+      - T4.1
+      - T4.2
+      - T4.3
+    comandos:
+      - "make test"
+      - "make coverage"
+    validacion:
+      - "Todos los tests pasan"
+      - "Coverage ≥ 80% para DependencyContainer"
+      - "Coverage ≥ 80% para TestDependencyContainer"
+    completedAt: null
+    notas: null
+
+  # ==========================================================================
+  # ETAPA 5: VALIDACIÓN Y DOCUMENTACIÓN (6 tareas)
+  # ==========================================================================
+
+  - id: T5.1
+    etapa: 5
+    titulo: "Build Completo del Proyecto"
+    descripcion: "Verificar que el proyecto compila sin errores ni warnings"
+    estado: pending
+    estimacion: 10min
+    prioridad: critica
+    dependencias:
+      - CHECKPOINT_E3
+      - CHECKPOINT_E4
+    comandos:
+      - "make clean"
+      - "make build"
+      - "xcodebuild -scheme apple-app clean build 2>&1 | grep -i warning"
+    validacion:
+      - "Build exitoso"
+      - "Sin errores"
+      - "Sin warnings (o solo warnings menores aceptables)"
+    completedAt: null
+    notas: null
+
+  - id: T5.2
+    etapa: 5
+    titulo: "Ejecutar Suite Completa de Tests"
+    descripcion: "Verificar que todos los tests pasan"
+    estado: pending
+    estimacion: 15min
+    prioridad: critica
+    dependencias:
+      - T5.1
+    comandos:
+      - "make test"
+      - "make test-domain"
+      - "make test-data"
+      - "make coverage"
+    validacion:
+      - "Todos los tests pasan"
+      - "Coverage general ≥ 75%"
+      - "Coverage de DependencyContainer ≥ 80%"
+    completedAt: null
+    notas: null
+
+  - id: T5.3
+    etapa: 5
+    titulo: "Pruebas Manuales en Simulador"
+    descripcion: "Validar manualmente el flujo completo de la app"
+    estado: pending
+    estimacion: 20min
+    prioridad: alta
+    dependencias:
+      - T5.2
+    comandos:
+      - "make run"
+      - "make run-ipad"
+    validacion:
+      - "SplashView carga correctamente"
+      - "Si no hay sesión, navega a LoginView"
+      - "LoginView permite ingresar credenciales"
+      - "Login con credenciales válidas funciona"
+      - "Navega a HomeView después de login exitoso"
+      - "HomeView muestra información del usuario"
+      - "Navegación a SettingsView funciona"
+      - "SettingsView permite cambiar tema"
+      - "Logout funciona y vuelve a LoginView"
+      - "No hay crashes"
+      - "No hay memory leaks visibles"
+    completedAt: null
+    notas: "Validación manual exhaustiva"
+
+  - id: T5.4
+    etapa: 5
+    titulo: "Actualizar CLAUDE.md"
+    descripcion: "Agregar sección sobre Dependency Injection"
+    estado: pending
+    estimacion: 20min
+    prioridad: media
+    dependencias:
+      - T5.3
+    archivos:
+      - "CLAUDE.md"
+    validacion:
+      - "Sección agregada correctamente"
+      - "Ejemplos son claros y funcionales"
+      - "Enlaces a docs funcionan"
+    completedAt: null
+    notas: "Agregar después de la sección de Design System"
+
+  - id: T5.5
+    etapa: 5
+    titulo: "Crear Documentación Extendida"
+    descripcion: "Crear guía completa en docs/"
+    estado: pending
+    estimacion: 30min
+    prioridad: media
+    dependencias:
+      - T5.4
+    archivos:
+      - "docs/07-dependency-injection.md"
+    validacion:
+      - "Documento creado y completo"
+      - "Ejemplos funcionan"
+      - "Diagramas claros (si aplica)"
+    completedAt: null
+    notas: "Guía completa con ejemplos, troubleshooting, FAQ"
+
+  - id: T5.6
+    etapa: 5
+    titulo: "Commit Final"
+    descripcion: "Crear commit atómico con todos los cambios"
+    estado: pending
+    estimacion: 10min
+    prioridad: baja
+    dependencias:
+      - T5.1
+      - T5.2
+      - T5.3
+      - T5.4
+      - T5.5
+    comandos:
+      - "git status"
+      - "git add apple-app/Core/"
+      - "git add docs/specs/dependency-container/"
+      - "git add docs/07-dependency-injection.md"
+      - "git add apple-app/apple_appApp.swift"
+      - "git add apple-app/Presentation/Navigation/AdaptiveNavigationView.swift"
+      - "git add CLAUDE.md"
+      - "git commit -m 'feat: Implementar Dependency Container...'"
+    validacion:
+      - "Commit message sigue convenciones"
+      - "Todos los archivos incluidos"
+      - "Usuario aprobó explícitamente"
+    completedAt: null
+    notas: "SOLO ejecutar si usuario da aprobación explícita y proyecto compila sin errores"
+
+  # Checkpoint Final
+  - id: CHECKPOINT_FINAL
+    etapa: 5
+    titulo: "✅ Checkpoint Final - Proyecto Completo"
+    descripcion: "Verificación final de todo el proyecto"
+    estado: pending
+    estimacion: 15min
+    prioridad: critica
+    dependencias:
+      - T5.1
+      - T5.2
+      - T5.3
+      - T5.4
+      - T5.5
+      - T5.6
+    comandos:
+      - "make clean && make build"
+      - "make test"
+      - "make run"
+      - "git status"
+      - "git log -1"
+    validacion:
+      - "Build exitoso sin errores ni warnings"
+      - "Todos los tests pasan"
+      - "App funciona en iPhone/iPad/macOS"
+      - "Documentación completa"
+      - "Git commit exitoso"
+    completedAt: null
+    notas: "Validación final antes de dar por terminado el proyecto"
+
+# ============================================================================
+# RESUMEN POR ETAPA
+# ============================================================================
+
+etapas:
+  - id: 1
+    nombre: "Setup Inicial"
+    descripcion: "Crear infraestructura base del Dependency Container"
+    totalTareas: 7
+    completadas: 0
+    inProgress: 0
+    pending: 7
+    blocked: 0
+    estado: pending
+    estimacion: "1-2 horas"
+    prioridad: critica
+    tareas:
+      - T1.1
+      - T1.2
+      - T1.3
+      - T1.4
+      - T1.5
+      - T1.6
+      - T1.7
+    checkpoint: CHECKPOINT_E1
+
+  - id: 2
+    nombre: "Registro de Dependencias"
+    descripcion: "Configurar todas las dependencias en el container"
+    totalTareas: 5
+    completadas: 0
+    inProgress: 0
+    pending: 5
+    blocked: 0
+    estado: pending
+    estimacion: "1-1.5 horas"
+    prioridad: critica
+    tareas:
+      - T2.1
+      - T2.2
+      - T2.3
+      - T2.4
+      - T2.5
+    checkpoint: CHECKPOINT_E2
+
+  - id: 3
+    nombre: "Refactorización de Vistas"
+    descripcion: "Modificar vistas para usar container"
+    totalTareas: 2
+    completadas: 0
+    inProgress: 0
+    pending: 2
+    blocked: 0
+    estado: pending
+    estimacion: "2 horas"
+    prioridad: alta
+    tareas:
+      - T3.1
+      - T3.2
+    checkpoint: CHECKPOINT_E3
+
+  - id: 4
+    nombre: "Testing Infrastructure"
+    descripcion: "Crear tests para el container y actualizar tests existentes"
+    totalTareas: 3
+    completadas: 0
+    inProgress: 0
+    pending: 3
+    blocked: 0
+    estado: pending
+    estimacion: "1.5 horas"
+    prioridad: alta
+    tareas:
+      - T4.1
+      - T4.2
+      - T4.3
+    checkpoint: CHECKPOINT_E4
+
+  - id: 5
+    nombre: "Validación y Documentación"
+    descripcion: "Verificar funcionamiento completo y documentar"
+    totalTareas: 6
+    completadas: 0
+    inProgress: 0
+    pending: 6
+    blocked: 0
+    estado: pending
+    estimacion: "1-2 horas"
+    prioridad: media
+    tareas:
+      - T5.1
+      - T5.2
+      - T5.3
+      - T5.4
+      - T5.5
+      - T5.6
+    checkpoint: CHECKPOINT_FINAL
+
+# ============================================================================
+# HITOS (MILESTONES)
+# ============================================================================
+
+milestones:
+  - id: M1
+    nombre: "Container Funcional"
+    descripcion: "DependencyContainer implementado y testeado"
+    etapas: [1, 4]
+    tareas:
+      - CHECKPOINT_E1
+      - CHECKPOINT_E4
+    completedAt: null
+
+  - id: M2
+    nombre: "Integración Completa"
+    descripcion: "Container integrado en toda la aplicación"
+    etapas: [2, 3]
+    tareas:
+      - CHECKPOINT_E2
+      - CHECKPOINT_E3
+    completedAt: null
+
+  - id: M3
+    nombre: "Proyecto Terminado"
+    descripcion: "Todo completo, documentado y funcionando"
+    etapas: [5]
+    tareas:
+      - CHECKPOINT_FINAL
+    completedAt: null
+
+# ============================================================================
+# CONFIGURACIÓN Y METADATOS ADICIONALES
+# ============================================================================
+
+configuracion:
+  autoUpdate: true
+  timestampFormat: "ISO8601"
+  notificarCheckpoints: true
+  crearBackupAntesDeCambios: true
+
+historial:
+  - fecha: 2025-01-23T13:30:00Z
+    accion: "Archivo creado"
+    usuario: "Claude Code"
+    descripcion: "Estructura inicial del task tracker"

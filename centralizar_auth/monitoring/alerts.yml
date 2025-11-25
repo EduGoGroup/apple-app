@@ -1,0 +1,166 @@
+# alerts.yml - Alertas de Prometheus para Auth Centralizada
+# Copiar a /etc/prometheus/rules/ o incluir en prometheus.yml
+
+groups:
+  - name: auth_centralizada_alerts
+    interval: 30s
+    rules:
+      # ============================================
+      # ALERTAS CRÍTICAS
+      # ============================================
+
+      - alert: AuthServiceDown
+        expr: up{job="api-admin"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: auth
+        annotations:
+          summary: "Auth service (api-admin) is down"
+          description: "api-admin has been down for more than 1 minute. All authentication will fail."
+          runbook_url: "https://docs.edugo.com/runbooks/auth-service-down"
+
+      - alert: AuthServiceHighErrorRate
+        expr: |
+          sum(rate(auth_login_attempts_total{status="failed"}[5m]))
+          / sum(rate(auth_login_attempts_total[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: critical
+          service: auth
+        annotations:
+          summary: "High authentication error rate"
+          description: "Auth error rate is {{ $value | humanizePercentage }} (threshold: 20%)"
+          runbook_url: "https://docs.edugo.com/runbooks/high-auth-errors"
+
+      # ============================================
+      # ALERTAS WARNING
+      # ============================================
+
+      - alert: AuthHighLoginLatency
+        expr: |
+          histogram_quantile(0.95, rate(auth_request_duration_seconds_bucket{endpoint="login"}[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High login latency"
+          description: "Login p95 latency is {{ $value | humanizeDuration }} (threshold: 500ms)"
+
+      - alert: AuthHighVerifyLatency
+        expr: |
+          histogram_quantile(0.99, rate(auth_request_duration_seconds_bucket{endpoint="verify"}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High token verification latency"
+          description: "Verify p99 latency is {{ $value | humanizeDuration }} (threshold: 100ms)"
+
+      - alert: AuthLowCacheHitRate
+        expr: |
+          sum(rate(auth_token_validations_total{cached="true"}[10m]))
+          / sum(rate(auth_token_validations_total[10m])) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "Low cache hit rate for token validation"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 50%)"
+
+      - alert: AuthRateLimitExceeded
+        expr: rate(auth_rate_limit_exceeded_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High rate of rate-limited requests"
+          description: "{{ $value }} requests/sec are being rate limited"
+
+      # ============================================
+      # ALERTAS INFO
+      # ============================================
+
+      - alert: AuthCircuitBreakerOpen
+        expr: auth_circuit_breaker_state{state="open"} == 1
+        for: 1m
+        labels:
+          severity: info
+          service: auth
+        annotations:
+          summary: "Circuit breaker is open"
+          description: "Circuit breaker for {{ $labels.service }} is open. Requests will fail fast."
+
+      - alert: AuthHighSessionCount
+        expr: sum(auth_active_sessions_total) > 10000
+        for: 5m
+        labels:
+          severity: info
+          service: auth
+        annotations:
+          summary: "High number of active sessions"
+          description: "There are {{ $value }} active sessions"
+
+      # ============================================
+      # ALERTAS DE DEPENDENCIAS
+      # ============================================
+
+      - alert: AuthRedisDown
+        expr: redis_up{job="auth-redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: auth
+        annotations:
+          summary: "Redis for auth cache is down"
+          description: "Redis used for token caching is down. Token validation will be slower."
+
+      - alert: AuthPostgresDown
+        expr: pg_up{job="auth-postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: auth
+        annotations:
+          summary: "PostgreSQL for auth is down"
+          description: "PostgreSQL database for user authentication is down."
+
+      - alert: AuthPostgresHighConnections
+        expr: |
+          pg_stat_activity_count{datname="edugo", state="active"}
+          / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High PostgreSQL connection usage"
+          description: "PostgreSQL is using {{ $value | humanizePercentage }} of max connections"
+
+  # ============================================
+  # RECORDING RULES (para optimizar queries)
+  # ============================================
+  - name: auth_recording_rules
+    interval: 30s
+    rules:
+      - record: auth:login_error_rate:5m
+        expr: |
+          sum(rate(auth_login_attempts_total{status="failed"}[5m]))
+          / sum(rate(auth_login_attempts_total[5m]))
+
+      - record: auth:cache_hit_rate:5m
+        expr: |
+          sum(rate(auth_token_validations_total{cached="true"}[5m]))
+          / sum(rate(auth_token_validations_total[5m]))
+
+      - record: auth:verify_latency_p99:5m
+        expr: |
+          histogram_quantile(0.99, rate(auth_request_duration_seconds_bucket{endpoint="verify"}[5m]))
+
+      - record: auth:login_latency_p95:5m
+        expr: |
+          histogram_quantile(0.95, rate(auth_request_duration_seconds_bucket{endpoint="login"}[5m]))

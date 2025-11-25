@@ -8,27 +8,37 @@
 import SwiftUI
 
 /// Tarjeta de contenido reutilizable del Design System
+/// Usa efectos visuales adaptativos que aprovechan Liquid Glass en iOS 26+/macOS 26+
+/// y materials modernos en iOS 18+/macOS 15+
 struct DSCard<Content: View>: View {
     let content: Content
     let padding: CGFloat
     let cornerRadius: CGFloat
+    let visualEffect: DSVisualEffectStyle
+    let isInteractive: Bool
 
     init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
+        visualEffect: DSVisualEffectStyle = .regular,
+        isInteractive: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.content = content()
         self.padding = padding
         self.cornerRadius = cornerRadius
+        self.visualEffect = visualEffect
+        self.isInteractive = isInteractive
     }
 
     var body: some View {
         content
             .padding(padding)
-            .background(DSColors.backgroundSecondary)
-            .cornerRadius(cornerRadius)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+            .dsGlassEffect(
+                visualEffect,
+                shape: .roundedRectangle(cornerRadius: cornerRadius),
+                isInteractive: isInteractive
+            )
     }
 }
 

@@ -3,40 +3,112 @@
 //  apple-app
 //
 //  Created on 16-11-25.
+//  Refactored on 23-11-25.
 //
 
 import SwiftUI
 
-/// Vista de navegación adaptativa que cambia según el dispositivo
-/// - iPhone: NavigationStack
-/// - iPad/Mac: NavigationSplitView con sidebar
+/// Vista raíz de navegación que maneja autenticación y navegación adaptativa
+///
+/// Arquitectura:
+/// - NO autenticado: Muestra LoginView fullscreen (sin sidebar)
+/// - Autenticado: Muestra navegación completa con sidebar (iPad/Mac) o tabs (iPhone)
 struct AdaptiveNavigationView: View {
-    @State private var coordinator = NavigationCoordinator()
-    @State private var selectedRoute: Route? = nil
+    @State private var authState = AuthenticationState()
+    @State private var isCheckingSession = true
 
-    // Dependencias
-    private let authRepository: AuthRepository
-    private let preferencesRepository: PreferencesRepository
+    @EnvironmentObject var container: DependencyContainer
 
-    init(
-        authRepository: AuthRepository,
-        preferencesRepository: PreferencesRepository
-    ) {
-        self.authRepository = authRepository
-        self.preferencesRepository = preferencesRepository
+    var body: some View {
+        Group {
+            if isCheckingSession {
+                // Splash mientras verifica sesión
+                SplashScreen()
+            } else if authState.isAuthenticated {
+                // Usuario autenticado: Mostrar app completa
+                AuthenticatedApp()
+                    .environment(authState)
+                    .environmentObject(container)
+            } else {
+                // Usuario NO autenticado: Mostrar login fullscreen
+                LoginFlow()
+                    .environment(authState)
+                    .environmentObject(container)
+            }
+        }
+        .task {
+            await checkInitialSession()
+        }
     }
+
+    // MARK: - Session Check
+
+    @MainActor
+    private func checkInitialSession() async {
+        // Delay para mostrar splash
+        try? await Task.sleep(nanoseconds: 500_000_000)
+
+        // Por ahora, siempre ir a login
+        // TODO: Verificar sesión guardada en Keychain
+        authState.logout()
+        isCheckingSession = false
+    }
+}
+
+// MARK: - Splash Screen
+
+private struct SplashScreen: View {
+    var body: some View {
+        ZStack {
+            DSColors.backgroundPrimary.ignoresSafeArea()
+
+            VStack(spacing: DSSpacing.xl) {
+                Image(systemName: "apple.logo")
+                    .font(.system(size: 80))
+                    .foregroundColor(DSColors.accent)
+
+                Text("EduGo")
+                    .font(DSTypography.largeTitle)
+                    .foregroundColor(DSColors.textPrimary)
+
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: DSColors.accent))
+                    .scaleEffect(1.2)
+            }
+        }
+    }
+}
+
+// MARK: - Login Flow (Sin Sidebar)
+
+private struct LoginFlow: View {
+    @Environment(AuthenticationState.self) private var authState
+    @EnvironmentObject var container: DependencyContainer
+
+    var body: some View {
+        LoginView(loginUseCase: container.resolve(LoginUseCase.self))
+            .environment(authState)
+    }
+}
+
+// MARK: - Authenticated App (Con Sidebar)
+
+private struct AuthenticatedApp: View {
+    @Environment(AuthenticationState.self) private var authState
+    @EnvironmentObject var container: DependencyContainer
+    @State private var selectedRoute: Route = .home
 
     var body: some View {
         #if os(iOS)
         if UIDevice.current.userInterfaceIdiom == .phone {
-            // iPhone: NavigationStack tradicional
+            // iPhone: NavigationStack simple
             phoneNavigation
         } else {
-            // iPad: NavigationSplitView
+            // iPad: NavigationSplitView con sidebar
             tabletNavigation
         }
         #else
-        // macOS: NavigationSplitView
+        // macOS: NavigationSplitView con sidebar
         desktopNavigation
         #endif
     }
@@ -44,55 +116,58 @@ struct AdaptiveNavigationView: View {
     // MARK: - iPhone Navigation
 
     private var phoneNavigation: some View {
-        NavigationStack(path: $coordinator.path) {
-            SplashView(authRepository: authRepository)
-                .navigationDestination(for: Route.self) { route in
-                    destination(for: route)
+        TabView(selection: $selectedRoute) {
+            destination(for: .home)
+                .tabItem {
+                    Label("Inicio", systemImage: "house.fill")
                 }
+                .tag(Route.home)
+
+            destination(for: .settings)
+                .tabItem {
+                    Label("Configuración", systemImage: "gear")
+                }
+                .tag(Route.settings)
         }
-        .environment(coordinator)
     }
 
-    // MARK: - iPad Navigation
+    // MARK: - iPad/Mac Navigation
 
     private var tabletNavigation: some View {
         NavigationSplitView {
-            // Sidebar
-            sidebarContent
+            sidebar
         } detail: {
-            // Detail view
-            if let route = selectedRoute {
-                destination(for: route)
-            } else {
-                SplashView(authRepository: authRepository)
-            }
+            destination(for: selectedRoute)
         }
-        .environment(coordinator)
     }
-
-    // MARK: - macOS Navigation
 
     private var desktopNavigation: some View {
         NavigationSplitView {
-            // Sidebar más compacto para macOS
-            sidebarContent
+            sidebar
                 .frame(minWidth: 200, idealWidth: 250, maxWidth: 300)
         } detail: {
-            // Detail view
-            if let route = selectedRoute {
-                destination(for: route)
-            } else {
-                SplashView(authRepository: authRepository)
-            }
+            destination(for: selectedRoute)
         }
-        .environment(coordinator)
     }
 
-    // MARK: - Sidebar Content
+    // MARK: - Sidebar
 
-    private var sidebarContent: some View {
-        List(selection: $selectedRoute) {
+    private var sidebar: some View {
+        List {
             Section("Navegación") {
+                #if os(macOS)
+                Button {
+                    selectedRoute = .home
+                } label: {
+                    Label("Inicio", systemImage: "house.fill")
+                }
+
+                Button {
+                    selectedRoute = .settings
+                } label: {
+                    Label("Configuración", systemImage: "gear")
+                }
+                #else
                 NavigationLink(value: Route.home) {
                     Label("Inicio", systemImage: "house.fill")
                 }
@@ -100,69 +175,101 @@ struct AdaptiveNavigationView: View {
                 NavigationLink(value: Route.settings) {
                     Label("Configuración", systemImage: "gear")
                 }
+                #endif
             }
 
             Section("Cuenta") {
-                Button {
+                Button(role: .destructive) {
                     Task {
-                        let logoutUseCase = DefaultLogoutUseCase(authRepository: authRepository)
-                        _ = await logoutUseCase.execute()
-                        selectedRoute = .login
+                        await performLogout()
                     }
                 } label: {
                     Label("Cerrar Sesión", systemImage: "rectangle.portrait.and.arrow.right")
-                        .foregroundColor(.red)
                 }
             }
         }
         .navigationTitle("EduGo")
+        #if os(macOS)
         .listStyle(.sidebar)
+        #endif
     }
 
-    // MARK: - Destination Builder
+    // MARK: - Destinations
 
     @ViewBuilder
     private func destination(for route: Route) -> some View {
         switch route {
-        case .splash:
-            SplashView(authRepository: authRepository)
-
         case .login:
-            LoginView(
-                loginUseCase: DefaultLoginUseCase(
-                    authRepository: authRepository,
-                    validator: DefaultInputValidator()
-                )
-            )
+            // Login nunca debería mostrarse aquí (ya estamos autenticados)
+            EmptyView()
 
         case .home:
             HomeView(
-                getCurrentUserUseCase: DefaultGetCurrentUserUseCase(
-                    authRepository: authRepository
-                ),
-                logoutUseCase: DefaultLogoutUseCase(
-                    authRepository: authRepository
-                )
+                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                logoutUseCase: container.resolve(LogoutUseCase.self),
+                authState: authState
             )
 
         case .settings:
             SettingsView(
-                updateThemeUseCase: DefaultUpdateThemeUseCase(
-                    preferencesRepository: preferencesRepository
-                ),
-                preferencesRepository: preferencesRepository
+                updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
+                preferencesRepository: container.resolve(PreferencesRepository.self)
             )
         }
+    }
+
+    // MARK: - Logout
+
+    private func performLogout() async {
+        let logoutUseCase = container.resolve(LogoutUseCase.self)
+        _ = await logoutUseCase.execute()
+        authState.logout()
     }
 }
 
 // MARK: - Previews
 
-#Preview("Adaptive Navigation") {
-    AdaptiveNavigationView(
-        authRepository: AuthRepositoryImpl(
-            apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
-        ),
-        preferencesRepository: PreferencesRepositoryImpl()
-    )
+#Preview("Login Flow") {
+    let container = DependencyContainer()
+    // Setup básico para preview
+    container.register(KeychainService.self, scope: .singleton) {
+        DefaultKeychainService.shared
+    }
+    container.register(APIClient.self, scope: .singleton) {
+        DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+    }
+    container.register(JWTDecoder.self, scope: .singleton) {
+        DefaultJWTDecoder()
+    }
+    container.register(BiometricAuthService.self, scope: .singleton) {
+        LocalAuthenticationService()
+    }
+    container.register(TokenRefreshCoordinator.self, scope: .singleton) {
+        TokenRefreshCoordinator(
+            apiClient: container.resolve(APIClient.self),
+            keychainService: container.resolve(KeychainService.self),
+            jwtDecoder: container.resolve(JWTDecoder.self)
+        )
+    }
+    container.register(AuthRepository.self, scope: .singleton) {
+        AuthRepositoryImpl(
+            apiClient: container.resolve(APIClient.self),
+            keychainService: container.resolve(KeychainService.self),
+            jwtDecoder: container.resolve(JWTDecoder.self),
+            tokenCoordinator: container.resolve(TokenRefreshCoordinator.self),
+            biometricService: container.resolve(BiometricAuthService.self)
+        )
+    }
+    container.register(InputValidator.self, scope: .singleton) {
+        DefaultInputValidator()
+    }
+    container.register(LoginUseCase.self) {
+        DefaultLoginUseCase(
+            authRepository: container.resolve(AuthRepository.self),
+            validator: container.resolve(InputValidator.self)
+        )
+    }
+
+    return AdaptiveNavigationView()
+        .environmentObject(container)
 }

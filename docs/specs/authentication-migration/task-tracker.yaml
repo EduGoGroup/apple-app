@@ -1,0 +1,20 @@
+spec:
+  id: SPEC-003
+  name: Authentication - Real API Migration
+  priority: P1_HIGH
+  status: PENDING
+  estimated_hours: 28
+  estimated_days: 3-4
+  dependencies: [SPEC-001, SPEC-002]
+  
+acceptance_criteria:
+  - criterion: "JWT validation local funcional"
+    verified: false
+  - criterion: "Auto-refresh sin race conditions"
+    verified: false
+  - criterion: "Biometric login (Face ID / Touch ID)"
+    verified: false
+  - criterion: "Feature flag DummyJSON/Real"
+    verified: false
+  - criterion: "AuthInterceptor auto-inject tokens"
+    verified: false

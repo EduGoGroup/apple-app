@@ -133,6 +133,51 @@ Desarrollar una aplicación nativa premium para el ecosistema Apple que aprovech
 
 ---
 
+## 🌍 Configuración de Ambientes
+
+El proyecto utiliza un **sistema profesional de configuración multi-ambiente** basado en archivos `.xcconfig`:
+
+### Ambientes Disponibles
+
+| Ambiente | Scheme | Display Name | Uso |
+|----------|--------|--------------|-----|
+| **Development** | EduGo-Dev | EduGo α | Desarrollo diario |
+| **Staging** | EduGo-Staging | EduGo β | Testing pre-producción |
+| **Production** | EduGo | EduGo | Producción |
+
+### Cambiar de Ambiente
+
+```bash
+# En Xcode: Seleccionar scheme en la barra superior
+# - EduGo-Dev → Para desarrollo
+# - EduGo-Staging → Para testing
+# - EduGo → Para producción
+
+# Desde terminal
+xcodebuild -scheme EduGo-Dev build
+```
+
+### Acceso desde Código
+
+```swift
+// API configurada según ambiente
+let apiURL = AppEnvironment.apiBaseURL
+
+// Feature flags
+if AppEnvironment.analyticsEnabled {
+    // Inicializar analytics
+}
+
+// Detectar ambiente
+if AppEnvironment.isDevelopment {
+    // Código solo para desarrollo
+}
+```
+
+**Documentación Completa**: Ver [Configuración de Ambientes](docs/README-Environment.md)
+
+---
+
 ## ✨ Características Principales
 
 ### Funcionalidades Core
@@ -159,6 +204,13 @@ Desarrollar una aplicación nativa premium para el ecosistema Apple que aprovech
 - ✅ Soporte completo de Dynamic Type
 - ✅ VoiceOver totalmente funcional
 - ✅ Handoff entre dispositivos (futuro)
+
+#### 5. Sistema de Logging Profesional
+- ✅ OSLog (framework nativo de Apple)
+- ✅ 6 categorías: network, auth, data, ui, business, system
+- ✅ Privacy redaction automática (tokens, emails)
+- ✅ Filtrable en Console.app
+- ✅ Testing con MockLogger
 - ✅ Widgets (Lock Screen y Home Screen) - Fase 2
 
 ### Métricas de Calidad

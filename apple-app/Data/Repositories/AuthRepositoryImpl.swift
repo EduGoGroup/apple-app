@@ -3,109 +3,248 @@
 //  apple-app
 //
 //  Created on 16-11-25.
+//  Updated on 24-01-25 - SPEC-003: Real API Migration
+//  Updated on 24-11-25 - SPRINT2-T05: Auth centralizada con api-admin
 //
 
 import Foundation
 
-/// Implementación del repositorio de autenticación usando DummyJSON API
-final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
+/// Actor para manejo thread-safe de tokens
+///
+/// Este actor garantiza acceso thread-safe a los tokens en memoria mediante el modelo
+/// de concurrencia de Swift. Los actores serializan el acceso a su estado mutable,
+/// previniendo data races cuando múltiples tareas intentan leer/escribir tokens
+/// concurrentemente (ej: refresh automático vs logout simultáneo).
+///
+/// - Note: Complementa el almacenamiento persistente en Keychain, actuando como caché rápido
+private actor TokenStore {
+    private var tokens: TokenInfo?
+
+    func getTokens() -> TokenInfo? {
+        tokens
+    }
+
+    func setTokens(_ newTokens: TokenInfo?) {
+        tokens = newTokens
+    }
+}
+
+/// Implementación del repositorio de autenticación
+///
+/// Usa `api-admin` como servicio central de autenticación.
+/// Los tokens emitidos funcionan con todos los servicios del ecosistema EduGo.
+///
+/// ## Arquitectura
+/// - Login/Refresh/Logout → api-admin (authAPIBaseURL)
+/// - El accessToken se usa para api-mobile y api-admin
+/// - Refresh automático cuando `shouldRefresh = true`
+///
+/// ## Thread Safety
+/// Usa `TokenStore` actor para operaciones concurrentes con tokens.
+final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider, @unchecked Sendable {
+
+    // MARK: - Dependencies
+
     private let apiClient: APIClient
     private let keychainService: KeychainService
+    private let jwtDecoder: JWTDecoder
+    private let tokenCoordinator: TokenRefreshCoordinator
+    private let biometricService: BiometricAuthService
+    private let logger = LoggerFactory.auth
 
-    // Claves para almacenar tokens en Keychain
+    // MARK: - Configuration
+
+    /// Modo de autenticación (DummyJSON vs Real API)
+    private let authMode: AuthenticationMode
+
+    // Claves para almacenar datos en Keychain
     private let accessTokenKey = "access_token"
     private let refreshTokenKey = "refresh_token"
+    private let tokenExpirationKey = "token_expiration"
+    private let storedEmailKey = "stored_email"
+    private let storedPasswordKey = "stored_password"
+
+    // MARK: - State
+
+    /// Store thread-safe para tokens
+    private let tokenStore = TokenStore()
+
+    // MARK: - Initialization
 
     init(
         apiClient: APIClient,
-        keychainService: KeychainService = DefaultKeychainService.shared
+        keychainService: KeychainService = DefaultKeychainService.shared,
+        jwtDecoder: JWTDecoder,
+        tokenCoordinator: TokenRefreshCoordinator,
+        biometricService: BiometricAuthService,
+        authMode: AuthenticationMode? = nil
     ) {
         self.apiClient = apiClient
         self.keychainService = keychainService
+        self.jwtDecoder = jwtDecoder
+        self.tokenCoordinator = tokenCoordinator
+        self.biometricService = biometricService
+        self.authMode = authMode ?? AppEnvironment.authMode
+
+        // Cargar tokens cacheados del Keychain (async, fire-and-forget en init)
+        Task {
+            do {
+                await loadCachedTokens()
+            } catch {
+                logger.error("Failed to load cached tokens during initialization", metadata: [
+                    "error": error.localizedDescription
+                ])
+            }
+        }
     }
 
     // MARK: - AuthRepository Implementation
 
+    @MainActor
     func login(email: String, password: String) async -> Result<User, AppError> {
+        logger.info("Login attempt started")
+        logger.logEmail(email)
+
         do {
-            // DummyJSON usa username en lugar de email
-            // Para este ejemplo, usamos el email como username
-            let username = email.components(separatedBy: "@").first ?? email
+            let user: User
+            let tokenInfo: TokenInfo
 
-            let request = LoginRequest(
-                username: username,
-                password: password,
-                expiresInMins: AppConfig.tokenExpirationMinutes
-            )
+            switch authMode {
+            case .dummyJSON:
+                (user, tokenInfo) = try await loginWithDummyJSON(email: email, password: password)
+            case .realAPI:
+                (user, tokenInfo) = try await loginWithRealAPI(email: email, password: password)
+            }
 
-            let response: LoginResponse = try await apiClient.execute(
-                endpoint: .login,
-                method: .post,
-                body: request
-            )
+            // Guardar tokens
+            await saveTokens(tokenInfo)
 
-            // Guardar tokens en Keychain
-            try keychainService.saveToken(response.accessToken, for: accessTokenKey)
-            try keychainService.saveToken(response.refreshToken, for: refreshTokenKey)
+            logger.info("Login successful", metadata: ["userId": user.id])
 
-            return .success(response.toDomain())
+            // Guardar credenciales para biometric login (opcional)
+            try? keychainService.saveToken(email, for: storedEmailKey)
+            try? keychainService.saveToken(password, for: storedPasswordKey)
+
+            return .success(user)
 
         } catch let error as NetworkError {
-            print("❌ Login NetworkError: \(error)")
+            logger.error("Login failed - Network error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.network(error))
         } catch let error as KeychainError {
-            print("❌ Login KeychainError: \(error)")
+            logger.error("Login failed - Keychain error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.system(error.localizedDescription)))
         } catch {
-            print("❌ Login Unknown Error: \(error)")
-            print("❌ Error Type: \(type(of: error))")
+            logger.error("Login failed - Unknown error", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.system("Error: \(error.localizedDescription)")))
         }
     }
 
-    func logout() async -> Result<Void, AppError> {
+    @MainActor
+    func loginWithBiometrics() async -> Result<User, AppError> {
+        logger.info("Biometric login attempt")
+
+        // 1. Verificar disponibilidad
+        guard await biometricService.isAvailable else {
+            logger.warning("Biometric auth not available")
+            return .failure(.system(.system("Autenticación biométrica no disponible")))
+        }
+
+        // 2. Autenticar con Face ID / Touch ID
         do {
-            // Eliminar tokens del Keychain
-            try keychainService.deleteToken(for: accessTokenKey)
-            try keychainService.deleteToken(for: refreshTokenKey)
+            let authenticated = try await biometricService.authenticate(
+                reason: "Iniciar sesión en EduGo"
+            )
 
-            return .success(())
+            guard authenticated else {
+                logger.warning("Biometric auth cancelled")
+                return .failure(.system(.cancelled))
+            }
 
-        } catch let error as KeychainError {
-            return .failure(.system(.system(error.localizedDescription)))
+            // 3. Leer credenciales guardadas
+            guard let email = try? keychainService.getToken(for: storedEmailKey),
+                  let password = try? keychainService.getToken(for: storedPasswordKey) else {
+                logger.warning("No stored credentials for biometric login")
+                return .failure(.system(.system("No hay credenciales guardadas")))
+            }
+
+            // 4. Login normal con credenciales
+            logger.info("Biometric auth successful, performing login")
+            return await login(email: email, password: password)
+
         } catch {
-            return .failure(.system(.unknown))
+            logger.error("Biometric login failed", metadata: [
+                "error": error.localizedDescription
+            ])
+            return .failure(.system(.system(error.localizedDescription)))
         }
     }
 
-    func getCurrentUser() async -> Result<User, AppError> {
+    @MainActor
+    func logout() async -> Result<Void, AppError> {
+        logger.info("Logout attempt started")
+
         do {
-            // Verificar que existe token de acceso
-            guard let _ = try keychainService.getToken(for: accessTokenKey) else {
-                return .failure(.network(.unauthorized))
-            }
-
-            let userDTO: UserDTO = try await apiClient.execute(
-                endpoint: .currentUser,
-                method: .get,
-                body: nil as String?
-            )
-
-            return .success(userDTO.toDomain())
-
-        } catch let error as NetworkError {
-            // Si el token expiró, intentar refresh
-            if case .unauthorized = error {
-                let refreshResult = await refreshSession()
-                switch refreshResult {
-                case .success:
-                    // Reintentar después del refresh
-                    return await getCurrentUser()
-                case .failure(let refreshError):
-                    return .failure(refreshError)
+            // Llamar API de logout solo en modo Real API
+            if authMode == .realAPI {
+                if let refreshToken = try? keychainService.getToken(for: refreshTokenKey) {
+                    // Llamar endpoint de logout (ignorar errores)
+                    let _: String? = try? await apiClient.execute(
+                        endpoint: .logout,
+                        method: .post,
+                        body: LogoutRequest(refreshToken: refreshToken)
+                    )
                 }
             }
-            return .failure(.network(error))
+
+            // Limpiar datos locales
+            clearLocalAuthData()
+
+            logger.info("Logout successful")
+            return .success(())
+
+        } catch {
+            logger.error("Logout failed - Unknown error", metadata: [
+                "error": error.localizedDescription
+            ])
+            // Limpiar de todos modos
+            clearLocalAuthData()
+            return .failure(.system(.unknown))
+        }
+    }
+
+    @MainActor
+    func getCurrentUser() async -> Result<User, AppError> {
+        do {
+            // Obtener access token
+            guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
+                return .failure(.network(.unauthorized))
+            }
+
+            // Decodificar JWT para obtener user info
+            let payload = try jwtDecoder.decode(accessToken)
+            let user = payload.toDomainUser
+
+            logger.info("Current user retrieved from JWT", metadata: ["userId": user.id])
+
+            return .success(user)
+
+        } catch is JWTError {
+            // Si el JWT es inválido o expiró, intentar refresh
+            logger.warning("JWT invalid or expired, attempting refresh")
+
+            let refreshResult = await refreshSession()
+            switch refreshResult {
+            case .success(let user):
+                return .success(user)
+            case .failure(let error):
+                return .failure(error)
+            }
 
         } catch let error as KeychainError {
             return .failure(.system(.system(error.localizedDescription)))
@@ -114,49 +253,260 @@ final class AuthRepositoryImpl: AuthRepository, @unchecked Sendable {
         }
     }
 
-    func refreshSession() async -> Result<User, AppError> {
+    // MARK: - Token Management
+
+    @MainActor
+    func refreshToken() async -> Result<AuthTokens, AppError> {
+        logger.info("Token refresh attempt started")
+
         do {
-            // Obtener refresh token del Keychain
-            guard let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+            // Obtener refresh token actual
+            guard let currentRefreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+                logger.warning("No refresh token available")
                 return .failure(.network(.unauthorized))
             }
 
-            let request = RefreshRequest(
-                refreshToken: refreshToken,
-                expiresInMins: AppConfig.tokenExpirationMinutes
-            )
+            let newTokens: TokenInfo
 
-            let response: LoginResponse = try await apiClient.execute(
-                endpoint: .refresh,
-                method: .post,
-                body: request
-            )
+            switch authMode {
+            case .dummyJSON:
+                let response: DummyJSONLoginResponse = try await apiClient.execute(
+                    endpoint: .refresh,
+                    method: .post,
+                    body: DummyJSONRefreshRequest(
+                        refreshToken: currentRefreshToken,
+                        expiresInMins: 30
+                    )
+                )
+                newTokens = response.toTokenInfo()
 
-            // Actualizar tokens en Keychain
-            try keychainService.saveToken(response.accessToken, for: accessTokenKey)
-            try keychainService.saveToken(response.refreshToken, for: refreshTokenKey)
+            case .realAPI:
+                let response: RefreshResponse = try await apiClient.execute(
+                    endpoint: .refresh,
+                    method: .post,
+                    body: RefreshRequest(refreshToken: currentRefreshToken)
+                )
+                // En Real API, el refresh token no cambia
+                newTokens = TokenInfo(
+                    accessToken: response.accessToken,
+                    refreshToken: currentRefreshToken,
+                    expiresIn: response.expiresIn
+                )
+            }
 
-            return .success(response.toDomain())
+            // Guardar nuevos tokens
+            await saveTokens(newTokens)
+
+            logger.info("Token refresh successful")
+            return .success(newTokens)
 
         } catch let error as NetworkError {
-            // Si el refresh falla, eliminar tokens
-            try? keychainService.deleteToken(for: accessTokenKey)
-            try? keychainService.deleteToken(for: refreshTokenKey)
-            return .failure(.network(error))
+            logger.error("Token refresh failed - Network error", metadata: [
+                "error": error.localizedDescription
+            ])
 
-        } catch let error as KeychainError {
-            return .failure(.system(.system(error.localizedDescription)))
+            // Si falla el refresh, limpiar sesión
+            if error == .unauthorized {
+                clearLocalAuthData()
+            }
+
+            return .failure(.network(error))
         } catch {
+            logger.error("Token refresh failed", metadata: [
+                "error": error.localizedDescription
+            ])
             return .failure(.system(.unknown))
+        }
+    }
+
+    func getValidAccessToken() async -> String? {
+        // Obtener tokens del store
+        var tokens = await tokenStore.getTokens()
+
+        if tokens == nil {
+            // Intentar cargar del Keychain
+            await loadCachedTokens()
+            tokens = await tokenStore.getTokens()
+        }
+
+        guard let tokens = tokens else {
+            return nil
+        }
+
+        return await processTokenForAccess(tokens)
+    }
+
+    @MainActor
+    private func processTokenForAccess(_ tokens: TokenInfo) async -> String? {
+        // Si el token está expirado, no intentar refresh aquí
+        if tokens.isExpired {
+            logger.warning("Access token expired")
+            return nil
+        }
+
+        // Si debe refrescarse, hacerlo
+        if tokens.shouldRefresh {
+            logger.info("Access token needs refresh, attempting...")
+            let refreshResult = await refreshToken()
+
+            switch refreshResult {
+            case .success(let newTokens):
+                return newTokens.accessToken
+            case .failure:
+                // Retornar el token actual aunque esté próximo a expirar
+                logger.warning("Token refresh failed, returning token close to expiration", metadata: [
+                    "timeRemaining": "\(Int(tokens.timeRemaining))s"
+                ])
+                return tokens.accessToken
+            }
+        }
+
+        return tokens.accessToken
+    }
+
+    func isAuthenticated() async -> Bool {
+        await getValidAccessToken() != nil
+    }
+
+    @MainActor
+    func refreshSession() async -> Result<User, AppError> {
+        logger.info("Session refresh attempt started")
+
+        // Primero refrescar tokens
+        let tokenResult = await refreshToken()
+
+        switch tokenResult {
+        case .success(let tokens):
+            // Obtener user del nuevo JWT
+            do {
+                let payload = try jwtDecoder.decode(tokens.accessToken)
+                let user = payload.toDomainUser
+                logger.info("Session refresh successful")
+                return .success(user)
+            } catch {
+                logger.error("Failed to decode refreshed token")
+                return .failure(.system(.unknown))
+            }
+
+        case .failure(let error):
+            return .failure(error)
         }
     }
 
     func hasActiveSession() async -> Bool {
-        do {
-            // Verificar que existe token de acceso
-            return try keychainService.getToken(for: accessTokenKey) != nil
-        } catch {
-            return false
+        await isAuthenticated()
+    }
+
+    func getTokenInfo() async -> Result<TokenInfo, AppError> {
+        // Intentar obtener del store
+        if let tokens = await tokenStore.getTokens() {
+            return .success(tokens)
         }
+
+        // Intentar cargar del Keychain
+        do {
+            guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
+                return .failure(.network(.unauthorized))
+            }
+
+            guard let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+                return .failure(.network(.unauthorized))
+            }
+
+            let payload = try jwtDecoder.decode(accessToken)
+
+            let tokenInfo = TokenInfo(
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                expiresAt: payload.exp
+            )
+
+            // Cachear
+            await tokenStore.setTokens(tokenInfo)
+
+            return .success(tokenInfo)
+
+        } catch {
+            return .failure(.network(.unauthorized))
+        }
+    }
+
+    // MARK: - Local Data Management
+
+    func clearLocalAuthData() {
+        // Limpiar store de manera asíncrona (fire-and-forget)
+        // Este patrón es intencional: no esperamos el resultado porque clearLocalAuthData
+        // debe ser inmediato. El Task se ejecutará en background sin bloquear.
+        Task {
+            await tokenStore.setTokens(nil)
+        }
+
+        try? keychainService.deleteToken(for: accessTokenKey)
+        try? keychainService.deleteToken(for: refreshTokenKey)
+        try? keychainService.deleteToken(for: tokenExpirationKey)
+
+        logger.info("Local auth data cleared")
+    }
+
+    // MARK: - Private Methods
+
+    private func loadCachedTokens() async {
+        do {
+            guard let accessToken = try keychainService.getToken(for: accessTokenKey),
+                  let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+                return
+            }
+
+            // Intentar obtener expiración del JWT
+            if let payload = try? jwtDecoder.decode(accessToken) {
+                let tokenInfo = TokenInfo(
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                    expiresAt: payload.exp
+                )
+                await tokenStore.setTokens(tokenInfo)
+            }
+        } catch {
+            // Silenciosamente ignorar errores de carga
+        }
+    }
+
+    private func saveTokens(_ tokens: TokenInfo) async {
+        await tokenStore.setTokens(tokens)
+
+        try? keychainService.saveToken(tokens.accessToken, for: accessTokenKey)
+        try? keychainService.saveToken(tokens.refreshToken, for: refreshTokenKey)
+    }
+
+    @MainActor
+    private func loginWithDummyJSON(email: String, password: String) async throws -> (User, TokenInfo) {
+        let username = email.components(separatedBy: "@").first ?? email
+
+        let request = DummyJSONLoginRequest(
+            username: username,
+            password: password,
+            expiresInMins: 30
+        )
+
+        let response: DummyJSONLoginResponse = try await apiClient.execute(
+            endpoint: .login,
+            method: .post,
+            body: request
+        )
+
+        return (response.toDomain(), response.toTokenInfo())
+    }
+
+    @MainActor
+    private func loginWithRealAPI(email: String, password: String) async throws -> (User, TokenInfo) {
+        let request = LoginRequest(email: email, password: password)
+
+        let response: LoginResponse = try await apiClient.execute(
+            endpoint: .login,
+            method: .post,
+            body: request
+        )
+
+        return (response.toDomain(), response.toTokenInfo())
     }
 }

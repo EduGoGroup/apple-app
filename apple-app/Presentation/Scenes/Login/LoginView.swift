@@ -12,7 +12,7 @@ struct LoginView: View {
     @State private var viewModel: LoginViewModel
     @State private var email = ""
     @State private var password = ""
-    @Environment(NavigationCoordinator.self) private var coordinator
+    @Environment(AuthenticationState.self) private var authState
 
     init(loginUseCase: LoginUseCase) {
         self._viewModel = State(initialValue: LoginViewModel(loginUseCase: loginUseCase))
@@ -42,9 +42,9 @@ struct LoginView: View {
                     }
 
                     // Hint de credenciales (solo en desarrollo)
-                    if AppConfig.environment.isDevelopment {
-                        developmentHint
-                    }
+                    #if DEBUG
+                    developmentHint
+                    #endif
 
                     Spacer()
                 }
@@ -52,8 +52,8 @@ struct LoginView: View {
             }
         }
         .onChange(of: viewModel.state) { oldValue, newValue in
-            if case .success = newValue {
-                coordinator.replacePath(with: .home)
+            if case .success(let user) = newValue {
+                authState.authenticate(user: user)
             }
         }
     }
@@ -127,43 +127,50 @@ struct LoginView: View {
     }
 
     private var developmentHint: some View {
-        VStack(spacing: DSSpacing.xs) {
-            Text("🧪 Modo Desarrollo")
-                .font(DSTypography.caption2)
-                .foregroundColor(DSColors.textTertiary)
-
-            Text("Email: \(AppConfig.TestCredentials.username)@example.com")
-                .font(DSTypography.caption2)
-                .foregroundColor(DSColors.textTertiary)
-
-            Text("Pass: \(AppConfig.TestCredentials.password)")
-                .font(DSTypography.caption2)
-                .foregroundColor(DSColors.textTertiary)
-
-            // Botón para llenar automáticamente
-            Button("Llenar credenciales") {
-                email = "\(AppConfig.TestCredentials.username)@example.com"
-                password = AppConfig.TestCredentials.password
+        VStack(spacing: DSSpacing.small) {
+            Text("🔧 Modo Desarrollo")
+                .font(DSTypography.caption)
+                .foregroundColor(DSColors.textSecondary)
+            
+            Button {
+                email = "admin@edugo.test"
+                password = "edugo2024"
+            } label: {
+                HStack(spacing: DSSpacing.small) {
+                    Image(systemName: "person.fill.checkmark")
+                    Text("Rellenar credenciales de prueba")
+                }
+                .font(DSTypography.caption)
+                .foregroundColor(DSColors.accent)
+                .padding(.horizontal, DSSpacing.medium)
+                .padding(.vertical, DSSpacing.small)
+                .background(DSColors.accent.opacity(0.1))
+                .cornerRadius(DSCornerRadius.small)
             }
-            .font(DSTypography.caption)
-            .foregroundColor(DSColors.accent)
-            .padding(.top, DSSpacing.xs)
+            .buttonStyle(.plain)
         }
-        .padding(DSSpacing.small)
-        .background(DSColors.backgroundTertiary)
-        .cornerRadius(DSCornerRadius.small)
+        .padding(.top, DSSpacing.large)
     }
 }
 
 // MARK: - Previews
 
 #Preview("Login - Idle") {
-    // Preview simplificado sin dependencias de mocks
+    let apiClient = DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL)
+    let jwtDecoder = DefaultJWTDecoder()
+
     LoginView(loginUseCase: DefaultLoginUseCase(
         authRepository: AuthRepositoryImpl(
-            apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
+            apiClient: apiClient,
+            jwtDecoder: jwtDecoder,
+            tokenCoordinator: TokenRefreshCoordinator(
+                apiClient: apiClient,
+                keychainService: DefaultKeychainService.shared,
+                jwtDecoder: jwtDecoder
+            ),
+            biometricService: LocalAuthenticationService()
         ),
         validator: DefaultInputValidator()
     ))
-    .environment(NavigationCoordinator())
+    .environment(AuthenticationState())
 }

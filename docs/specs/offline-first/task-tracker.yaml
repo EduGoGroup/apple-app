@@ -1,0 +1,7 @@
+spec:
+  id: SPEC-013
+  name: Offline-First Strategy
+  priority: P2_MEDIUM
+  status: PENDING
+  estimated_hours: 28
+  dependencies: [SPEC-004, SPEC-005]

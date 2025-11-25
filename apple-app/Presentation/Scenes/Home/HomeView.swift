@@ -11,11 +11,12 @@ import SwiftUI
 struct HomeView: View {
     @State private var viewModel: HomeViewModel
     @State private var showLogoutAlert = false
-    @Environment(NavigationCoordinator.self) private var coordinator
+    @Environment(AuthenticationState.self) private var authState
 
     init(
         getCurrentUserUseCase: GetCurrentUserUseCase,
-        logoutUseCase: LogoutUseCase
+        logoutUseCase: LogoutUseCase,
+        authState: AuthenticationState
     ) {
         self._viewModel = State(
             initialValue: HomeViewModel(
@@ -57,8 +58,7 @@ struct HomeView: View {
                 Task {
                     let success = await viewModel.logout()
                     if success {
-                        coordinator.popToRoot()
-                        coordinator.replacePath(with: .login)
+                        authState.logout()
                     }
                 }
             }
@@ -100,7 +100,7 @@ struct HomeView: View {
 
     private func userHeaderSection(user: User) -> some View {
         VStack(spacing: DSSpacing.medium) {
-            // Avatar con iniciales
+            // Avatar con iniciales - Ahora con efecto glass
             Circle()
                 .fill(DSColors.accent.opacity(0.2))
                 .frame(width: 80, height: 80)
@@ -109,6 +109,7 @@ struct HomeView: View {
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(DSColors.accent)
                 )
+                .dsGlassEffect(.prominent, shape: .circle, isInteractive: true)
 
             Text("Hola, \(user.displayName)")
                 .font(DSTypography.largeTitle)
@@ -118,7 +119,7 @@ struct HomeView: View {
     }
 
     private func userInfoCard(user: User) -> some View {
-        DSCard {
+        DSCard(visualEffect: .prominent) {
             VStack(alignment: .leading, spacing: DSSpacing.medium) {
                 infoRow(icon: "envelope", label: "Email", value: user.email)
                 Divider()
@@ -153,10 +154,6 @@ struct HomeView: View {
 
     private var actionsSection: some View {
         VStack(spacing: DSSpacing.medium) {
-            DSButton(title: "Configuración", style: .secondary) {
-                coordinator.navigate(to: .settings)
-            }
-
             DSButton(title: "Cerrar Sesión", style: .tertiary) {
                 showLogoutAlert = true
             }
@@ -188,15 +185,39 @@ struct HomeView: View {
 // MARK: - Previews
 
 #Preview("Home - Loaded") {
-    let authRepo = AuthRepositoryImpl(
-        apiClient: DefaultAPIClient(baseURL: AppConfig.baseURL)
-    )
+    @Previewable @State var authState = AuthenticationState()
 
-    NavigationStack {
+    return NavigationStack {
         HomeView(
-            getCurrentUserUseCase: DefaultGetCurrentUserUseCase(authRepository: authRepo),
-            logoutUseCase: DefaultLogoutUseCase(authRepository: authRepo)
+            getCurrentUserUseCase: DefaultGetCurrentUserUseCase(
+                authRepository: AuthRepositoryImpl(
+                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                    jwtDecoder: DefaultJWTDecoder(),
+                    tokenCoordinator: TokenRefreshCoordinator(
+                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                        keychainService: DefaultKeychainService.shared,
+                        jwtDecoder: DefaultJWTDecoder()
+                    ),
+                    biometricService: LocalAuthenticationService()
+                )
+            ),
+            logoutUseCase: DefaultLogoutUseCase(
+                authRepository: AuthRepositoryImpl(
+                    apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                    jwtDecoder: DefaultJWTDecoder(),
+                    tokenCoordinator: TokenRefreshCoordinator(
+                        apiClient: DefaultAPIClient(baseURL: AppEnvironment.apiBaseURL),
+                        keychainService: DefaultKeychainService.shared,
+                        jwtDecoder: DefaultJWTDecoder()
+                    ),
+                    biometricService: LocalAuthenticationService()
+                )
+            ),
+            authState: authState
         )
     }
-    .environment(NavigationCoordinator())
+    .environment(authState)
+    .onAppear {
+        authState.authenticate(user: User.mock)
+    }
 }

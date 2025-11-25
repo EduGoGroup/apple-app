@@ -9,9 +9,6 @@ import Foundation
 
 /// Rutas de navegación de la aplicación
 enum Route: Hashable, Sendable {
-    /// Pantalla de splash (inicial)
-    case splash
-
     /// Pantalla de login
     case login
 
