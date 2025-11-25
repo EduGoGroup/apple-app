@@ -21,6 +21,10 @@ enum ConnectionType: Sendable {
 protocol NetworkMonitor: Sendable {
     var isConnected: Bool { get async }
     var connectionType: ConnectionType { get async }
+
+    /// Stream de cambios de conectividad
+    /// - Returns: AsyncStream que emite true cuando hay conexión, false cuando no
+    func connectionStream() -> AsyncStream<Bool>
 }
 
 /// Implementación usando Network framework de Apple
@@ -67,6 +71,22 @@ final class DefaultNetworkMonitor: NetworkMonitor, @unchecked Sendable {
     deinit {
         monitor.cancel()
     }
+
+    // MARK: - Observable
+
+    /// Stream de cambios de conectividad
+    func connectionStream() -> AsyncStream<Bool> {
+        AsyncStream { continuation in
+            monitor.pathUpdateHandler = { path in
+                let isConnected = path.status == .satisfied
+                continuation.yield(isConnected)
+            }
+
+            continuation.onTermination = { @Sendable _ in
+                // Cleanup si es necesario
+            }
+        }
+    }
 }
 
 // MARK: - Testing
@@ -82,6 +102,14 @@ final class MockNetworkMonitor: NetworkMonitor, @unchecked Sendable {
 
     var connectionType: ConnectionType {
         get async { connectionTypeValue }
+    }
+
+    func connectionStream() -> AsyncStream<Bool> {
+        AsyncStream { continuation in
+            // Mock: Solo emite el valor actual
+            continuation.yield(isConnectedValue)
+            continuation.finish()
+        }
     }
 }
 #endif
