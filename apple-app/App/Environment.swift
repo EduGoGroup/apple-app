@@ -4,6 +4,7 @@
 //
 //  Created on 23-11-25.
 //  Updated on 24-01-25 - Refactored to modern Swift 6 approach
+//  Updated on 24-11-25 - SPRINT2: URLs separadas para ecosistema EduGo
 //  SPEC-001: Environment Configuration System (Modernized)
 //
 
@@ -27,6 +28,11 @@ enum AuthenticationMode: Sendable, Equatable {
 /// - Constantes compile-time (type-safe, sin runtime overhead)
 /// - SWIFT_ACTIVE_COMPILATION_CONDITIONS configurado en .xcconfig
 ///
+/// ## URLs del Ecosistema EduGo
+/// - `authAPIBaseURL`: api-admin (Puerto 8081) - Autenticación centralizada
+/// - `mobileAPIBaseURL`: api-mobile (Puerto 9091) - Materiales y progreso
+/// - `adminAPIBaseURL`: api-admin (Puerto 8081) - Funciones administrativas
+///
 /// ## Ventajas
 /// - ✅ Type-safe en compile-time
 /// - ✅ Sin crashes por variables faltantes
@@ -36,8 +42,8 @@ enum AuthenticationMode: Sendable, Equatable {
 ///
 /// ## Uso
 /// ```swift
-/// let apiURL = AppEnvironment.apiBaseURL
-/// let timeout = AppEnvironment.apiTimeout
+/// let authURL = AppEnvironment.authAPIBaseURL
+/// let mobileURL = AppEnvironment.mobileAPIBaseURL
 ///
 /// if AppEnvironment.isDevelopment {
 ///     print("🔧 Modo desarrollo")
@@ -91,20 +97,55 @@ enum AppEnvironment {
         #endif
     }
 
-    // MARK: - API Configuration (Compile-Time Constants)
+    // MARK: - API URLs del Ecosistema EduGo
 
-    /// URL base del API configurada para el ambiente actual
-    static var apiBaseURL: URL {
+    /// URL base para autenticación (api-admin)
+    /// Endpoints: /v1/auth/login, /v1/auth/refresh, /v1/auth/logout, /v1/auth/verify
+    ///
+    /// Esta es la fuente única de tokens JWT para todo el ecosistema.
+    /// Los tokens emitidos aquí funcionan con api-mobile y api-admin.
+    static var authAPIBaseURL: URL {
         #if DEBUG
-        // Desarrollo: API local (puerto 9091)
+        return URL(string: "http://localhost:8081")!
+        #elseif STAGING
+        return URL(string: "https://staging-api-admin.edugo.com")!
+        #else
+        return URL(string: "https://api-admin.edugo.com")!
+        #endif
+    }
+
+    /// URL base para API móvil (api-mobile)
+    /// Endpoints: /v1/materials, /v1/progress, etc.
+    ///
+    /// Usa tokens emitidos por authAPIBaseURL (api-admin).
+    static var mobileAPIBaseURL: URL {
+        #if DEBUG
         return URL(string: "http://localhost:9091")!
         #elseif STAGING
-        // Staging: API de staging
-        return URL(string: "http://localhost:9091")!
+        return URL(string: "https://staging-api-mobile.edugo.com")!
         #else
-        // Producción: API real
-        return URL(string: "https://api.edugo.com")!
+        return URL(string: "https://api-mobile.edugo.com")!
         #endif
+    }
+
+    /// URL base para administración (api-admin)
+    /// Endpoints: /v1/schools, /v1/units, etc.
+    ///
+    /// Mismo servidor que auth, pero para funciones administrativas.
+    static var adminAPIBaseURL: URL {
+        #if DEBUG
+        return URL(string: "http://localhost:8081")!
+        #elseif STAGING
+        return URL(string: "https://staging-api-admin.edugo.com")!
+        #else
+        return URL(string: "https://api-admin.edugo.com")!
+        #endif
+    }
+
+    /// URL base genérica del API (retrocompatibilidad)
+    /// @deprecated Usar authAPIBaseURL, mobileAPIBaseURL o adminAPIBaseURL según el servicio
+    static var apiBaseURL: URL {
+        mobileAPIBaseURL
     }
 
     /// Timeout para requests HTTP (en segundos)
@@ -116,6 +157,26 @@ enum AppEnvironment {
         #else
         return 30  // Producción
         #endif
+    }
+
+    // MARK: - JWT Configuration
+
+    /// Issuer esperado en los tokens JWT
+    /// DEBE coincidir con el issuer configurado en api-admin
+    static var jwtIssuer: String {
+        "edugo-central"
+    }
+
+    /// Duración del access token (para cálculo de refresh anticipado)
+    /// Valor por defecto: 15 minutos (900 segundos)
+    static var accessTokenDuration: TimeInterval {
+        15 * 60
+    }
+
+    /// Tiempo antes de expiración para iniciar refresh automático
+    /// Default: 2 minutos antes de expirar
+    static var tokenRefreshThreshold: TimeInterval {
+        2 * 60
     }
 
     // MARK: - Logging Configuration
@@ -136,7 +197,7 @@ enum AppEnvironment {
     /// Modo de autenticación (DummyJSON vs Real API)
     static var authMode: AuthenticationMode {
         #if DEBUG
-        return .realAPI    // Desarrollo: API real (localhost:8080)
+        return .realAPI    // Desarrollo: API real centralizada
         #elseif STAGING
         return .realAPI    // Staging: API real
         #else
@@ -197,16 +258,27 @@ enum AppEnvironment {
         #if DEBUG
         print("""
 
-        🌍 Environment Configuration (Modern Approach):
-        ════════════════════════════════════════
-        Environment:    \(current.rawValue)
-        API URL:        \(apiBaseURL.absoluteString)
-        Timeout:        \(apiTimeout)s
-        Log Level:      \(logLevel.rawValue)
-        Auth Mode:      \(authMode == .dummyJSON ? "DummyJSON" : "Real API")
-        Analytics:      \(analyticsEnabled ? "✅" : "❌")
-        Crashlytics:    \(crashlyticsEnabled ? "✅" : "❌")
-        ════════════════════════════════════════
+        🌍 EduGo Environment Configuration
+        ════════════════════════════════════════════════
+        Environment:      \(current.rawValue)
+
+        📡 API URLs:
+        ├─ Auth API:      \(authAPIBaseURL.absoluteString)
+        ├─ Mobile API:    \(mobileAPIBaseURL.absoluteString)
+        └─ Admin API:     \(adminAPIBaseURL.absoluteString)
+
+        🔐 JWT Configuration:
+        ├─ Issuer:        \(jwtIssuer)
+        ├─ Token Duration: \(Int(accessTokenDuration / 60)) min
+        └─ Refresh at:    \(Int(tokenRefreshThreshold / 60)) min before expiry
+
+        ⚙️ Settings:
+        ├─ Timeout:       \(Int(apiTimeout))s
+        ├─ Log Level:     \(logLevel.rawValue)
+        ├─ Auth Mode:     \(authMode == .dummyJSON ? "DummyJSON" : "Real API")
+        ├─ Analytics:     \(analyticsEnabled ? "✅" : "❌")
+        └─ Crashlytics:   \(crashlyticsEnabled ? "✅" : "❌")
+        ════════════════════════════════════════════════
 
         """)
         #endif
