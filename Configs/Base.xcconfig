@@ -1,6 +1,17 @@
 // Base.xcconfig
 // Configuración compartida entre todos los ambientes
 // SPEC-001: Environment Configuration System
+// SPEC-008: Info.plist híbrido para ATS (Updated 2025-11-25)
+
+// ============================================================================
+// MARK: - Info.plist Configuration (Approach Híbrido)
+// ============================================================================
+// El proyecto usa approach híbrido para Info.plist:
+// - Keys simples: INFOPLIST_KEY_* en este archivo
+// - Diccionarios complejos (ATS, Permissions): Info.plist físico
+
+INFOPLIST_FILE = $(SRCROOT)/apple-app/Config/Info.plist
+GENERATE_INFOPLIST_FILE = NO
 
 // ============================================================================
 // MARK: - App Information

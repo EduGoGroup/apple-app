@@ -130,17 +130,25 @@ struct LoginView: View {
                 .font(DSTypography.caption)
                 .foregroundColor(DSColors.textSecondary)
 
-            DSButton(
-                title: "Usar Face ID",
-                style: .secondary,
-                icon: "faceid",
-                isLoading: viewModel.isLoading,
-                isDisabled: viewModel.isLoginDisabled
-            ) {
+            Button {
                 Task {
                     await viewModel.loginWithBiometrics()
                 }
+            } label: {
+                HStack(spacing: DSSpacing.small) {
+                    Image(systemName: "faceid")
+                    Text("Usar Face ID")
+                }
+                .font(DSTypography.body.weight(.semibold))
+                .foregroundColor(DSColors.accent)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(DSColors.backgroundSecondary)
+                .cornerRadius(DSCornerRadius.medium)
             }
+            .buttonStyle(.plain)
+            .disabled(viewModel.isLoginDisabled)
+            .opacity(viewModel.isLoginDisabled ? 0.5 : 1.0)
         }
         .padding(.top, DSSpacing.small)
     }

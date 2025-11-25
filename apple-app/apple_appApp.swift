@@ -4,6 +4,7 @@
 //
 //  Created by Jhoan Medina on 15-11-25.
 //  Updated on 25-11-25 - SPEC-003: AuthInterceptor integration
+//  Updated on 25-11-25 - SPEC-008: Security services integration
 //
 
 import SwiftUI
@@ -73,6 +74,9 @@ struct apple_appApp: App {
         // Servicios base (Keychain, NetworkMonitor)
         registerBaseServices(in: container)
 
+        // Security services (Certificate Pinning, Jailbreak Detection) - SPEC-008
+        registerSecurityServices(in: container)
+
         // Auth services (JWT, Biometric, TokenCoordinator) - necesarios para APIClient
         registerAuthServices(in: container)
 
@@ -102,6 +106,26 @@ struct apple_appApp: App {
         // NetworkMonitor - Singleton (SPEC-004)
         container.register(NetworkMonitor.self, scope: .singleton) {
             DefaultNetworkMonitor()
+        }
+    }
+
+    // MARK: - Security Services Registration
+
+    /// Registra servicios de seguridad (SPEC-008)
+    private static func registerSecurityServices(in container: DependencyContainer) {
+        // CertificatePinner - Singleton
+        // Validación de certificados SSL
+        container.register(CertificatePinner.self, scope: .singleton) {
+            // TODO: Agregar hashes reales cuando tengamos acceso al servidor
+            // Por ahora, hashes vacíos = modo desarrollo (permite todas las conexiones)
+            let pinnedHashes: Set<String> = []
+            return DefaultCertificatePinner(pinnedPublicKeyHashes: pinnedHashes)
+        }
+
+        // SecurityValidator - Singleton
+        // Detección de jailbreak y debugger
+        container.register(SecurityValidator.self, scope: .singleton) {
+            DefaultSecurityValidator()
         }
     }
 
@@ -143,22 +167,32 @@ struct apple_appApp: App {
 
     // MARK: - API Client Registration
 
-    /// Registra APIClient con todos los interceptores (Auth + Logging)
+    /// Registra APIClient con todos los interceptores (Security + Auth + Logging)
     private static func registerAPIClient(in container: DependencyContainer) {
         // APIClient - Singleton
-        // Configurado con interceptores completos: Auth + Logging (SPEC-003 + SPEC-004)
+        // Configurado con interceptores completos: Security + Auth + Logging (SPEC-008 + SPEC-003 + SPEC-004)
         container.register(APIClient.self, scope: .singleton) {
-            // Logging interceptor (request + response)
-            let loggingInterceptor = LoggingInterceptor()
+            // Security Guard interceptor (valida dispositivo) - SPEC-008
+            let securityInterceptor = SecurityGuardInterceptor(
+                securityValidator: container.resolve(SecurityValidator.self)
+            )
 
             // Auth interceptor (auto-refresh de tokens) - SPEC-003
             let authInterceptor = AuthInterceptor(
                 tokenCoordinator: container.resolve(TokenRefreshCoordinator.self)
             )
 
+            // Logging interceptor (request + response) - SPEC-002
+            let loggingInterceptor = LoggingInterceptor()
+
             return DefaultAPIClient(
                 baseURL: AppEnvironment.mobileAPIBaseURL, // API móvil por defecto
-                requestInterceptors: [authInterceptor, loggingInterceptor],
+                certificatePinner: container.resolve(CertificatePinner.self), // SPEC-008: SSL Pinning
+                requestInterceptors: [
+                    securityInterceptor,  // 1° Validar dispositivo
+                    authInterceptor,      // 2° Inyectar token
+                    loggingInterceptor    // 3° Loggear request
+                ],
                 responseInterceptors: [loggingInterceptor],
                 retryPolicy: .default,
                 networkMonitor: container.resolve(NetworkMonitor.self)
