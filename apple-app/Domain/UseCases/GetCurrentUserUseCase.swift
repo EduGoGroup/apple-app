@@ -8,14 +8,15 @@
 import Foundation
 
 /// Protocolo para el caso de uso de obtener usuario actual
-/// Con Swift 6.2 Default MainActor Isolation, Sendable es implícito
-protocol GetCurrentUserUseCase {
+@MainActor
+protocol GetCurrentUserUseCase: Sendable {
     /// Obtiene el usuario actualmente autenticado
     /// - Returns: Result con el User actual o AppError
     func execute() async -> Result<User, AppError>
 }
 
 /// Implementación por defecto del caso de uso de obtener usuario actual
+@MainActor
 final class DefaultGetCurrentUserUseCase: GetCurrentUserUseCase {
     private let authRepository: AuthRepository
     
