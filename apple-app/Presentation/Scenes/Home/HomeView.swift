@@ -45,16 +45,16 @@ struct HomeView: View {
                 .padding(DSSpacing.xl)
             }
         }
-        .navigationTitle("Inicio")
+        .navigationTitle(String(localized: "home.title"))
         #if canImport(UIKit)
         .navigationBarTitleDisplayMode(.large)
         #endif
         .task {
             await viewModel.loadUser()
         }
-        .alert("Cerrar Sesión", isPresented: $showLogoutAlert) {
-            Button("Cancelar", role: .cancel) {}
-            Button("Cerrar Sesión", role: .destructive) {
+        .alert(String(localized: "home.logout.alert.title"), isPresented: $showLogoutAlert) {
+            Button(String(localized: "common.cancel"), role: .cancel) {}
+            Button(String(localized: "home.button.logout"), role: .destructive) {
                 Task {
                     let success = await viewModel.logout()
                     if success {
@@ -63,7 +63,7 @@ struct HomeView: View {
                 }
             }
         } message: {
-            Text("¿Estás seguro que deseas cerrar sesión?")
+            Text(String(localized: "home.logout.alert.message"))
         }
     }
 
@@ -75,7 +75,7 @@ struct HomeView: View {
                 .progressViewStyle(CircularProgressViewStyle(tint: DSColors.accent))
                 .scaleEffect(1.5)
 
-            Text("Cargando...")
+            Text(String(localized: "common.loading"))
                 .font(DSTypography.body)
                 .foregroundColor(DSColors.textSecondary)
         }
@@ -111,7 +111,7 @@ struct HomeView: View {
                 )
                 .dsGlassEffect(.prominent, shape: .circle, isInteractive: true)
 
-            Text("Hola, \(user.displayName)")
+            Text(String(format: String(localized: "home.greeting"), user.displayName))
                 .font(DSTypography.largeTitle)
                 .foregroundColor(DSColors.textPrimary)
         }
@@ -121,12 +121,12 @@ struct HomeView: View {
     private func userInfoCard(user: User) -> some View {
         DSCard(visualEffect: .prominent) {
             VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                infoRow(icon: "envelope", label: "Email", value: user.email)
+                infoRow(icon: "envelope", label: String(localized: "home.info.email.label"), value: user.email)
                 Divider()
                 infoRow(
                     icon: user.isEmailVerified ? "checkmark.circle.fill" : "xmark.circle",
-                    label: "Estado",
-                    value: user.isEmailVerified ? "Verificado" : "No verificado"
+                    label: String(localized: "home.info.status.label"),
+                    value: user.isEmailVerified ? String(localized: "home.info.status.verified") : String(localized: "home.info.status.unverified")
                 )
             }
         }
@@ -154,7 +154,7 @@ struct HomeView: View {
 
     private var actionsSection: some View {
         VStack(spacing: DSSpacing.medium) {
-            DSButton(title: "Cerrar Sesión", style: .tertiary) {
+            DSButton(title: String(localized: "home.button.logout"), style: .tertiary) {
                 showLogoutAlert = true
             }
         }
@@ -171,7 +171,7 @@ struct HomeView: View {
                 .foregroundColor(DSColors.textSecondary)
                 .multilineTextAlignment(.center)
 
-            DSButton(title: "Reintentar", style: .primary) {
+            DSButton(title: String(localized: "common.retry"), style: .primary) {
                 Task {
                     await viewModel.loadUser()
                 }

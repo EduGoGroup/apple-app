@@ -27,7 +27,7 @@ struct SplashView: View {
                     .foregroundColor(DSColors.accent)
 
                 // Nombre de la app
-                Text("EduGo")
+                Text(String(localized: "app.name"))
                     .font(DSTypography.largeTitle)
                     .foregroundColor(DSColors.textPrimary)
 

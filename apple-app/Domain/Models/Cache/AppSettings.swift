@@ -45,4 +45,14 @@ final class AppSettings {
     func updateTheme(_ theme: Theme) {
         self.theme = theme.rawValue
     }
+
+    /// SPEC-010: Helper para obtener Language enum desde String
+    var languageEnum: Language {
+        Language(rawValue: language) ?? .default
+    }
+
+    /// SPEC-010: Actualiza el idioma de la aplicación
+    func updateLanguage(_ language: Language) {
+        self.language = language.rawValue
+    }
 }

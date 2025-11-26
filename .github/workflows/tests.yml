@@ -24,6 +24,7 @@ jobs:
             -scheme EduGo-Dev \
             -destination 'platform=macOS' \
             -enableCodeCoverage YES \
+            -derivedDataPath DerivedData \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
@@ -34,7 +35,62 @@ jobs:
             -scheme EduGo-Dev \
             -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
             -enableCodeCoverage YES \
+            -derivedDataPath DerivedData \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
         continue-on-error: true
+
+      - name: Generate coverage report
+        continue-on-error: true
+        run: |
+          # Buscar el archivo de profdata
+          PROFDATA_PATH=$(find DerivedData/Build/ProfileData -name "Coverage.profdata" | head -n 1)
+
+          if [ -z "$PROFDATA_PATH" ]; then
+            echo "⚠️ No se encontró archivo Coverage.profdata - coverage no disponible"
+            exit 0
+          fi
+
+          echo "📊 Generando reporte de coverage desde: $PROFDATA_PATH"
+
+          # Buscar el binario de la app
+          BINARY_PATH=$(find DerivedData/Build/Products -name "apple-app" -type f | grep -v ".dSYM" | head -n 1)
+
+          if [ -z "$BINARY_PATH" ]; then
+            echo "⚠️ No se encontró el binario de la app - coverage no disponible"
+            exit 0
+          fi
+
+          echo "🔍 Usando binario: $BINARY_PATH"
+
+          # Generar reporte en formato lcov
+          xcrun llvm-cov export \
+            -format="lcov" \
+            -instr-profile="$PROFDATA_PATH" \
+            "$BINARY_PATH" \
+            > coverage.lcov || echo "⚠️ Coverage export falló - continuando sin coverage"
+
+          if [ -f coverage.lcov ]; then
+            echo "✅ Reporte de coverage generado: coverage.lcov"
+            ls -lh coverage.lcov
+          fi
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.lcov
+          fail_ci_if_error: false
+          verbose: true
+          flags: unittests
+          name: codecov-umbrella
+        if: always()
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.lcov
+          retention-days: 7
+        if: always()

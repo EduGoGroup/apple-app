@@ -49,7 +49,7 @@ struct OfflineBanner: View {
                 .foregroundStyle(.white)
 
             // Mensaje
-            Text("Sin conexión a internet")
+            Text(String(localized: "offline.banner.message"))
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.white)

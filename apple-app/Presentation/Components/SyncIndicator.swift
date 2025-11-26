@@ -64,13 +64,14 @@ struct SyncIndicator: View {
     // MARK: - Private Computed Properties
 
     /// Mensaje de sincronización con pluralización correcta
+    /// SPEC-010: Migrado a Localizable.xcstrings
     private var syncMessage: String {
         if itemCount == 1 {
-            return "Sincronizando 1 elemento..."
+            return String(localized: "sync.indicator.single")
         } else if itemCount > 1 {
-            return "Sincronizando \(itemCount) elementos..."
+            return String(format: String(localized: "sync.indicator.multiple"), itemCount)
         } else {
-            return "Sincronizando..."
+            return String(localized: "sync.indicator.default")
         }
     }
 }

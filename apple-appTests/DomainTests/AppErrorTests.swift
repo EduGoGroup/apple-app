@@ -14,6 +14,9 @@ import SwiftUI
 @Suite("AppError Tests")
 struct AppErrorTests {
     
+    // MARK: - Tests de mensajes localizados
+    // Nota: userMessage depende del locale del sistema, verificamos via String(localized:)
+
     @Test("AppError should delegate userMessage to wrapped error")
     func testUserMessageDelegation() async throws {
         // Given
@@ -21,11 +24,12 @@ struct AppErrorTests {
         let validationError = AppError.validation(.emptyEmail)
         let businessError = AppError.business(.userNotFound)
         let systemError = AppError.system(.unknown)
-        
-        // Then
-        #expect(networkError.userMessage == "No hay conexión a internet. Verifica tu red.")
-        #expect(validationError.userMessage == "El email es requerido.")
-        #expect(businessError.userMessage == "Usuario no encontrado.")
+
+        // Then - usa locale del sistema para errores localizados
+        #expect(networkError.userMessage == String(localized: "error.network.noConnection"))
+        #expect(validationError.userMessage == String(localized: "error.validation.emptyEmail"))
+        #expect(businessError.userMessage == String(localized: "error.business.userNotFound"))
+        // SystemError.unknown tiene string hardcodeado (no localizado)
         #expect(systemError.userMessage == "Ocurrió un error inesperado. Por favor intenta de nuevo.")
     }
     
@@ -155,9 +159,9 @@ struct AppErrorTests {
     func testLocalizedError() async throws {
         // Given
         let error = AppError.network(.noConnection)
-        
-        // Then
-        #expect(error.errorDescription == "No hay conexión a internet. Verifica tu red.")
+
+        // Then - errorDescription usa locale del sistema
+        #expect(error.errorDescription == String(localized: "error.network.noConnection"))
         #expect(error.failureReason?.contains("Network connection unavailable") == true)
     }
     

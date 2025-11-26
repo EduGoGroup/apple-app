@@ -1,0 +1,81 @@
+# Configuración de Codecov para EduGo iOS App
+# SPEC-007: Testing Infrastructure - Code Coverage Integration
+# Documentación: https://docs.codecov.com/docs/codecov-yaml
+
+# Configuración general
+codecov:
+  # Requiere cambios en coverage para marcar PR como failed
+  require_ci_to_pass: yes
+
+  # Notificaciones
+  notify:
+    # Esperar hasta que todos los builds completen antes de notificar
+    wait_for_ci: yes
+
+# Configuración de cobertura
+coverage:
+  precision: 2
+  round: down
+  range: "70...95"
+
+  status:
+    # Configuración para el proyecto completo
+    project:
+      default:
+        target: 70%
+        threshold: 2%
+        base: auto
+        # Solo fallar si baja más del 2%
+        if_ci_failed: error
+        if_not_found: success
+        only_pulls: false
+
+    # Configuración para cambios en el PR
+    patch:
+      default:
+        target: 70%
+        threshold: 5%
+        base: auto
+        if_ci_failed: error
+        if_not_found: success
+        only_pulls: true
+
+# Comentarios en PRs
+comment:
+  layout: "header, diff, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+  branches:
+    - dev
+    - main
+
+# Configuración de flags
+flags:
+  unittests:
+    paths:
+      - apple-app/
+    carryforward: true
+
+# Ignorar archivos
+ignore:
+  - "apple-appTests/**/*"
+  - "apple-appUITests/**/*"
+  - "**/*.generated.swift"
+  - "**/Mocks/**/*"
+  - "**/Fixtures/**/*"
+  - "**/Preview Content/**/*"
+
+# Configuración de parsers
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+# GitHub Checks
+github_checks:
+  annotations: true

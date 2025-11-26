@@ -11,60 +11,61 @@ import Foundation
 enum BusinessError: Error, Equatable, Sendable {
     /// Usuario ya existe
     case userAlreadyExists
-    
+
     /// Usuario no encontrado
     case userNotFound
-    
+
     /// Credenciales inválidas
     case invalidCredentials
-    
+
     /// Sesión expirada
     case sessionExpired
-    
+
     /// Cuenta deshabilitada
     case accountDisabled
-    
+
     /// Email no verificado
     case emailNotVerified
-    
+
     /// Operación no permitida
     case operationNotAllowed
-    
+
     /// Límite de intentos excedido
     case tooManyAttempts
-    
+
     /// Recurso no disponible
     case resourceUnavailable
-    
+
     /// Error de negocio personalizado con mensaje
     case custom(String)
-    
+
     /// Mensaje amigable para mostrar al usuario
+    /// SPEC-010: Migrado a Localizable.xcstrings
     var userMessage: String {
         switch self {
         case .userAlreadyExists:
-            return "Este usuario ya está registrado."
+            return String(localized: "error.business.userAlreadyExists")
         case .userNotFound:
-            return "Usuario no encontrado."
+            return String(localized: "error.business.userNotFound")
         case .invalidCredentials:
-            return "Email o contraseña incorrectos."
+            return String(localized: "error.business.invalidCredentials")
         case .sessionExpired:
-            return "Tu sesión ha expirado. Por favor inicia sesión nuevamente."
+            return String(localized: "error.business.sessionExpired")
         case .accountDisabled:
-            return "Tu cuenta ha sido deshabilitada. Contacta soporte."
+            return String(localized: "error.business.accountDisabled")
         case .emailNotVerified:
-            return "Por favor verifica tu email antes de continuar."
+            return String(localized: "error.business.emailNotVerified")
         case .operationNotAllowed:
-            return "Esta operación no está permitida."
+            return String(localized: "error.business.operationNotAllowed")
         case .tooManyAttempts:
-            return "Demasiados intentos. Por favor espera un momento."
+            return String(localized: "error.business.tooManyAttempts")
         case .resourceUnavailable:
-            return "El recurso no está disponible en este momento."
+            return String(localized: "error.business.resourceUnavailable")
         case .custom(let message):
             return message
         }
     }
-    
+
     /// Mensaje técnico para logs y debugging
     var technicalMessage: String {
         switch self {

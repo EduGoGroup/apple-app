@@ -32,7 +32,15 @@ struct SettingsView: View {
                 Section {
                     themePicker
                 } header: {
-                    Text("Apariencia")
+                    Text(String(localized: "settings.section.appearance"))
+                        .font(DSTypography.subheadline)
+                }
+
+                // SPEC-010: Sección de Idioma
+                Section {
+                    languagePicker
+                } header: {
+                    Text(String(localized: "settings.section.language"))
                         .font(DSTypography.subheadline)
                 }
 
@@ -40,13 +48,13 @@ struct SettingsView: View {
                 Section {
                     infoRows
                 } header: {
-                    Text("Información")
+                    Text(String(localized: "settings.section.info"))
                         .font(DSTypography.subheadline)
                 }
             }
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle("Configuración")
+        .navigationTitle(String(localized: "settings.title"))
         #if canImport(UIKit)
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -59,7 +67,7 @@ struct SettingsView: View {
 
     private var themePicker: some View {
         HStack {
-            Label("Tema", systemImage: "paintbrush")
+            Label(String(localized: "settings.theme.label"), systemImage: "paintbrush")
                 .font(DSTypography.body)
 
             Spacer()
@@ -85,13 +93,42 @@ struct SettingsView: View {
         }
     }
 
+    // SPEC-010: Language Picker
+    private var languagePicker: some View {
+        HStack {
+            Label(String(localized: "settings.language.label"), systemImage: "globe")
+                .font(DSTypography.body)
+
+            Spacer()
+
+            Picker("", selection: Binding(
+                get: { viewModel.currentLanguage },
+                set: { language in
+                    Task {
+                        await viewModel.updateLanguage(language)
+                    }
+                }
+            )) {
+                ForEach(Language.allCases, id: \.self) { language in
+                    HStack {
+                        Text(language.flagEmoji)
+                        Text(language.displayName)
+                    }
+                    .tag(language)
+                }
+            }
+            .pickerStyle(.menu)
+            .disabled(viewModel.isLoading)
+        }
+    }
+
     private var infoRows: some View {
         VStack(spacing: 0) {
-            infoRow(label: "Versión", value: "1.0.0")
+            infoRow(label: String(localized: "settings.info.version"), value: "1.0.0")
             Divider().padding(.leading, DSSpacing.xl)
-            infoRow(label: "Build", value: "1")
+            infoRow(label: String(localized: "settings.info.build"), value: "1")
             Divider().padding(.leading, DSSpacing.xl)
-            infoRow(label: "Ambiente", value: AppEnvironment.displayName)
+            infoRow(label: String(localized: "settings.info.environment"), value: AppEnvironment.displayName)
         }
     }
 
@@ -126,11 +163,11 @@ struct SettingsView: View {
     private func themeDisplayName(for theme: Theme) -> String {
         switch theme {
         case .light:
-            return "Claro"
+            return String(localized: "settings.theme.light")
         case .dark:
-            return "Oscuro"
+            return String(localized: "settings.theme.dark")
         case .system:
-            return "Sistema"
+            return String(localized: "settings.theme.system")
         }
     }
 }

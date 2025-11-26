@@ -11,55 +11,56 @@ import Foundation
 enum ValidationError: Error, Equatable, Sendable {
     /// Email vacío
     case emptyEmail
-    
+
     /// Formato de email inválido
     case invalidEmailFormat
-    
+
     /// Contraseña vacía
     case emptyPassword
-    
+
     /// Contraseña demasiado corta
     case passwordTooShort
-    
+
     /// Las contraseñas no coinciden
     case passwordMismatch
-    
+
     /// Nombre vacío
     case emptyName
-    
+
     /// Nombre demasiado corto
     case nameTooShort
-    
+
     /// Campo requerido vacío con nombre del campo
     case requiredField(String)
-    
+
     /// Formato inválido con mensaje específico
     case invalidFormat(String)
-    
+
     /// Mensaje amigable para mostrar al usuario
+    /// SPEC-010: Migrado a Localizable.xcstrings
     var userMessage: String {
         switch self {
         case .emptyEmail:
-            return "El email es requerido."
+            return String(localized: "error.validation.emptyEmail")
         case .invalidEmailFormat:
-            return "El formato del email es inválido."
+            return String(localized: "error.validation.invalidEmailFormat")
         case .emptyPassword:
-            return "La contraseña es requerida."
+            return String(localized: "error.validation.emptyPassword")
         case .passwordTooShort:
-            return "La contraseña debe tener al menos 6 caracteres."
+            return String(localized: "error.validation.passwordTooShort")
         case .passwordMismatch:
-            return "Las contraseñas no coinciden."
+            return String(localized: "error.validation.passwordMismatch")
         case .emptyName:
-            return "El nombre es requerido."
+            return String(localized: "error.validation.emptyName")
         case .nameTooShort:
-            return "El nombre debe tener al menos 2 caracteres."
+            return String(localized: "error.validation.nameTooShort")
         case .requiredField(let field):
-            return "El campo '\(field)' es requerido."
+            return String(format: String(localized: "error.validation.requiredField"), field)
         case .invalidFormat(let message):
             return message
         }
     }
-    
+
     /// Mensaje técnico para logs y debugging
     var technicalMessage: String {
         switch self {
