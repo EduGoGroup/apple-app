@@ -99,8 +99,8 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     @MainActor
     func login(email: String, password: String) async -> Result<User, AppError> {
-        logger.info("Login attempt started")
-        logger.logEmail(email)
+        await logger.info("Login attempt started")
+        await logger.logEmail(email)
 
         do {
             let user: User
@@ -116,26 +116,26 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             // Guardar tokens
             await saveTokens(tokenInfo)
 
-            logger.info("Login successful", metadata: ["userId": user.id])
+            await logger.info("Login successful", metadata: ["userId": user.id])
 
             // Guardar credenciales para biometric login (opcional)
-            try? keychainService.saveToken(email, for: storedEmailKey)
-            try? keychainService.saveToken(password, for: storedPasswordKey)
+            try? await keychainService.saveToken(email, for: storedEmailKey)
+            try? await keychainService.saveToken(password, for: storedPasswordKey)
 
             return .success(user)
 
         } catch let error as NetworkError {
-            logger.error("Login failed - Network error", metadata: [
+            await logger.error("Login failed - Network error", metadata: [
                 "error": error.localizedDescription
             ])
             return .failure(.network(error))
         } catch let error as KeychainError {
-            logger.error("Login failed - Keychain error", metadata: [
+            await logger.error("Login failed - Keychain error", metadata: [
                 "error": error.localizedDescription
             ])
             return .failure(.system(.system(error.localizedDescription)))
         } catch {
-            logger.error("Login failed - Unknown error", metadata: [
+            await logger.error("Login failed - Unknown error", metadata: [
                 "error": error.localizedDescription
             ])
             return .failure(.system(.system("Error: \(error.localizedDescription)")))
@@ -143,11 +143,11 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     }
 
     func loginWithBiometrics() async -> Result<User, AppError> {
-        logger.info("Biometric login attempt")
+        await logger.info("Biometric login attempt")
 
         // 1. Verificar disponibilidad
         guard await biometricService.isAvailable else {
-            logger.warning("Biometric auth not available")
+            await logger.warning("Biometric auth not available")
             return .failure(.system(.system("Autenticación biométrica no disponible")))
         }
 
@@ -158,23 +158,23 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             )
 
             guard authenticated else {
-                logger.warning("Biometric auth cancelled")
+                await logger.warning("Biometric auth cancelled")
                 return .failure(.system(.cancelled))
             }
 
             // 3. Leer credenciales guardadas
-            guard let email = try? keychainService.getToken(for: storedEmailKey),
-                  let password = try? keychainService.getToken(for: storedPasswordKey) else {
-                logger.warning("No stored credentials for biometric login")
+            guard let email = try? await keychainService.getToken(for: storedEmailKey),
+                  let password = try? await keychainService.getToken(for: storedPasswordKey) else {
+                await logger.warning("No stored credentials for biometric login")
                 return .failure(.system(.system("No hay credenciales guardadas")))
             }
 
             // 4. Login normal con credenciales
-            logger.info("Biometric auth successful, performing login")
+            await logger.info("Biometric auth successful, performing login")
             return await login(email: email, password: password)
 
         } catch {
-            logger.error("Biometric login failed", metadata: [
+            await logger.error("Biometric login failed", metadata: [
                 "error": error.localizedDescription
             ])
             return .failure(.system(.system(error.localizedDescription)))
@@ -182,11 +182,11 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     }
 
     func logout() async -> Result<Void, AppError> {
-        logger.info("Logout attempt started")
+        await logger.info("Logout attempt started")
 
         // Llamar API de logout solo en modo Real API
         if authMode == .realAPI {
-            if let refreshToken = try? keychainService.getToken(for: refreshTokenKey) {
+            if let refreshToken = try? await keychainService.getToken(for: refreshTokenKey) {
                 // Llamar endpoint de logout (ignorar errores - best effort)
                 let _: String? = try? await apiClient.execute(
                     endpoint: .logout,
@@ -197,32 +197,32 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
         }
 
         // Limpiar datos locales siempre
-        clearLocalAuthData()
+        await clearLocalAuthData()
 
-        logger.info("Logout successful")
+        await logger.info("Logout successful")
         return .success(())
     }
 
     func getCurrentUser() async -> Result<User, AppError> {
-        logger.info("Get current user attempt")
+        await logger.info("Get current user attempt")
 
         do {
             // Obtener access token
-            guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
+            guard let accessToken = try await keychainService.getToken(for: accessTokenKey) else {
                 return .failure(.network(.unauthorized))
             }
 
             // Decodificar JWT para obtener user info
-            let payload = try jwtDecoder.decode(accessToken)
+            let payload = try await jwtDecoder.decode(accessToken)
             let user = payload.toDomainUser
 
-            logger.info("Current user retrieved from JWT", metadata: ["userId": user.id])
+            await logger.info("Current user retrieved from JWT", metadata: ["userId": user.id])
 
             return .success(user)
 
         } catch {
             // Si hay cualquier error (JWT inválido, keychain, etc), intentar refresh
-            logger.warning("Error retrieving current user, attempting refresh", metadata: [
+            await logger.warning("Error retrieving current user, attempting refresh", metadata: [
                 "error": error.localizedDescription
             ])
 
@@ -239,12 +239,12 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     // MARK: - Token Management
 
     func refreshToken() async -> Result<AuthTokens, AppError> {
-        logger.info("Token refresh attempt started")
+        await logger.info("Token refresh attempt started")
 
         do {
             // Obtener refresh token actual
-            guard let currentRefreshToken = try keychainService.getToken(for: refreshTokenKey) else {
-                logger.warning("No refresh token available")
+            guard let currentRefreshToken = try await keychainService.getToken(for: refreshTokenKey) else {
+                await logger.warning("No refresh token available")
                 return .failure(.network(.unauthorized))
             }
 
@@ -279,22 +279,22 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             // Guardar nuevos tokens
             await saveTokens(newTokens)
 
-            logger.info("Token refresh successful")
+            await logger.info("Token refresh successful")
             return .success(newTokens)
 
         } catch let error as NetworkError {
-            logger.error("Token refresh failed - Network error", metadata: [
+            await logger.error("Token refresh failed - Network error", metadata: [
                 "error": error.localizedDescription
             ])
 
             // Si falla el refresh, limpiar sesión
             if error == .unauthorized {
-                clearLocalAuthData()
+                await clearLocalAuthData()
             }
 
             return .failure(.network(error))
         } catch {
-            logger.error("Token refresh failed", metadata: [
+            await logger.error("Token refresh failed", metadata: [
                 "error": error.localizedDescription
             ])
             return .failure(.system(.unknown))
@@ -321,13 +321,13 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     private func processTokenForAccess(_ tokens: TokenInfo) async -> String? {
         // Si el token está expirado, no intentar refresh aquí
         if tokens.isExpired {
-            logger.warning("Access token expired")
+            await logger.warning("Access token expired")
             return nil
         }
 
         // Si debe refrescarse, hacerlo
         if tokens.shouldRefresh {
-            logger.info("Access token needs refresh, attempting...")
+            await logger.info("Access token needs refresh, attempting...")
             let refreshResult = await refreshToken()
 
             switch refreshResult {
@@ -335,7 +335,7 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
                 return newTokens.accessToken
             case .failure:
                 // Retornar el token actual aunque esté próximo a expirar
-                logger.warning("Token refresh failed, returning token close to expiration", metadata: [
+                await logger.warning("Token refresh failed, returning token close to expiration", metadata: [
                     "timeRemaining": "\(Int(tokens.timeRemaining))s"
                 ])
                 return tokens.accessToken
@@ -350,7 +350,7 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     }
 
     func refreshSession() async -> Result<User, AppError> {
-        logger.info("Session refresh attempt started")
+        await logger.info("Session refresh attempt started")
 
         // Primero refrescar tokens
         let tokenResult = await refreshToken()
@@ -359,12 +359,12 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
         case .success(let tokens):
             // Obtener user del nuevo JWT
             do {
-                let payload = try jwtDecoder.decode(tokens.accessToken)
+                let payload = try await jwtDecoder.decode(tokens.accessToken)
                 let user = payload.toDomainUser
-                logger.info("Session refresh successful")
+                await logger.info("Session refresh successful")
                 return .success(user)
             } catch {
-                logger.error("Failed to decode refreshed token")
+                await logger.error("Failed to decode refreshed token")
                 return .failure(.system(.unknown))
             }
 
@@ -385,15 +385,15 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
         // Intentar cargar del Keychain
         do {
-            guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
+            guard let accessToken = try await keychainService.getToken(for: accessTokenKey) else {
                 return .failure(.network(.unauthorized))
             }
 
-            guard let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+            guard let refreshToken = try await keychainService.getToken(for: refreshTokenKey) else {
                 return .failure(.network(.unauthorized))
             }
 
-            let payload = try jwtDecoder.decode(accessToken)
+            let payload = try await jwtDecoder.decode(accessToken)
 
             let tokenInfo = TokenInfo(
                 accessToken: accessToken,
@@ -413,32 +413,27 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - Local Data Management
 
-    func clearLocalAuthData() {
-        // Limpiar store de manera asíncrona (fire-and-forget)
-        // Este patrón es intencional: no esperamos el resultado porque clearLocalAuthData
-        // debe ser inmediato. El Task se ejecutará en background sin bloquear.
-        Task {
-            await tokenStore.setTokens(nil)
-        }
+    func clearLocalAuthData() async {
+        // Limpiar store
+        await tokenStore.setTokens(nil)
+        await logger.info("Local auth data cleared")
 
-        try? keychainService.deleteToken(for: accessTokenKey)
-        try? keychainService.deleteToken(for: refreshTokenKey)
-        try? keychainService.deleteToken(for: tokenExpirationKey)
-
-        logger.info("Local auth data cleared")
+        try? await keychainService.deleteToken(for: accessTokenKey)
+        try? await keychainService.deleteToken(for: refreshTokenKey)
+        try? await keychainService.deleteToken(for: tokenExpirationKey)
     }
 
     // MARK: - Private Methods
 
     private func loadCachedTokens() async {
         do {
-            guard let accessToken = try keychainService.getToken(for: accessTokenKey),
-                  let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+            guard let accessToken = try await keychainService.getToken(for: accessTokenKey),
+                  let refreshToken = try await keychainService.getToken(for: refreshTokenKey) else {
                 return
             }
 
             // Intentar obtener expiración del JWT
-            if let payload = try? jwtDecoder.decode(accessToken) {
+            if let payload = try? await jwtDecoder.decode(accessToken) {
                 let tokenInfo = TokenInfo(
                     accessToken: accessToken,
                     refreshToken: refreshToken,
@@ -454,8 +449,8 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     private func saveTokens(_ tokens: TokenInfo) async {
         await tokenStore.setTokens(tokens)
 
-        try? keychainService.saveToken(tokens.accessToken, for: accessTokenKey)
-        try? keychainService.saveToken(tokens.refreshToken, for: refreshTokenKey)
+        try? await keychainService.saveToken(tokens.accessToken, for: accessTokenKey)
+        try? await keychainService.saveToken(tokens.refreshToken, for: refreshTokenKey)
     }
 
     private func loginWithDummyJSON(email: String, password: String) async throws -> (User, TokenInfo) {

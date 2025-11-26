@@ -53,7 +53,7 @@ final class TokenRefreshCoordinator {
     /// Obtiene un token válido, refrescándolo si es necesario
     func getValidToken() async throws -> TokenInfo {
         // 1. Obtener token actual
-        let currentToken = try getCurrentTokenInfo()
+        let currentToken = try await getCurrentTokenInfo()
 
         // 2. Si válido (no necesita refresh), retornar
         if !currentToken.shouldRefresh {
@@ -81,25 +81,25 @@ final class TokenRefreshCoordinator {
         ongoingRefresh?.cancel()
         ongoingRefresh = nil
 
-        let currentToken = try getCurrentTokenInfo()
+        let currentToken = try await getCurrentTokenInfo()
         return try await performRefresh(currentToken.refreshToken)
     }
 
     // MARK: - Private Methods
 
     /// Obtiene el TokenInfo actual desde Keychain y JWT
-    private func getCurrentTokenInfo() throws -> TokenInfo {
+    private func getCurrentTokenInfo() async throws -> TokenInfo {
         // 1. Leer tokens de Keychain
-        guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
+        guard let accessToken = try await keychainService.getToken(for: accessTokenKey) else {
             throw AppError.network(.unauthorized)
         }
 
-        guard let refreshToken = try keychainService.getToken(for: refreshTokenKey) else {
+        guard let refreshToken = try await keychainService.getToken(for: refreshTokenKey) else {
             throw AppError.network(.unauthorized)
         }
 
         // 2. Decodificar JWT para obtener expiración
-        let payload = try jwtDecoder.decode(accessToken)
+        let payload = try await jwtDecoder.decode(accessToken)
 
         return TokenInfo(
             accessToken: accessToken,
@@ -126,14 +126,14 @@ final class TokenRefreshCoordinator {
             )
 
             // 3. Guardar en Keychain (solo access token)
-            try keychainService.saveToken(newTokenInfo.accessToken, for: accessTokenKey)
+            try await keychainService.saveToken(newTokenInfo.accessToken, for: accessTokenKey)
 
             return newTokenInfo
 
         } catch {
             // Limpiar tokens si refresh falla
-            try? keychainService.deleteToken(for: accessTokenKey)
-            try? keychainService.deleteToken(for: refreshTokenKey)
+            try? await keychainService.deleteToken(for: accessTokenKey)
+            try? await keychainService.deleteToken(for: refreshTokenKey)
 
             throw AppError.network(.unauthorized)
         }

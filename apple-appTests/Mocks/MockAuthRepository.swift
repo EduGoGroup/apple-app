@@ -97,7 +97,7 @@ final class MockAuthRepository: AuthRepository {
         return getTokenInfoResult
     }
 
-    func clearLocalAuthData() {
+    func clearLocalAuthData() async {
         clearLocalAuthDataCallCount += 1
     }
 

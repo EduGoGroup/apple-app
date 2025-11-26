@@ -117,7 +117,7 @@ final class DefaultAPIClient: APIClient {
         // SPEC-004: Verificar cache para requests GET (solo si no hay body)
         if method == .get, body == nil, let cache = responseCache {
             if let cachedResponse = cache.get(for: url) {
-                logger.debug("Cache hit", metadata: ["url": url.absoluteString])
+                await logger.debug("Cache hit", metadata: ["url": url.absoluteString])
                 return try decoder.decode(T.self, from: cachedResponse.data)
             }
         }
@@ -133,7 +133,7 @@ final class DefaultAPIClient: APIClient {
             do {
                 request.httpBody = try encoder.encode(AnyEncodable(body))
             } catch {
-                logger.error("Failed to encode request body", metadata: [
+                await logger.error("Failed to encode request body", metadata: [
                     "error": error.localizedDescription
                 ])
                 throw NetworkError.decodingError
@@ -174,7 +174,7 @@ final class DefaultAPIClient: APIClient {
             if retryPolicy.shouldRetry(statusCode: statusCode, attempt: attempt) {
                 let delay = retryPolicy.backoffStrategy.delay(for: attempt)
 
-                logger.warning("Request failed, retrying", metadata: [
+                await logger.warning("Request failed, retrying", metadata: [
                     "status": statusCode.description,
                     "attempt": attempt.description,
                     "delay": delay.description
@@ -210,7 +210,7 @@ final class DefaultAPIClient: APIClient {
 
                 return decoded
             } catch {
-                logger.error("Failed to decode response", metadata: [
+                await logger.error("Failed to decode response", metadata: [
                     "error": error.localizedDescription
                 ])
                 throw NetworkError.decodingError
@@ -232,7 +232,7 @@ final class DefaultAPIClient: APIClient {
 
                 await queue.enqueue(queuedRequest)
 
-                logger.info("Request enqueued for offline retry", metadata: [
+                await logger.info("Request enqueued for offline retry", metadata: [
                     "url": url.absoluteString
                 ])
             }

@@ -26,7 +26,7 @@ final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor {
     func intercept(_ request: URLRequest) async throws -> URLRequest {
         guard let url = request.url else { return request }
 
-        logger.info("HTTP Request", metadata: [
+        await logger.info("HTTP Request", metadata: [
             "method": request.httpMethod ?? "GET",
             "url": url.absoluteString,
             "path": url.path
@@ -44,23 +44,23 @@ final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor {
 
         switch statusCode {
         case 200..<300:
-            logger.info("HTTP Response", metadata: [
+            await logger.info("HTTP Response", metadata: [
                 "url": url.path,
                 "status": statusCode.description,
                 "size": data.count.description
             ])
         case 400..<500:
-            logger.warning("HTTP Response - Client Error", metadata: [
+            await logger.warning("HTTP Response - Client Error", metadata: [
                 "url": url.path,
                 "status": statusCode.description
             ])
         case 500..<600:
-            logger.error("HTTP Response - Server Error", metadata: [
+            await logger.error("HTTP Response - Server Error", metadata: [
                 "url": url.path,
                 "status": statusCode.description
             ])
         default:
-            logger.debug("HTTP Response", metadata: [
+            await logger.debug("HTTP Response", metadata: [
                 "url": url.path,
                 "status": statusCode.description
             ])

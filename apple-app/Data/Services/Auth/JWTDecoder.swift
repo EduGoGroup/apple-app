@@ -16,7 +16,7 @@ protocol JWTDecoder: Sendable {
     /// - Parameter token: JWT token en formato string
     /// - Returns: Payload decodificado con claims
     /// - Throws: JWTError si el token es inválido
-    func decode(_ token: String) throws -> JWTPayload
+    func decode(_ token: String) async throws -> JWTPayload
 }
 
 // MARK: - Payload
@@ -81,13 +81,13 @@ final class DefaultJWTDecoder: JWTDecoder {
     /// Issuers válidos: edugo-central (api-admin) y edugo-mobile (legacy)
     private let validIssuers = ["edugo-central", "edugo-mobile"]
 
-    func decode(_ token: String) throws -> JWTPayload {
-        logger.debug("Decoding JWT token")
+    func decode(_ token: String) async throws -> JWTPayload {
+        await logger.debug("Decoding JWT token")
 
         // 1. Separar en segmentos (header.payload.signature)
         let segments = token.components(separatedBy: ".")
         guard segments.count == 3 else {
-            logger.error("JWT format invalid", metadata: [
+            await logger.error("JWT format invalid", metadata: [
                 "segments": segments.count.description
             ])
             throw JWTError.invalidFormat
@@ -96,7 +96,7 @@ final class DefaultJWTDecoder: JWTDecoder {
         // 2. Decodificar payload (segmento 1)
         let payloadSegment = segments[1]
         guard let payloadData = base64URLDecode(payloadSegment) else {
-            logger.error("Failed to decode base64URL payload")
+            await logger.error("Failed to decode base64URL payload")
             throw JWTError.invalidBase64
         }
 
@@ -108,7 +108,7 @@ final class DefaultJWTDecoder: JWTDecoder {
 
         // 4. Validar issuer (acepta edugo-central o edugo-mobile)
         guard let issuer = dto.iss, validIssuers.contains(issuer) else {
-            logger.error("Invalid issuer", metadata: [
+            await logger.error("Invalid issuer", metadata: [
                 "expected": validIssuers.joined(separator: " o "),
                 "actual": dto.iss ?? "nil"
             ])
@@ -125,7 +125,7 @@ final class DefaultJWTDecoder: JWTDecoder {
             iss: dto.iss ?? ""
         )
 
-        logger.debug("JWT decoded successfully", metadata: [
+        await logger.debug("JWT decoded successfully", metadata: [
             "userId": payload.sub,
             "role": payload.role
         ])

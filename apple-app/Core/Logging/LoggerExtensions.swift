@@ -25,9 +25,9 @@ extension Logger {
     /// - Parameters:
     ///   - token: Token a loggear (será redactado)
     ///   - label: Etiqueta descriptiva (default: "Token")
-    func logToken(_ token: String, label: String = "Token") {
+    func logToken(_ token: String, label: String = "Token") async {
         let redacted = redactToken(token)
-        debug("\(label): \(redacted)")
+        await debug("\(label): \(redacted)")
     }
 
     /// Log un email con redacción parcial
@@ -44,9 +44,9 @@ extension Logger {
     /// - Parameters:
     ///   - email: Email a loggear (será redactado)
     ///   - label: Etiqueta descriptiva (default: "Email")
-    func logEmail(_ email: String, label: String = "Email") {
+    func logEmail(_ email: String, label: String = "Email") async {
         let redacted = redactEmail(email)
-        debug("\(label): \(redacted)")
+        await debug("\(label): \(redacted)")
     }
 
     /// Log un User ID con redacción parcial
@@ -62,9 +62,9 @@ extension Logger {
     /// - Parameters:
     ///   - userId: User ID a loggear (será redactado)
     ///   - label: Etiqueta descriptiva (default: "UserID")
-    func logUserId(_ userId: String, label: String = "UserID") {
+    func logUserId(_ userId: String, label: String = "UserID") async {
         let redacted = redactId(userId)
-        debug("\(label): \(redacted)")
+        await debug("\(label): \(redacted)")
     }
 
     // MARK: - Private Redaction Functions
@@ -120,7 +120,7 @@ extension Logger {
     ///   - method: HTTP method (GET, POST, etc.)
     ///   - url: URL del request
     ///   - headers: Headers HTTP (tokens serán redactados)
-    func logHTTPRequest(method: String, url: String, headers: [String: String]? = nil) {
+    func logHTTPRequest(method: String, url: String, headers: [String: String]? = nil) async {
         var metadata: [String: String] = [
             "method": method,
             "url": url
@@ -138,7 +138,7 @@ extension Logger {
             metadata["headers"] = redactedHeaders.description
         }
 
-        info("HTTP Request", metadata: metadata)
+        await info("HTTP Request", metadata: metadata)
     }
 
     /// Log un HTTP response con información estructurada
@@ -146,7 +146,7 @@ extension Logger {
     ///   - statusCode: Status code HTTP
     ///   - url: URL del request
     ///   - size: Tamaño de la respuesta en bytes (opcional)
-    func logHTTPResponse(statusCode: Int, url: String, size: Int? = nil) {
+    func logHTTPResponse(statusCode: Int, url: String, size: Int? = nil) async {
         var metadata: [String: String] = [
             "statusCode": "\(statusCode)",
             "url": url
@@ -157,9 +157,9 @@ extension Logger {
         }
 
         if statusCode >= 400 {
-            error("HTTP Response", metadata: metadata)
+            await error("HTTP Response", metadata: metadata)
         } else {
-            info("HTTP Response", metadata: metadata)
+            await info("HTTP Response", metadata: metadata)
         }
     }
 }

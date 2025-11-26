@@ -55,7 +55,7 @@ final class SecurityGuardInterceptor: RequestInterceptor {
         let isTampered = await securityValidator.isTampered
 
         if isTampered {
-            logger.warning("Security violation detected", metadata: [
+            await logger.warning("Security violation detected", metadata: [
                 "jailbroken": "\(await securityValidator.isJailbroken)",
                 "debugger": "\(securityValidator.isDebuggerAttached)",
                 "strictMode": "\(strictMode)"
@@ -63,11 +63,11 @@ final class SecurityGuardInterceptor: RequestInterceptor {
 
             if strictMode {
                 // Modo estricto (producción): Bloquear request
-                logger.error("Request blocked due to security violation")
+                await logger.error("Request blocked due to security violation")
                 throw SecurityError.tamperedDevice
             } else {
                 // Modo permisivo (desarrollo): Solo advertir
-                logger.notice("⚠️ Security violation detected but allowed in development mode")
+                await logger.notice("⚠️ Security violation detected but allowed in development mode")
             }
         }
 

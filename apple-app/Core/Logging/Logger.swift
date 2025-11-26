@@ -13,11 +13,16 @@ import Foundation
 /// Permite diferentes implementations (OSLog para producción, MockLogger para testing)
 /// y proporciona una API consistente para logging en toda la aplicación.
 ///
+/// ## Swift 6 Concurrency
+/// Todos los métodos son `async` para permitir implementaciones thread-safe:
+/// - OSLogger: Puede loggear de forma sincrónica (os.Logger es thread-safe)
+/// - MockLogger: Usa actor para proteger estado mutable
+///
 /// ## Uso Básico
 /// ```swift
 /// let logger = LoggerFactory.network
-/// logger.info("Request started")
-/// logger.error("Request failed", metadata: ["url": url])
+/// await logger.info("Request started")
+/// await logger.error("Request failed", metadata: ["url": url])
 /// ```
 ///
 /// ## Niveles de Log
@@ -41,7 +46,7 @@ protocol Logger: Sendable {
         file: String,
         function: String,
         line: Int
-    )
+    ) async
 
     /// Log mensaje informativo
     func info(
@@ -50,7 +55,7 @@ protocol Logger: Sendable {
         file: String,
         function: String,
         line: Int
-    )
+    ) async
 
     /// Log mensaje de notificación (evento significativo, no error)
     func notice(
@@ -59,7 +64,7 @@ protocol Logger: Sendable {
         file: String,
         function: String,
         line: Int
-    )
+    ) async
 
     /// Log advertencia (potencial problema)
     func warning(
@@ -68,7 +73,7 @@ protocol Logger: Sendable {
         file: String,
         function: String,
         line: Int
-    )
+    ) async
 
     /// Log error (problema que requiere atención)
     func error(
@@ -77,7 +82,7 @@ protocol Logger: Sendable {
         file: String,
         function: String,
         line: Int
-    )
+    ) async
 
     /// Log crítico (fallo severo del sistema)
     func critical(
@@ -86,7 +91,7 @@ protocol Logger: Sendable {
         file: String,
         function: String,
         line: Int
-    )
+    ) async
 }
 
 // MARK: - Convenience Extensions
@@ -99,8 +104,8 @@ extension Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line
-    ) {
-        debug(message, metadata: metadata, file: file, function: function, line: line)
+    ) async {
+        await debug(message, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Log info con parámetros por defecto
@@ -110,8 +115,8 @@ extension Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line
-    ) {
-        info(message, metadata: metadata, file: file, function: function, line: line)
+    ) async {
+        await info(message, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Log notice con parámetros por defecto
@@ -121,8 +126,8 @@ extension Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line
-    ) {
-        notice(message, metadata: metadata, file: file, function: function, line: line)
+    ) async {
+        await notice(message, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Log warning con parámetros por defecto
@@ -132,8 +137,8 @@ extension Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line
-    ) {
-        warning(message, metadata: metadata, file: file, function: function, line: line)
+    ) async {
+        await warning(message, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Log error con parámetros por defecto
@@ -143,8 +148,8 @@ extension Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line
-    ) {
-        error(message, metadata: metadata, file: file, function: function, line: line)
+    ) async {
+        await error(message, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Log critical con parámetros por defecto
@@ -154,7 +159,7 @@ extension Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line
-    ) {
-        critical(message, metadata: metadata, file: file, function: function, line: line)
+    ) async {
+        await critical(message, metadata: metadata, file: file, function: function, line: line)
     }
 }
