@@ -55,7 +55,7 @@ enum ValidationError: Error, Equatable, Sendable {
         case .nameTooShort:
             return String(localized: "error.validation.nameTooShort")
         case .requiredField(let field):
-            return String(localized: "error.validation.requiredField", defaultValue: "El campo '\(field)' es requerido.")
+            return String(format: String(localized: "error.validation.requiredField"), field)
         case .invalidFormat(let message):
             return message
         }

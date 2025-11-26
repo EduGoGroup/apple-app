@@ -111,7 +111,7 @@ struct HomeView: View {
                 )
                 .dsGlassEffect(.prominent, shape: .circle, isInteractive: true)
 
-            Text(String(localized: "home.greeting", defaultValue: "Hola, \(user.displayName)"))
+            Text(String(format: String(localized: "home.greeting"), user.displayName))
                 .font(DSTypography.largeTitle)
                 .foregroundColor(DSColors.textPrimary)
         }

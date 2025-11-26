@@ -22,8 +22,11 @@ import Observation
 /// ```
 ///
 /// - Note: Usa @Observable (iOS 17+) para reactividad automática
+/// - Important: Marcado como @MainActor porque maneja estado de UI y se accede
+///   principalmente desde vistas SwiftUI. Esto garantiza thread-safety en Swift 6.
 @Observable
-final class LocalizationManager: Sendable {
+@MainActor
+final class LocalizationManager {
 
     // MARK: - Properties
 
@@ -34,8 +37,9 @@ final class LocalizationManager: Sendable {
 
     /// Inicializa el gestor con un idioma específico
     /// - Parameter language: Idioma inicial (por defecto detecta del sistema)
-    init(language: Language? = nil) {
-        self.currentLanguage = language ?? Language.systemLanguage()
+    nonisolated init(language: Language? = nil) {
+        let resolvedLanguage = language ?? Language.systemLanguage()
+        self._currentLanguage = resolvedLanguage
     }
 
     // MARK: - Public Methods

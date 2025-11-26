@@ -69,7 +69,7 @@ struct SyncIndicator: View {
         if itemCount == 1 {
             return String(localized: "sync.indicator.single")
         } else if itemCount > 1 {
-            return String(localized: "sync.indicator.multiple", defaultValue: "Sincronizando \(itemCount) elementos...")
+            return String(format: String(localized: "sync.indicator.multiple"), itemCount)
         } else {
             return String(localized: "sync.indicator.default")
         }

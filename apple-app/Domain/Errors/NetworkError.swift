@@ -45,7 +45,7 @@ enum NetworkError: Error, Equatable, Sendable {
         case .timeout:
             return String(localized: "error.network.timeout")
         case .serverError(let code):
-            return String(localized: "error.network.serverError", defaultValue: "Error del servidor (\(code)). Intenta más tarde.")
+            return String(format: String(localized: "error.network.serverError"), code)
         case .unauthorized:
             return String(localized: "error.network.unauthorized")
         case .forbidden:
