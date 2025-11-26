@@ -99,7 +99,7 @@ final class NetworkState {
             await updateInitialState()
 
             // Monitorear cambios
-            for await connected in await networkMonitor.connectionStream() {
+            for await connected in networkMonitor.connectionStream() {
                 await handleConnectionChange(connected)
             }
         }
