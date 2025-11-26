@@ -8,7 +8,18 @@
 import Foundation
 
 /// Implementación del repositorio de preferencias usando UserDefaults
-final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// Esta clase está marcada como `@MainActor` porque:
+/// 1. UserDefaults es thread-safe pero funciona mejor en main thread
+/// 2. Se usa principalmente desde UI (SwiftUI views)
+/// 3. NotificationCenter observers se ejecutan en main queue
+/// 4. El protocolo PreferencesRepository requiere @MainActor
+///
+/// FASE 1 - Refactoring: Eliminado @unchecked Sendable de la clase principal
+/// Nota: Se mantiene un wrapper mínimo para NSObjectProtocol (limitación del SDK)
+@MainActor
+final class PreferencesRepositoryImpl: PreferencesRepository {
     private let userDefaults: UserDefaults
     private let preferencesKey = "user_preferences"
 
@@ -49,69 +60,99 @@ final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendabl
     }
 
     func observeTheme() -> AsyncStream<Theme> {
-        AsyncStream { continuation in
-            // Enviar valor actual
-            Task {
+        AsyncStream { [weak self] continuation in
+            guard let self else {
+                continuation.finish()
+                return
+            }
+
+            // Enviar valor actual (ya estamos en @MainActor)
+            Task { @MainActor in
                 let preferences = await self.getPreferences()
                 continuation.yield(preferences.theme)
             }
 
-            // Observar cambios (simplificado)
-            // Usamos una clase wrapper para hacer el observation Sendable
-            final class ObserverBox: @unchecked Sendable {
-                var observer: NSObjectProtocol?
-            }
-
-            let box = ObserverBox()
-            box.observer = NotificationCenter.default.addObserver(
+            // Observar cambios en main queue (NotificationCenter)
+            let observer = NotificationCenter.default.addObserver(
                 forName: UserDefaults.didChangeNotification,
                 object: nil,
                 queue: .main
-            ) { _ in
-                Task {
+            ) { [weak self] _ in
+                guard let self else { return }
+
+                // Ya estamos en main queue, ejecutar directamente
+                Task { @MainActor in
                     let preferences = await self.getPreferences()
                     continuation.yield(preferences.theme)
                 }
             }
 
-            continuation.onTermination = { @Sendable _ in
-                if let observer = box.observer {
-                    NotificationCenter.default.removeObserver(observer)
+            // Wrapper para hacer NSObjectProtocol Sendable de forma segura
+            // JUSTIFICACIÓN Swift 6: NSObjectProtocol no es Sendable en el SDK de Apple,
+            // pero el observer solo se usa de forma inmutable en la closure de terminación.
+            // Este es un caso donde el SDK no está actualizado para Swift 6, pero el uso
+            // es thread-safe porque NotificationCenter maneja el ciclo de vida del observer.
+            final class ObserverWrapper: @unchecked Sendable {
+                let observer: NSObjectProtocol
+                init(_ observer: NSObjectProtocol) {
+                    self.observer = observer
                 }
+            }
+
+            let wrapper = ObserverWrapper(observer)
+
+            // Cleanup cuando el stream termine
+            continuation.onTermination = { @Sendable _ in
+                NotificationCenter.default.removeObserver(wrapper.observer)
             }
         }
     }
 
     func observePreferences() -> AsyncStream<UserPreferences> {
-        AsyncStream { continuation in
-            // Enviar valor actual
-            Task {
+        AsyncStream { [weak self] continuation in
+            guard let self else {
+                continuation.finish()
+                return
+            }
+
+            // Enviar valor actual (ya estamos en @MainActor)
+            Task { @MainActor in
                 let preferences = await self.getPreferences()
                 continuation.yield(preferences)
             }
 
-            // Observar cambios
-            // Usamos una clase wrapper para hacer el observation Sendable
-            final class ObserverBox: @unchecked Sendable {
-                var observer: NSObjectProtocol?
-            }
-
-            let box = ObserverBox()
-            box.observer = NotificationCenter.default.addObserver(
+            // Observar cambios en main queue (NotificationCenter)
+            let observer = NotificationCenter.default.addObserver(
                 forName: UserDefaults.didChangeNotification,
                 object: nil,
                 queue: .main
-            ) { _ in
-                Task {
+            ) { [weak self] _ in
+                guard let self else { return }
+
+                // Ya estamos en main queue, ejecutar directamente
+                Task { @MainActor in
                     let preferences = await self.getPreferences()
                     continuation.yield(preferences)
                 }
             }
 
-            continuation.onTermination = { @Sendable _ in
-                if let observer = box.observer {
-                    NotificationCenter.default.removeObserver(observer)
+            // Wrapper para hacer NSObjectProtocol Sendable de forma segura
+            // JUSTIFICACIÓN Swift 6: NSObjectProtocol no es Sendable en el SDK de Apple,
+            // pero el observer solo se usa de forma inmutable en la closure de terminación.
+            // Este es un caso donde el SDK no está actualizado para Swift 6, pero el uso
+            // es thread-safe porque NotificationCenter maneja el ciclo de vida del observer.
+            final class ObserverWrapper: @unchecked Sendable {
+                let observer: NSObjectProtocol
+                init(_ observer: NSObjectProtocol) {
+                    self.observer = observer
                 }
+            }
+
+            let wrapper = ObserverWrapper(observer)
+
+            // Cleanup cuando el stream termine
+            continuation.onTermination = { @Sendable _ in
+                NotificationCenter.default.removeObserver(wrapper.observer)
             }
         }
     }
