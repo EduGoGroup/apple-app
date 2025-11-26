@@ -11,31 +11,31 @@ import Foundation
 enum NetworkError: Error, Equatable, Sendable {
     /// No hay conexión a internet
     case noConnection
-    
+
     /// Tiempo de espera agotado
     case timeout
-    
+
     /// Error del servidor con código HTTP
     case serverError(Int)
-    
+
     /// No autorizado (401)
     case unauthorized
-    
+
     /// Prohibido (403)
     case forbidden
-    
+
     /// No encontrado (404)
     case notFound
-    
+
     /// Petición incorrecta con mensaje específico
     case badRequest(String)
-    
+
     /// Error de decodificación de respuesta
     case decodingError
-    
+
     /// Error desconocido de red
     case unknown
-    
+
     /// Mensaje amigable para mostrar al usuario
     var userMessage: String {
         switch self {
@@ -59,7 +59,7 @@ enum NetworkError: Error, Equatable, Sendable {
             return "Ocurrió un error de red. Intenta de nuevo."
         }
     }
-    
+
     /// Mensaje técnico para logs y debugging
     var technicalMessage: String {
         switch self {
@@ -82,5 +82,14 @@ enum NetworkError: Error, Equatable, Sendable {
         case .unknown:
             return "Unknown network error occurred"
         }
+    }
+
+    /// Indica si el error es un conflicto de sincronización (HTTP 409)
+    /// - SPEC-013: Usado por OfflineQueue para conflict resolution
+    var isConflict: Bool {
+        if case .serverError(409) = self {
+            return true
+        }
+        return false
     }
 }
