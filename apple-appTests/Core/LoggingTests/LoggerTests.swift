@@ -17,7 +17,7 @@ struct LoggerTests {
     // MARK: - MockLogger Tests
 
     @Test("MockLogger almacena entries correctamente")
-    func mockLoggerStoresEntries() {
+    func mockLoggerStoresEntries() async {
         // Given
         let logger = MockLogger()
 
@@ -26,97 +26,127 @@ struct LoggerTests {
         logger.info("Info message")
         logger.error("Error message")
 
+        // Pequeño delay para que los Tasks async completen
+        await logger.waitForPendingLogs()
+
         // Then
-        #expect(logger.entries.count == 3)
-        #expect(logger.entries[0].level == "debug")
-        #expect(logger.entries[1].level == "info")
-        #expect(logger.entries[2].level == "error")
+        let entries = await logger.entries
+        #expect(entries.count == 3)
+        #expect(entries[0].level == "debug")
+        #expect(entries[1].level == "info")
+        #expect(entries[2].level == "error")
     }
 
     @Test("MockLogger contains() funciona correctamente")
-    func mockLoggerContains() {
+    func mockLoggerContains() async {
         // Given
         let logger = MockLogger()
         logger.info("User logged in successfully")
+        await logger.waitForPendingLogs()
         logger.error("Network error occurred")
+        await logger.waitForPendingLogs()
 
         // Then
-        #expect(logger.contains(level: "info", message: "logged in"))
-        #expect(logger.contains(level: "error", message: "Network"))
-        #expect(!logger.contains(level: "debug", message: "anything"))
+        let hasInfo = await logger.contains(level: "info", message: "logged in")
+        let hasError = await logger.contains(level: "error", message: "Network")
+        let hasDebug = await logger.contains(level: "debug", message: "anything")
+
+        #expect(hasInfo)
+        #expect(hasError)
+        #expect(!hasDebug)
     }
 
     @Test("MockLogger count() cuenta correctamente")
-    func mockLoggerCount() {
+    func mockLoggerCount() async {
         // Given
         let logger = MockLogger()
         logger.debug("Debug 1")
         logger.debug("Debug 2")
         logger.info("Info 1")
+        await logger.waitForPendingLogs()
         logger.error("Error 1")
+        await logger.waitForPendingLogs()
         logger.error("Error 2")
+        await logger.waitForPendingLogs()
         logger.error("Error 3")
+        await logger.waitForPendingLogs()
 
         // Then
-        #expect(logger.count(level: "debug") == 2)
-        #expect(logger.count(level: "info") == 1)
-        #expect(logger.count(level: "error") == 3)
-        #expect(logger.count(level: "warning") == 0)
+        let debugCount = await logger.count(level: "debug")
+        let infoCount = await logger.count(level: "info")
+        let errorCount = await logger.count(level: "error")
+        let warningCount = await logger.count(level: "warning")
+
+        #expect(debugCount == 2)
+        #expect(infoCount == 1)
+        #expect(errorCount == 3)
+        #expect(warningCount == 0)
     }
 
     @Test("MockLogger clear() limpia entries")
-    func mockLoggerClear() {
+    func mockLoggerClear() async {
         // Given
         let logger = MockLogger()
         logger.info("Message 1")
+        await logger.waitForPendingLogs()
         logger.info("Message 2")
-        #expect(logger.entries.count == 2)
+        await logger.waitForPendingLogs()
+
+        let entriesBefore = await logger.entries
+        #expect(entriesBefore.count == 2)
 
         // When
-        logger.clear()
+        await logger.clear()
 
         // Then
-        #expect(logger.entries.isEmpty)
+        let entriesAfter = await logger.entries
+        #expect(entriesAfter.isEmpty)
     }
 
     @Test("MockLogger lastEntry devuelve el último")
-    func mockLoggerLastEntry() {
+    func mockLoggerLastEntry() async {
         // Given
         let logger = MockLogger()
 
         // When
         logger.info("First")
+        await logger.waitForPendingLogs()
         logger.error("Last")
+        await logger.waitForPendingLogs()
 
         // Then
-        #expect(logger.lastEntry?.level == "error")
-        #expect(logger.lastEntry?.message == "Last")
+        let lastEntry = await logger.lastEntry
+        #expect(lastEntry?.level == "error")
+        #expect(lastEntry?.message == "Last")
     }
 
     @Test("MockLogger almacena metadata")
-    func mockLoggerStoresMetadata() {
+    func mockLoggerStoresMetadata() async {
         // Given
         let logger = MockLogger()
         let metadata = ["userId": "123", "action": "login"]
 
         // When
         logger.info("User action", metadata: metadata)
+        await logger.waitForPendingLogs()
 
         // Then
-        #expect(logger.lastEntry?.metadata?["userId"] == "123")
-        #expect(logger.lastEntry?.metadata?["action"] == "login")
+        let lastEntry = await logger.lastEntry
+        #expect(lastEntry?.metadata?["userId"] == "123")
+        #expect(lastEntry?.metadata?["action"] == "login")
     }
 
     @Test("MockLogger almacena file/function/line")
-    func mockLoggerStoresContext() {
+    func mockLoggerStoresContext() async {
         // Given
         let logger = MockLogger()
 
         // When
         logger.info("Test message")  // Esta línea
+        await logger.waitForPendingLogs()
 
         // Then
-        let entry = logger.lastEntry
+        let entry = await logger.lastEntry
         #expect(entry?.file.contains("LoggerTests.swift") == true)
         #expect(entry?.function.contains("mockLoggerStoresContext") == true)
         #expect((entry?.line ?? 0) > 0)
@@ -170,7 +200,7 @@ struct LoggerTests {
     // MARK: - Logger Convenience Extensions Tests
 
     @Test("Logger métodos con default parameters funcionan")
-    func loggerDefaultParametersWork() {
+    func loggerDefaultParametersWork() async {
         // Given
         let logger = MockLogger()
 
@@ -179,9 +209,11 @@ struct LoggerTests {
         logger.info("Info without params")
         logger.warning("Warning without params")
         logger.error("Error without params")
+        await logger.waitForPendingLogs()
 
         // Then - Deberían haber loggeado con contexto automático
-        #expect(logger.entries.count == 4)
-        #expect(logger.entries[0].file.contains("LoggerTests.swift") == true)
+        let entries = await logger.entries
+        #expect(entries.count == 4)
+        #expect(entries[0].file.contains("LoggerTests.swift") == true)
     }
 }

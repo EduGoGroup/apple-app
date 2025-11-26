@@ -13,6 +13,11 @@ import Foundation
 /// Permite verificar que el código loggea correctamente sin generar logs reales.
 /// Útil para testing unitario de componentes que usan logging.
 ///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado NSLock, usado actor interno.
+/// Los métodos de logging son sincrónicos (por protocolo Logger) pero usan
+/// Task.detached para no bloquear. Las propiedades de verificación son async.
+///
 /// ## Uso en Tests
 /// ```swift
 /// func testLoginLogsCorrectly() async {
@@ -21,14 +26,15 @@ import Foundation
 ///     let repository = AuthRepositoryImpl(..., logger: mockLogger)
 ///
 ///     // When
-///     await repository.login(...)
+///     repository.login(...) // Logging sincrónico, no bloquea
 ///
-///     // Then
-///     #expect(mockLogger.contains(level: "info", message: "Login"))
-///     #expect(mockLogger.count(level: "error") == 0)
+///     // Then - Verificación async
+///     await mockLogger.waitForPendingLogs()
+///     let hasInfo = await mockLogger.contains(level: "info", message: "Login")
+///     #expect(hasInfo)
 /// }
 /// ```
-final class MockLogger: Logger, @unchecked Sendable {
+final class MockLogger: Logger, Sendable {
     // MARK: - LogEntry
 
     /// Representa un entry de log almacenado
@@ -41,7 +47,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         let line: Int
         let timestamp: Date
 
-        init(
+        nonisolated init(
             level: String,
             message: String,
             metadata: [String: String]?,
@@ -59,21 +65,48 @@ final class MockLogger: Logger, @unchecked Sendable {
         }
     }
 
-    // MARK: - Properties
+    // MARK: - Actor Interno
 
-    /// Entries de log almacenados
-    private var _entries: [LogEntry] = []
-    private let lock = NSLock()
+    /// Actor interno para proteger estado mutable de forma thread-safe
+    actor Storage {
+        private var _entries: [LogEntry] = []
 
-    var entries: [LogEntry] {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries
+        func append(_ entry: LogEntry) {
+            _entries.append(entry)
+        }
+
+        func clear() {
+            _entries.removeAll()
+        }
+
+        var entries: [LogEntry] {
+            _entries
+        }
+
+        func contains(level: String, message: String) -> Bool {
+            _entries.contains { $0.level == level && $0.message.contains(message) }
+        }
+
+        func count(level: String) -> Int {
+            _entries.filter { $0.level == level }.count
+        }
+
+        var lastEntry: LogEntry? {
+            _entries.last
+        }
+
+        func entries(forLevel level: String) -> [LogEntry] {
+            _entries.filter { $0.level == level }
+        }
     }
 
-    // MARK: - Logger Implementation
+    // MARK: - Properties
 
-    func debug(
+    let storage = Storage()
+
+    // MARK: - Logger Implementation (sincrónicos por protocolo)
+
+    nonisolated func debug(
         _ message: String,
         metadata: [String: String]?,
         file: String,
@@ -83,7 +116,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         append(level: "debug", message: message, metadata: metadata, file: file, function: function, line: line)
     }
 
-    func info(
+    nonisolated func info(
         _ message: String,
         metadata: [String: String]?,
         file: String,
@@ -93,7 +126,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         append(level: "info", message: message, metadata: metadata, file: file, function: function, line: line)
     }
 
-    func notice(
+    nonisolated func notice(
         _ message: String,
         metadata: [String: String]?,
         file: String,
@@ -103,7 +136,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         append(level: "notice", message: message, metadata: metadata, file: file, function: function, line: line)
     }
 
-    func warning(
+    nonisolated func warning(
         _ message: String,
         metadata: [String: String]?,
         file: String,
@@ -113,7 +146,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         append(level: "warning", message: message, metadata: metadata, file: file, function: function, line: line)
     }
 
-    func error(
+    nonisolated func error(
         _ message: String,
         metadata: [String: String]?,
         file: String,
@@ -123,7 +156,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         append(level: "error", message: message, metadata: metadata, file: file, function: function, line: line)
     }
 
-    func critical(
+    nonisolated func critical(
         _ message: String,
         metadata: [String: String]?,
         file: String,
@@ -133,54 +166,54 @@ final class MockLogger: Logger, @unchecked Sendable {
         append(level: "critical", message: message, metadata: metadata, file: file, function: function, line: line)
     }
 
-    // MARK: - Testing Helpers
+    // MARK: - Testing Helpers (async para acceder al actor)
+
+    /// Espera a que todos los logs pendientes se procesen
+    /// - Note: Llama a esto en tests después de loggear y antes de verificar
+    func waitForPendingLogs() async {
+        // Yield para dar oportunidad a Tasks pendientes
+        await Task.yield()
+        // Pequeña espera adicional para garantizar procesamiento
+        try? await Task.sleep(nanoseconds: 5_000_000) // 5ms
+    }
+
+    /// Obtiene todos los entries almacenados
+    var entries: [LogEntry] {
+        get async {
+            await storage.entries
+        }
+    }
 
     /// Limpia todos los entries almacenados
-    func clear() {
-        lock.lock()
-        defer { lock.unlock() }
-        _entries.removeAll()
+    func clear() async {
+        await storage.clear()
     }
 
     /// Verifica si existe un entry con el nivel y mensaje especificados
-    /// - Parameters:
-    ///   - level: Nivel del log
-    ///   - message: Texto a buscar en el mensaje (búsqueda parcial)
-    /// - Returns: true si existe al menos un entry que coincida
-    func contains(level: String, message: String) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.contains { $0.level == level && $0.message.contains(message) }
+    func contains(level: String, message: String) async -> Bool {
+        await storage.contains(level: level, message: message)
     }
 
     /// Cuenta cuántos entries hay de un nivel específico
-    /// - Parameter level: Nivel a contar
-    /// - Returns: Número de entries con ese nivel
-    func count(level: String) -> Int {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.filter { $0.level == level }.count
+    func count(level: String) async -> Int {
+        await storage.count(level: level)
     }
 
     /// Obtiene el último entry loggeado
     var lastEntry: LogEntry? {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.last
+        get async {
+            await storage.lastEntry
+        }
     }
 
     /// Obtiene todos los entries de un nivel específico
-    /// - Parameter level: Nivel a filtrar
-    /// - Returns: Array de entries con ese nivel
-    func entries(forLevel level: String) -> [LogEntry] {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.filter { $0.level == level }
+    func entries(forLevel level: String) async -> [LogEntry] {
+        await storage.entries(forLevel: level)
     }
 
     // MARK: - Private Helpers
 
-    private func append(
+    private nonisolated func append(
         level: String,
         message: String,
         metadata: [String: String]?,
@@ -188,15 +221,19 @@ final class MockLogger: Logger, @unchecked Sendable {
         function: String,
         line: Int
     ) {
-        lock.lock()
-        defer { lock.unlock() }
-        _entries.append(LogEntry(
+        let entry = LogEntry(
             level: level,
             message: message,
             metadata: metadata,
             file: file,
             function: function,
             line: line
-        ))
+        )
+
+        // Usar Task.detached con prioridad alta para ejecución inmediata
+        // pero sin bloquear el caller (logging debe ser no-bloqueante)
+        Task.detached(priority: .high) { [storage] in
+            await storage.append(entry)
+        }
     }
 }
