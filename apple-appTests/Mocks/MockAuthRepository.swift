@@ -10,7 +10,12 @@ import Foundation
 @testable import apple_app
 
 /// Mock de AuthRepository para testing
-final class MockAuthRepository: AuthRepository, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor
+/// para alinearse con el protocolo AuthRepository.
+@MainActor
+final class MockAuthRepository: AuthRepository {
 
     // MARK: - Resultados configurables
 
@@ -121,7 +126,6 @@ final class MockAuthRepository: AuthRepository, @unchecked Sendable {
 
     // MARK: - Convenience setters para tests
 
-    @MainActor
     func setAuthenticatedUser(_ user: User, tokens: TokenInfo? = nil) {
         loginResult = .success(user)
         getCurrentUserResult = .success(user)
