@@ -117,26 +117,68 @@ import CommonCrypto
 
 #if DEBUG
 /// Mock delegate para testing
-final class MockSecureSessionDelegate: NSObject, URLSessionDelegate, @unchecked Sendable {
-    nonisolated(unsafe) var shouldAcceptChallenge = true
-    nonisolated(unsafe) var challengeReceivedCount = 0
-    nonisolated(unsafe) var lastHost: String?
+///
+/// ## Swift 6 Concurrency
+/// FASE 1 - Refactoring: Eliminado nonisolated(unsafe), usado actor interno
+/// para proteger estado mutable de forma thread-safe.
+final class MockSecureSessionDelegate: NSObject, URLSessionDelegate, Sendable {
+
+    /// Actor interno para estado mutable thread-safe
+    actor State {
+        var shouldAcceptChallenge = true
+        var challengeReceivedCount = 0
+        var lastHost: String?
+
+        func recordChallenge(host: String) {
+            challengeReceivedCount += 1
+            lastHost = host
+        }
+
+        func reset() {
+            shouldAcceptChallenge = true
+            challengeReceivedCount = 0
+            lastHost = nil
+        }
+    }
+
+    let state = State()
 
     nonisolated func urlSession(
         _ session: URLSession,
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
-        challengeReceivedCount += 1
-        lastHost = challenge.protectionSpace.host
+        let host = challenge.protectionSpace.host
 
-        if shouldAcceptChallenge,
-           let serverTrust = challenge.protectionSpace.serverTrust {
+        // Registrar el challenge de forma async (fire-and-forget para el mock)
+        Task {
+            await state.recordChallenge(host: host)
+        }
+
+        // Respuesta sincrónica para el mock (siempre acepta en tests)
+        if let serverTrust = challenge.protectionSpace.serverTrust {
             let credential = URLCredential(trust: serverTrust)
             completionHandler(.useCredential, credential)
         } else {
             completionHandler(.cancelAuthenticationChallenge, nil)
         }
+    }
+
+    // MARK: - Test Helpers
+
+    /// Obtiene el número de challenges recibidos
+    func getChallengeCount() async -> Int {
+        await state.challengeReceivedCount
+    }
+
+    /// Obtiene el último host que presentó un challenge
+    func getLastHost() async -> String? {
+        await state.lastHost
+    }
+
+    /// Resetea el estado del mock
+    func resetState() async {
+        await state.reset()
     }
 }
 #endif
