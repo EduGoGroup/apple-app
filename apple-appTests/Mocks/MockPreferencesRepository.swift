@@ -12,7 +12,7 @@ import Foundation
 final class MockPreferencesRepository: PreferencesRepository {
     // Estado actual
     var storedPreferences: UserPreferences = .default
-    
+
     // Tracking de llamadas
     var getPreferencesCallCount = 0
     var savePreferencesCallCount = 0
@@ -21,41 +21,41 @@ final class MockPreferencesRepository: PreferencesRepository {
     var updateBiometricsEnabledCallCount = 0
     var observeThemeCallCount = 0
     var observePreferencesCallCount = 0
-    
+
     // Streams
     private var themeContinuation: AsyncStream<Theme>.Continuation?
     private var preferencesContinuation: AsyncStream<UserPreferences>.Continuation?
-    
+
     func getPreferences() async -> UserPreferences {
         getPreferencesCallCount += 1
         return storedPreferences
     }
-    
+
     func savePreferences(_ preferences: UserPreferences) async {
         savePreferencesCallCount += 1
         storedPreferences = preferences
         preferencesContinuation?.yield(preferences)
     }
-    
+
     func updateTheme(_ theme: Theme) async {
         updateThemeCallCount += 1
         storedPreferences.theme = theme
         themeContinuation?.yield(theme)
         preferencesContinuation?.yield(storedPreferences)
     }
-    
-    func updateLanguage(_ language: String) async {
+
+    func updateLanguage(_ language: Language) async {
         updateLanguageCallCount += 1
-        storedPreferences.language = language
+        storedPreferences.language = language.rawValue
         preferencesContinuation?.yield(storedPreferences)
     }
-    
+
     func updateBiometricsEnabled(_ enabled: Bool) async {
         updateBiometricsEnabledCallCount += 1
         storedPreferences.biometricsEnabled = enabled
         preferencesContinuation?.yield(storedPreferences)
     }
-    
+
     func observeTheme() -> AsyncStream<Theme> {
         observeThemeCallCount += 1
         return AsyncStream { continuation in
@@ -63,7 +63,7 @@ final class MockPreferencesRepository: PreferencesRepository {
             continuation.yield(self.storedPreferences.theme)
         }
     }
-    
+
     func observePreferences() -> AsyncStream<UserPreferences> {
         observePreferencesCallCount += 1
         return AsyncStream { continuation in
@@ -71,7 +71,7 @@ final class MockPreferencesRepository: PreferencesRepository {
             continuation.yield(self.storedPreferences)
         }
     }
-    
+
     // Helper para reset
     func reset() {
         storedPreferences = .default

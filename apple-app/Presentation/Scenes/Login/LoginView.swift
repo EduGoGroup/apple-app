@@ -77,11 +77,11 @@ struct LoginView: View {
                 .font(.system(size: 60))
                 .foregroundColor(DSColors.accent)
 
-            Text("Bienvenido a EduGo")
+            Text(String(localized: "login.welcome.title"))
                 .font(DSTypography.largeTitle)
                 .foregroundColor(DSColors.textPrimary)
 
-            Text("Inicia sesión para continuar")
+            Text(String(localized: "login.welcome.subtitle"))
                 .font(DSTypography.body)
                 .foregroundColor(DSColors.textSecondary)
         }
@@ -90,7 +90,7 @@ struct LoginView: View {
     private var formSection: some View {
         VStack(spacing: DSSpacing.large) {
             DSTextField(
-                placeholder: "Email",
+                placeholder: String(localized: "login.email.placeholder"),
                 text: $email,
                 leadingIcon: "envelope"
             )
@@ -102,7 +102,7 @@ struct LoginView: View {
             #endif
 
             DSTextField(
-                placeholder: "Contraseña",
+                placeholder: String(localized: "login.password.placeholder"),
                 text: $password,
                 isSecure: true,
                 leadingIcon: "lock"
@@ -113,7 +113,7 @@ struct LoginView: View {
 
     private var loginButton: some View {
         DSButton(
-            title: "Iniciar Sesión",
+            title: String(localized: "login.button.login"),
             style: .primary,
             isLoading: viewModel.isLoading,
             isDisabled: viewModel.isLoginDisabled
@@ -126,7 +126,7 @@ struct LoginView: View {
 
     private var biometricLoginButton: some View {
         VStack(spacing: DSSpacing.small) {
-            Text("o")
+            Text(String(localized: "login.or"))
                 .font(DSTypography.caption)
                 .foregroundColor(DSColors.textSecondary)
 
@@ -137,7 +137,7 @@ struct LoginView: View {
             } label: {
                 HStack(spacing: DSSpacing.small) {
                     Image(systemName: "faceid")
-                    Text("Usar Face ID")
+                    Text(String(localized: "login.button.biometric"))
                 }
                 .font(DSTypography.body.weight(.semibold))
                 .foregroundColor(DSColors.accent)
@@ -168,7 +168,7 @@ struct LoginView: View {
 
     private var developmentHint: some View {
         VStack(spacing: DSSpacing.small) {
-            Text("🔧 Modo Desarrollo")
+            Text(String(localized: "login.dev.hint.title"))
                 .font(DSTypography.caption)
                 .foregroundColor(DSColors.textSecondary)
 
@@ -178,7 +178,7 @@ struct LoginView: View {
             } label: {
                 HStack(spacing: DSSpacing.small) {
                     Image(systemName: "person.fill.checkmark")
-                    Text("Rellenar credenciales de prueba")
+                    Text(String(localized: "login.dev.hint.button"))
                 }
                 .font(DSTypography.caption)
                 .foregroundColor(DSColors.accent)

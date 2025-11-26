@@ -13,6 +13,7 @@ import Observation
 @MainActor
 final class SettingsViewModel {
     private(set) var currentTheme: Theme = .system
+    private(set) var currentLanguage: Language = .default // SPEC-010
     private(set) var isLoading = false
 
     private let updateThemeUseCase: UpdateThemeUseCase
@@ -30,6 +31,7 @@ final class SettingsViewModel {
     func loadPreferences() async {
         let preferences = await preferencesRepository.getPreferences()
         currentTheme = preferences.theme
+        currentLanguage = Language(rawValue: preferences.language) ?? .default // SPEC-010
     }
 
     /// Actualiza el tema de la aplicación
@@ -38,6 +40,15 @@ final class SettingsViewModel {
         isLoading = true
         await updateThemeUseCase.execute(theme)
         currentTheme = theme
+        isLoading = false
+    }
+
+    /// SPEC-010: Actualiza el idioma de la aplicación
+    /// - Parameter language: Nuevo idioma a aplicar
+    func updateLanguage(_ language: Language) async {
+        isLoading = true
+        await preferencesRepository.updateLanguage(language)
+        currentLanguage = language
         isLoading = false
     }
 }

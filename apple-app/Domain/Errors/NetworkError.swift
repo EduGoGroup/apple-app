@@ -37,26 +37,27 @@ enum NetworkError: Error, Equatable, Sendable {
     case unknown
 
     /// Mensaje amigable para mostrar al usuario
+    /// SPEC-010: Migrado a Localizable.xcstrings
     var userMessage: String {
         switch self {
         case .noConnection:
-            return "No hay conexión a internet. Verifica tu red."
+            return String(localized: "error.network.noConnection")
         case .timeout:
-            return "La operación tardó demasiado. Intenta de nuevo."
+            return String(localized: "error.network.timeout")
         case .serverError(let code):
-            return "Error del servidor (\(code)). Intenta más tarde."
+            return String(localized: "error.network.serverError", defaultValue: "Error del servidor (\(code)). Intenta más tarde.")
         case .unauthorized:
-            return "Tu sesión ha expirado. Por favor inicia sesión nuevamente."
+            return String(localized: "error.network.unauthorized")
         case .forbidden:
-            return "No tienes permisos para realizar esta acción."
+            return String(localized: "error.network.forbidden")
         case .notFound:
-            return "El recurso solicitado no fue encontrado."
+            return String(localized: "error.network.notFound")
         case .badRequest(let message):
-            return message.isEmpty ? "Petición inválida." : message
+            return message.isEmpty ? String(localized: "error.network.badRequest") : message
         case .decodingError:
-            return "Error al procesar la respuesta del servidor."
+            return String(localized: "error.network.decodingError")
         case .unknown:
-            return "Ocurrió un error de red. Intenta de nuevo."
+            return String(localized: "error.network.unknown")
         }
     }
 

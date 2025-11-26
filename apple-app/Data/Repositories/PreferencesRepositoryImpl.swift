@@ -36,9 +36,9 @@ final class PreferencesRepositoryImpl: PreferencesRepository, @unchecked Sendabl
         await savePreferences(preferences)
     }
 
-    func updateLanguage(_ language: String) async {
+    func updateLanguage(_ language: Language) async {
         var preferences = await getPreferences()
-        preferences.language = language
+        preferences.language = language.rawValue
         await savePreferences(preferences)
     }
 
