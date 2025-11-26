@@ -87,11 +87,20 @@ final class PreferencesRepositoryImpl: PreferencesRepository {
                 }
             }
 
-            // Wrapper para hacer NSObjectProtocol Sendable de forma segura
-            // JUSTIFICACIÓN Swift 6: NSObjectProtocol no es Sendable en el SDK de Apple,
-            // pero el observer solo se usa de forma inmutable en la closure de terminación.
-            // Este es un caso donde el SDK no está actualizado para Swift 6, pero el uso
-            // es thread-safe porque NotificationCenter maneja el ciclo de vida del observer.
+            // ============================================================
+            // EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA
+            // ============================================================
+            // Tipo: SDK de Apple no marcado Sendable
+            // Componente: NSObjectProtocol (NotificationCenter observer)
+            // Justificación: NSObjectProtocol no es Sendable en el SDK de Apple,
+            //                pero el observer es inmutable (let) y solo se usa
+            //                en la closure @Sendable de terminación.
+            //                NotificationCenter garantiza thread-safety del observer.
+            // Referencia: https://developer.apple.com/documentation/foundation/notificationcenter
+            // Ticket: N/A (limitación del SDK de Apple)
+            // Fecha: 2025-11-26
+            // Revisión: Revisar cuando Apple actualice NSObjectProtocol para Swift 6
+            // ============================================================
             final class ObserverWrapper: @unchecked Sendable {
                 let observer: NSObjectProtocol
                 init(_ observer: NSObjectProtocol) {
@@ -136,11 +145,20 @@ final class PreferencesRepositoryImpl: PreferencesRepository {
                 }
             }
 
-            // Wrapper para hacer NSObjectProtocol Sendable de forma segura
-            // JUSTIFICACIÓN Swift 6: NSObjectProtocol no es Sendable en el SDK de Apple,
-            // pero el observer solo se usa de forma inmutable en la closure de terminación.
-            // Este es un caso donde el SDK no está actualizado para Swift 6, pero el uso
-            // es thread-safe porque NotificationCenter maneja el ciclo de vida del observer.
+            // ============================================================
+            // EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA
+            // ============================================================
+            // Tipo: SDK de Apple no marcado Sendable
+            // Componente: NSObjectProtocol (NotificationCenter observer)
+            // Justificación: NSObjectProtocol no es Sendable en el SDK de Apple,
+            //                pero el observer es inmutable (let) y solo se usa
+            //                en la closure @Sendable de terminación.
+            //                NotificationCenter garantiza thread-safety del observer.
+            // Referencia: https://developer.apple.com/documentation/foundation/notificationcenter
+            // Ticket: N/A (limitación del SDK de Apple)
+            // Fecha: 2025-11-26
+            // Revisión: Revisar cuando Apple actualice NSObjectProtocol para Swift 6
+            // ============================================================
             final class ObserverWrapper: @unchecked Sendable {
                 let observer: NSObjectProtocol
                 init(_ observer: NSObjectProtocol) {

@@ -9,13 +9,20 @@
 import Foundation
 
 /// Interceptor que loggea requests y responses HTTP
-final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. Los interceptores se ejecutan en el contexto de APIClient (@MainActor)
+/// 2. Simplifica el modelo de concurrencia del network layer
+/// 3. Logger es thread-safe, pero mantener @MainActor es más consistente
+@MainActor
+final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor {
 
     private let logger = LoggerFactory.network
 
     // MARK: - RequestInterceptor
 
-    @MainActor
     func intercept(_ request: URLRequest) async throws -> URLRequest {
         guard let url = request.url else { return request }
 
@@ -30,7 +37,6 @@ final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor, @unchec
 
     // MARK: - ResponseInterceptor
 
-    @MainActor
     func intercept(_ response: HTTPURLResponse, data: Data) async throws -> Data {
         guard let url = response.url else { return data }
 

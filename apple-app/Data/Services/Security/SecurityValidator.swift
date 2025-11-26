@@ -21,7 +21,15 @@ protocol SecurityValidator: Sendable {
 }
 
 /// Implementación de validación de seguridad
-final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. Usa FileManager que no es thread-safe
+/// 2. Los métodos internos ya están marcados @MainActor
+/// 3. Se accede principalmente desde interceptors (@MainActor)
+@MainActor
+final class DefaultSecurityValidator: SecurityValidator {
 
     var isJailbroken: Bool {
         get async {
@@ -29,9 +37,7 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
             // En simulador siempre retornar false
             return false
             #else
-            await MainActor.run {
-                checkSuspiciousPaths() || checkSuspiciousFiles()
-            }
+            checkSuspiciousPaths() || checkSuspiciousFiles()
             #endif
         }
     }
@@ -63,7 +69,6 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
 
     // MARK: - Private Jailbreak Checks
 
-    @MainActor
     private func checkSuspiciousPaths() -> Bool {
         let suspiciousPaths = [
             "/Applications/Cydia.app",
@@ -86,7 +91,6 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
         return false
     }
 
-    @MainActor
     private func checkSuspiciousFiles() -> Bool {
         // Intentar escribir fuera del sandbox
         let testPath = "/private/test_jailbreak.txt"

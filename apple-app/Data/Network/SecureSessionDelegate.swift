@@ -25,6 +25,20 @@ import Security
 /// ## Swift 6 Concurrency
 /// Para evitar complejidad de actor boundaries, la validación se hace
 /// sincrónicamente inline sin usar CertificatePinner.
+///
+/// # ============================================================
+/// # EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA
+/// # ============================================================
+/// Tipo: Wrapper de C/Objective-C con datos inmutables
+/// Componente: URLSessionDelegate para certificate pinning
+/// Justificación: Solo contiene datos inmutables (pinnedPublicKeyHashes: Set<String>).
+///                Todos los métodos del delegate son nonisolated por protocolo.
+///                La validación se hace de forma sincrónica sin estado mutable.
+/// Referencia: https://developer.apple.com/documentation/foundation/urlsessiondelegate
+/// Ticket: N/A (patrón estándar de URLSessionDelegate)
+/// Fecha: 2025-11-26
+/// Revisión: No requiere revisión (inmutable por diseño)
+/// # ============================================================
 final class SecureSessionDelegate: NSObject, URLSessionDelegate, @unchecked Sendable {
 
     // MARK: - Dependencies
