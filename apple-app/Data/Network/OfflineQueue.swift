@@ -180,7 +180,11 @@ actor OfflineQueue {
         )
 
         // Resolver conflicto
-        let _ = await conflictResolver.resolve(
+        // El resultado se ignora intencionalmente porque la estrategia 'serverWins'
+        // significa descartar los cambios locales y remover el item de la cola.
+        // En el futuro, otras estrategias (clientWins, manual) usarán el resultado
+        // para actualizar el request con los datos resueltos.
+        _ = await conflictResolver.resolve(
             conflict,
             strategy: .serverWins
         )

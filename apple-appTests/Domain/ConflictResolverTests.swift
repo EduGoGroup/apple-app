@@ -94,6 +94,7 @@ struct ConflictResolverTests {
     }
 
     @Test("DefaultConflictResolver - clientWins strategy")
+    @MainActor
     func defaultResolverClientWins() async {
         // Given
         let sut = DefaultConflictResolver()
@@ -125,6 +126,7 @@ struct ConflictResolverTests {
     }
 
     @Test("SyncConflict se crea correctamente")
+    @MainActor
     func syncConflictCreation() {
         // Given
         let localData = "local".data(using: .utf8)!
