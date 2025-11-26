@@ -89,7 +89,7 @@ struct AuthPerformanceTests {
     // Nota: Este test usa el Keychain real que no funciona en simulador CI
     // debido a falta de entitlements (errSecMissingEntitlement = -34018)
     @Test("Keychain save/get debe ser < 50ms", .disabled("Keychain no disponible en simulador CI"))
-    func keychainPerformance() throws {
+    func keychainPerformance() async throws {
         let keychain = DefaultKeychainService.shared
         let token = "test_token_\(UUID().uuidString)"
         let key = "perf_test_\(UUID().uuidString)"
