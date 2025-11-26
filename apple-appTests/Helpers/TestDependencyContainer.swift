@@ -25,7 +25,15 @@ import Foundation
 ///     }
 /// }
 /// ```
-final class TestDependencyContainer: DependencyContainer, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. Solo se usa en setup de tests (contexto main thread)
+/// 2. DependencyContainer padre no es Sendable
+/// 3. Los tests Swift Testing se ejecutan en main actor por defecto
+@MainActor
+final class TestDependencyContainer: DependencyContainer {
 
     /// Tipos registrados para verificación
     private var registeredTypeKeys: Set<String> = []

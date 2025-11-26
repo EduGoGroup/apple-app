@@ -120,7 +120,7 @@ protocol AuthRepository: Sendable {
     ///
     /// NO revoca tokens en el servidor, solo limpia Keychain local.
     /// Usar `logout()` para cierre de sesión completo.
-    func clearLocalAuthData()
+    func clearLocalAuthData() async
 
     // MARK: - Biometric Authentication
 

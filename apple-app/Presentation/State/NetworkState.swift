@@ -158,9 +158,9 @@ extension NetworkState {
         isConnected: Bool = true,
         isSyncing: Bool = false,
         syncingItemsCount: Int = 0
-    ) -> NetworkState {
+    ) async -> NetworkState {
         let mockMonitor = MockNetworkMonitor()
-        mockMonitor.isConnectedValue = isConnected
+        await mockMonitor.setConnected(isConnected)
 
         // OfflineQueue con mock monitor
         let mockQueue = OfflineQueue(networkMonitor: mockMonitor)

@@ -9,6 +9,11 @@ import Foundation
 @testable import apple_app
 
 /// Mock de PreferencesRepository para testing
+///
+/// ## Swift 6 Concurrency
+/// Marcado como @MainActor para cumplir con el protocolo PreferencesRepository.
+/// FASE 1 - Refactoring: Alineado con la implementación real
+@MainActor
 final class MockPreferencesRepository: PreferencesRepository {
     // Estado actual
     var storedPreferences: UserPreferences = .default

@@ -58,28 +58,32 @@ enum BiometricError: Error, LocalizedError {
 // MARK: - Implementation
 
 /// Implementación usando LocalAuthentication framework de Apple
-final class LocalAuthenticationService: BiometricAuthService, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. LAContext debe ser accedido desde el main thread (requisito de Apple)
+/// 2. Los métodos internos ya usaban MainActor.run
+/// 3. Simplifica el código eliminando los wrappers MainActor.run
+@MainActor
+final class LocalAuthenticationService: BiometricAuthService {
 
     var isAvailable: Bool {
         get async {
-            await MainActor.run {
-                let context = LAContext()
-                var error: NSError?
-                return context.canEvaluatePolicy(
-                    .deviceOwnerAuthenticationWithBiometrics,
-                    error: &error
-                )
-            }
+            let context = LAContext()
+            var error: NSError?
+            return context.canEvaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                error: &error
+            )
         }
     }
 
     var biometryType: LABiometryType {
         get async {
-            await MainActor.run {
-                let context = LAContext()
-                _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
-                return context.biometryType
-            }
+            let context = LAContext()
+            _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
+            return context.biometryType
         }
     }
 
@@ -122,7 +126,12 @@ final class LocalAuthenticationService: BiometricAuthService, @unchecked Sendabl
 
 #if DEBUG
 /// Mock Biometric Service para testing
-final class MockBiometricService: BiometricAuthService, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo tiene métodos sincrónicos.
+@MainActor
+final class MockBiometricService: BiometricAuthService {
     var isAvailableValue = true
     var biometryTypeValue: LABiometryType = .faceID
     var authenticateResult: Bool = true
@@ -145,6 +154,14 @@ final class MockBiometricService: BiometricAuthService, @unchecked Sendable {
         }
 
         return authenticateResult
+    }
+
+    func reset() {
+        isAvailableValue = true
+        biometryTypeValue = .faceID
+        authenticateResult = true
+        authenticateError = nil
+        authenticateCallCount = 0
     }
 }
 #endif

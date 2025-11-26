@@ -1,0 +1,158 @@
+name: Swift 6 Concurrency Audit
+
+on:
+  pull_request:
+    paths:
+      - "**.swift"
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  concurrency-audit:
+    name: Auditoría de Concurrencia Swift 6
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: ❌ BLOQUEAR - nonisolated(unsafe) PROHIBIDO
+        run: |
+          echo "🔍 Buscando nonisolated(unsafe) en código (ignorando comentarios)..."
+          violations=$(grep -rn "nonisolated(unsafe)" --include="*.swift" apple-app apple-appTests | grep -v "//.*nonisolated(unsafe)" | grep -v "///.*nonisolated(unsafe)" || true)
+
+          if [ -n "$violations" ]; then
+            echo "::error::❌ PROHIBIDO: Se encontró nonisolated(unsafe) en código"
+            echo ""
+            echo "VIOLACIONES:"
+            echo "$violations"
+            echo ""
+            echo "SOLUCIÓN:"
+            echo "  - Usar 'actor' para estado mutable"
+            echo "  - Usar '@MainActor' si el componente pertenece al main thread"
+            echo "  - Ver docs/revision/03-REGLAS-DESARROLLO-IA.md"
+            exit 1
+          fi
+
+          echo "✅ No se encontró nonisolated(unsafe) en código"
+
+      - name: ⚠️  ADVERTIR - @unchecked Sendable sin documentación
+        run: |
+          echo "🔍 Buscando @unchecked Sendable sin documentación..."
+
+          # Buscar todos los @unchecked Sendable
+          files_with_unchecked=$(grep -l "@unchecked Sendable" --include="*.swift" -r apple-app apple-appTests || true)
+
+          if [ -z "$files_with_unchecked" ]; then
+            echo "✅ No hay @unchecked Sendable en el proyecto"
+            exit 0
+          fi
+
+          # Para cada archivo, verificar que tenga documentación
+          violations=""
+          for file in $files_with_unchecked; do
+            # Buscar si tiene el bloque de documentación
+            if ! grep -q "EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA" "$file"; then
+              violations="$violations\n$file"
+            fi
+          done
+
+          if [ -n "$violations" ]; then
+            echo "::warning::⚠️  @unchecked Sendable sin documentación encontrado en:"
+            echo -e "$violations"
+            echo ""
+            echo "ACCIÓN REQUERIDA:"
+            echo "  - Agregar bloque de documentación según Regla 7"
+            echo "  - Ver docs/revision/03-REGLAS-DESARROLLO-IA.md"
+            echo "  - O mejor aún: eliminar @unchecked usando actor/@MainActor"
+          else
+            echo "✅ Todos los @unchecked Sendable están documentados"
+          fi
+
+      - name: 💡 SUGERIR - NSLock en código nuevo
+        run: |
+          echo "🔍 Buscando NSLock en archivos modificados..."
+
+          # Solo revisar archivos modificados en este PR/push
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            changed_files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '*.swift' || true)
+          else
+            changed_files=$(git diff --name-only HEAD~1 -- '*.swift' || true)
+          fi
+
+          if [ -z "$changed_files" ]; then
+            echo "ℹ️  No hay archivos Swift modificados"
+            exit 0
+          fi
+
+          suggestions=""
+          for file in $changed_files; do
+            if [ -f "$file" ] && grep -q "NSLock" "$file"; then
+              suggestions="$suggestions\n$file"
+            fi
+          done
+
+          if [ -n "$suggestions" ]; then
+            echo "::notice::💡 Considera usar 'actor' en vez de NSLock en:"
+            echo -e "$suggestions"
+            echo ""
+            echo "BENEFICIOS de usar actor:"
+            echo "  - Thread-safety garantizada por el compilador"
+            echo "  - No hay posibilidad de olvidar lock/unlock"
+            echo "  - Mejor integración con async/await"
+            echo "  - Ver docs/revision/03-REGLAS-DESARROLLO-IA.md"
+          else
+            echo "✅ No se encontró NSLock en archivos nuevos/modificados"
+          fi
+
+      - name: 📊 RESUMEN - Estado de concurrencia
+        run: |
+          echo "📊 RESUMEN DE AUDITORÍA"
+          echo "======================="
+          echo ""
+
+          # Contar @unchecked Sendable
+          unchecked_count=$(grep -r "@unchecked Sendable" --include="*.swift" apple-app apple-appTests | wc -l | xargs)
+          echo "  @unchecked Sendable: $unchecked_count usos"
+
+          # Contar actors
+          actor_count=$(grep -r "^actor " --include="*.swift" apple-app apple-appTests | wc -l | xargs)
+          echo "  actors: $actor_count definiciones"
+
+          # Contar @MainActor en clases
+          mainactor_count=$(grep -r "@MainActor" --include="*.swift" apple-app apple-appTests | grep "final class\|class " | wc -l | xargs)
+          echo "  @MainActor classes: $mainactor_count"
+
+          echo ""
+          echo "✅ Auditoría completada"
+
+      - name: 🎯 META - Proyecto Swift 6 compliant
+        run: |
+          echo ""
+          echo "🎯 OBJETIVO DEL PROYECTO"
+          echo "========================"
+          echo ""
+          echo "Meta: CERO usos de @unchecked Sendable injustificados"
+          echo "      CERO usos de nonisolated(unsafe)"
+          echo "      100% Swift 6 concurrency compliant"
+          echo ""
+          echo "Progreso actual:"
+
+          # Calcular progreso
+          unchecked=$(grep -r "@unchecked Sendable" --include="*.swift" apple-app apple-appTests | wc -l | xargs)
+
+          if [ "$unchecked" -le 4 ]; then
+            echo "  ✅ @unchecked Sendable: $unchecked/4 (objetivo alcanzado)"
+          else
+            echo "  ⚠️  @unchecked Sendable: $unchecked/4 (por encima del objetivo)"
+          fi
+
+          nonisolated=$(grep -r "nonisolated(unsafe)" --include="*.swift" apple-app apple-appTests | wc -l | xargs)
+
+          if [ "$nonisolated" -eq 0 ]; then
+            echo "  ✅ nonisolated(unsafe): 0 (objetivo alcanzado)"
+          else
+            echo "  ❌ nonisolated(unsafe): $nonisolated (debe ser 0)"
+          fi

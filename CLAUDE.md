@@ -260,14 +260,113 @@ Text("Contenido")
 
 ---
 
+## ⚡ Swift 6 Concurrencia
+
+**Estado**: ✅ Migración completa a Swift 6 concurrency model (Fase 3 completada)
+
+### Reglas Obligatorias
+
+**PROHIBICIONES ABSOLUTAS**:
+- ❌ **NUNCA** usar `nonisolated(unsafe)` (eliminado 100% del proyecto)
+- ❌ **NUNCA** usar `NSLock` en código nuevo (usar `actor` en su lugar)
+- ❌ **NUNCA** silenciar warnings de concurrencia sin justificación documentada
+
+**PATRONES OBLIGATORIOS**:
+
+1. **ViewModels**: SIEMPRE `@Observable @MainActor`
+   ```swift
+   @Observable
+   @MainActor
+   final class MyViewModel {
+       var state: ViewState<Data> = .idle
+       
+       nonisolated init() { }  // Init puede ser nonisolated
+       
+       func loadData() async { }  // Ya está en @MainActor
+   }
+   ```
+
+2. **Repositories/Services con estado**: SIEMPRE `actor`
+   ```swift
+   actor UserRepository {
+       private var cache: [UUID: User] = [:]
+       
+       func getUser(id: UUID) async throws -> User {
+           // Acceso thread-safe automático
+       }
+   }
+   ```
+
+3. **Services sin estado**: Puede ser `struct Sendable` o `@MainActor`
+   ```swift
+   struct ValidationService: Sendable {
+       func validate(_ input: String) -> Bool {
+           // Sin estado mutable, thread-safe por diseño
+       }
+   }
+   ```
+
+4. **Mocks para Testing**: SIEMPRE `actor` o `@MainActor`
+   ```swift
+   @MainActor
+   final class MockAuthRepository: AuthRepository {
+       var loginResult: Result<User, Error>?
+       var callCount = 0
+       
+       func login() async throws -> User {
+           callCount += 1
+           // ...
+       }
+   }
+   ```
+
+5. **Network Interceptors**: SIEMPRE `@MainActor`
+   ```swift
+   @MainActor
+   final class AuthInterceptor: RequestInterceptor {
+       func intercept(_ request: URLRequest) async throws -> URLRequest {
+           // ...
+       }
+   }
+   ```
+
+### Excepciones Documentadas
+
+Solo **4 usos** de `@unchecked Sendable` en todo el proyecto (todos justificados):
+
+1. **OSLogger** - SDK de Apple no marcado Sendable (thread-safe garantizado)
+2. **SecureSessionDelegate** - URLSessionDelegate con datos inmutables
+3. **ObserverWrapper** (2 usos) - NSObjectProtocol del SDK de Apple
+
+**Formato obligatorio para documentar excepciones**:
+```swift
+// ============================================================
+// EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA
+// ============================================================
+// Tipo: SDK de Apple no marcado Sendable
+// Componente: os.Logger
+// Justificación: [explicación técnica detallada]
+// Referencia: [link a documentación oficial]
+// Ticket: N/A (o número de ticket)
+// Fecha: 2025-11-26
+// Revisión: [cuándo revisar]
+// ============================================================
+```
+
+### Referencia Completa
+
+Ver `docs/revision/03-REGLAS-DESARROLLO-IA.md` para reglas detalladas y ejemplos.
+
+---
+
 ## 🔄 Agregar Nueva Feature
 
 1. **Domain**: Crear Use Case + Protocol (si necesita datos)
 2. **Data**: Implementar Repository + Endpoint (si llama API)
-3. **Presentation**: Crear View + ViewModel
+3. **Presentation**: Crear View + ViewModel (**@MainActor obligatorio**)
 4. **DI**: Registrar en `setupDependencies()`
 5. **Navigation**: Agregar Route (si es nueva pantalla)
-6. **Tests**: Use Case + ViewModel
+6. **Tests**: Use Case + ViewModel (**mocks como actor/@MainActor**)
 
 ---
 

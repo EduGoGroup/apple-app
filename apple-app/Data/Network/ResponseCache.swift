@@ -15,54 +15,59 @@ struct CachedResponse: Sendable {
     let cachedAt: Date
 
     /// Indica si el cache expiró
-    var isExpired: Bool {
+    nonisolated var isExpired: Bool {
         Date() >= expiresAt
     }
 
     /// Tiempo restante de validez (en segundos)
-    var timeRemaining: TimeInterval {
+    nonisolated var timeRemaining: TimeInterval {
         expiresAt.timeIntervalSinceNow
     }
 }
 
 /// Cache thread-safe para responses HTTP
 ///
-/// Usa NSCache (thread-safe nativo) para gestión automática de memoria.
-/// Los responses expiran según TTL configurado (default: 5 minutos).
-///
-/// NSCache es thread-safe, por lo que NO necesita actor.
-final class ResponseCache: @unchecked Sendable {
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado @unchecked Sendable y NSCache wrapper.
+/// Marcado como @MainActor porque:
+/// 1. Solo se usa desde APIClient (que es @MainActor)
+/// 2. No requiere actor separation (no hay contención)
+/// 3. Dictionary simple más eficiente que NSCache
+@MainActor
+final class ResponseCache {
 
     // MARK: - Storage
 
-    private let cache = NSCache<NSString, CachedResponseWrapper>()
+    private var storage: [String: CachedResponse] = [:]
     private let defaultTTL: TimeInterval
+    private let maxEntries: Int
+    private let maxTotalSize: Int
 
     // MARK: - Initialization
 
-    init(defaultTTL: TimeInterval = 300) {
+    init(
+        defaultTTL: TimeInterval = 300,
+        maxEntries: Int = 100,
+        maxTotalSize: Int = 10 * 1024 * 1024 // 10 MB
+    ) {
         self.defaultTTL = defaultTTL
-
-        // Configurar límites de caché
-        cache.countLimit = 100  // Máximo 100 responses
-        cache.totalCostLimit = 10 * 1024 * 1024  // 10 MB
+        self.maxEntries = maxEntries
+        self.maxTotalSize = maxTotalSize
     }
 
     // MARK: - Public API
 
     /// Obtiene un response cacheado si existe y no ha expirado
     func get(for url: URL) -> CachedResponse? {
-        let key = cacheKey(for: url)
+        let key = url.absoluteString
 
-        guard let wrapper = cache.object(forKey: key) else {
+        guard let response = storage[key] else {
             return nil
         }
 
-        let response = wrapper.response
-
         // Si expiró, remover y retornar nil
-        if Date() >= response.expiresAt {
-            cache.removeObject(forKey: key)
+        if response.isExpired {
+            storage.removeValue(forKey: key)
             return nil
         }
 
@@ -79,38 +84,56 @@ final class ResponseCache: @unchecked Sendable {
             cachedAt: Date()
         )
 
-        let wrapper = CachedResponseWrapper(response: response)
-        let key = cacheKey(for: url)
-        let cost = data.count
+        let key = url.absoluteString
 
-        cache.setObject(wrapper, forKey: key, cost: cost)
+        // Verificar límites antes de agregar
+        if storage.count >= maxEntries {
+            evictOldest()
+        }
+
+        storage[key] = response
+
+        // Verificar tamaño total
+        if currentTotalSize > maxTotalSize {
+            evictUntilSize(maxTotalSize)
+        }
     }
 
     /// Invalida el cache para una URL específica
     func invalidate(for url: URL) {
-        let key = cacheKey(for: url)
-        cache.removeObject(forKey: key)
+        let key = url.absoluteString
+        storage.removeValue(forKey: key)
     }
 
     /// Limpia todo el cache
     func clearAll() {
-        cache.removeAllObjects()
+        storage.removeAll()
     }
 
-    // MARK: - Private
-
-    private func cacheKey(for url: URL) -> NSString {
-        url.absoluteString as NSString
+    /// Limpia entries expirados
+    func clearExpired() {
+        storage = storage.filter { !$0.value.isExpired }
     }
-}
 
-// MARK: - Wrapper para NSCache
+    // MARK: - Private Helpers
 
-/// Wrapper para CachedResponse porque NSCache requiere class
-private final class CachedResponseWrapper: @unchecked Sendable {
-    let response: CachedResponse
+    /// Tamaño total del cache en bytes
+    private var currentTotalSize: Int {
+        storage.values.reduce(0) { $0 + $1.data.count }
+    }
 
-    init(response: CachedResponse) {
-        self.response = response
+    /// Elimina el entry más antiguo
+    private func evictOldest() {
+        guard let oldest = storage.min(by: { $0.value.cachedAt < $1.value.cachedAt }) else {
+            return
+        }
+        storage.removeValue(forKey: oldest.key)
+    }
+
+    /// Elimina entries hasta alcanzar el tamaño objetivo
+    private func evictUntilSize(_ targetSize: Int) {
+        while currentTotalSize > targetSize && !storage.isEmpty {
+            evictOldest()
+        }
     }
 }

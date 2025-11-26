@@ -17,7 +17,15 @@ import Foundation
 ///
 /// Si se detecta algún problema de seguridad, el request es rechazado antes
 /// de enviarse, previniendo que datos sensibles salgan del dispositivo comprometido.
-final class SecurityGuardInterceptor: RequestInterceptor, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. SecurityValidator es @MainActor (dependencia)
+/// 2. Los interceptores se ejecutan en el contexto de APIClient (@MainActor)
+/// 3. Simplifica el modelo de concurrencia del network layer
+@MainActor
+final class SecurityGuardInterceptor: RequestInterceptor {
 
     // MARK: - Dependencies
 
@@ -42,13 +50,12 @@ final class SecurityGuardInterceptor: RequestInterceptor, @unchecked Sendable {
 
     // MARK: - RequestInterceptor
 
-    @MainActor
     func intercept(_ request: URLRequest) async throws -> URLRequest {
         // Validar seguridad del dispositivo
         let isTampered = await securityValidator.isTampered
 
         if isTampered {
-            logger.warning("Security violation detected", metadata: [
+            await logger.warning("Security violation detected", metadata: [
                 "jailbroken": "\(await securityValidator.isJailbroken)",
                 "debugger": "\(securityValidator.isDebuggerAttached)",
                 "strictMode": "\(strictMode)"
@@ -56,11 +63,11 @@ final class SecurityGuardInterceptor: RequestInterceptor, @unchecked Sendable {
 
             if strictMode {
                 // Modo estricto (producción): Bloquear request
-                logger.error("Request blocked due to security violation")
+                await logger.error("Request blocked due to security violation")
                 throw SecurityError.tamperedDevice
             } else {
                 // Modo permisivo (desarrollo): Solo advertir
-                logger.notice("⚠️ Security violation detected but allowed in development mode")
+                await logger.notice("⚠️ Security violation detected but allowed in development mode")
             }
         }
 

@@ -9,7 +9,15 @@
 import Foundation
 
 /// Interceptor que inyecta automáticamente el token de autenticación en los requests
-final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. TokenRefreshCoordinator es @MainActor (dependencia)
+/// 2. El método intercept ya está marcado @MainActor
+/// 3. No hay razón para @unchecked cuando la solución correcta es @MainActor
+@MainActor
+final class AuthInterceptor: RequestInterceptor {
 
     // MARK: - Dependencies
 
@@ -23,7 +31,6 @@ final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
 
     // MARK: - RequestInterceptor
 
-    @MainActor
     func intercept(_ request: URLRequest) async throws -> URLRequest {
         // 1. Verificar si el endpoint requiere autenticación
         guard requiresAuth(request) else {

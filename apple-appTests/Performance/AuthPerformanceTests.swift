@@ -29,7 +29,7 @@ struct AuthPerformanceTests {
 
         // Ejecutar múltiples veces para promedio
         for _ in 0..<100 {
-            _ = try decoder.decode(validToken)
+            _ = try await decoder.decode(validToken)
         }
 
         let elapsed = Date().timeIntervalSince(start)
@@ -44,10 +44,11 @@ struct AuthPerformanceTests {
     @Test("Token refresh debe ser < 500ms")
     func tokenRefreshPerformance() async throws {
         let mockKeychain = MockKeychainService()
+
+        // Configurar token que necesita refresh
         let mockJWT = MockJWTDecoder()
         let mockAPI = MockAPIClient()
 
-        // Configurar token que necesita refresh
         let expiringPayload = JWTPayload(
             sub: "123",
             email: "test@test.com",
@@ -88,7 +89,7 @@ struct AuthPerformanceTests {
     // Nota: Este test usa el Keychain real que no funciona en simulador CI
     // debido a falta de entitlements (errSecMissingEntitlement = -34018)
     @Test("Keychain save/get debe ser < 50ms", .disabled("Keychain no disponible en simulador CI"))
-    func keychainPerformance() throws {
+    func keychainPerformance() async throws {
         let keychain = DefaultKeychainService.shared
         let token = "test_token_\(UUID().uuidString)"
         let key = "perf_test_\(UUID().uuidString)"
@@ -96,13 +97,13 @@ struct AuthPerformanceTests {
         let start = Date()
 
         // Save
-        try keychain.saveToken(token, for: key)
+        try await keychain.saveToken(token, for: key)
 
         // Get
-        _ = try keychain.getToken(for: key)
+        _ = try await keychain.getToken(for: key)
 
         // Delete
-        try keychain.deleteToken(for: key)
+        try await keychain.deleteToken(for: key)
 
         let elapsed = Date().timeIntervalSince(start) * 1000.0 // En ms
 

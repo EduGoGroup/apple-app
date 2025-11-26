@@ -24,8 +24,8 @@ struct JWTDecoderTests {
     // MARK: - Decode Valid Token
 
     @Test("Decode valid JWT token successfully")
-    func decodeValidToken() throws {
-        let payload = try decoder.decode(validToken)
+    func decodeValidToken() async throws {
+        let payload = try await decoder.decode(validToken)
 
         #expect(payload.sub == "550e8400")
         #expect(payload.email == "test@edugo.com")
@@ -34,8 +34,8 @@ struct JWTDecoderTests {
     }
 
     @Test("Decoded payload has correct dates")
-    func decodedPayloadDates() throws {
-        let payload = try decoder.decode(validToken)
+    func decodedPayloadDates() async throws {
+        let payload = try await decoder.decode(validToken)
 
         // iat debe ser en el pasado
         #expect(payload.iat < Date())
@@ -47,71 +47,71 @@ struct JWTDecoderTests {
     // MARK: - Invalid Format
 
     @Test("Decode throws error for invalid format - too few segments")
-    func invalidFormatTooFewSegments() {
+    func invalidFormatTooFewSegments() async {
         let invalidToken = "header.payload" // Solo 2 segmentos
 
-        #expect(throws: JWTError.self) {
-            try decoder.decode(invalidToken)
+        await #expect(throws: JWTError.self) {
+            try await decoder.decode(invalidToken)
         }
     }
 
     @Test("Decode throws error for invalid format - too many segments")
-    func invalidFormatTooManySegments() {
+    func invalidFormatTooManySegments() async {
         let invalidToken = "header.payload.signature.extra" // 4 segmentos
 
-        #expect(throws: JWTError.self) {
-            try decoder.decode(invalidToken)
+        await #expect(throws: JWTError.self) {
+            try await decoder.decode(invalidToken)
         }
     }
 
     @Test("Decode throws error for empty string")
-    func invalidFormatEmptyString() {
-        #expect(throws: JWTError.self) {
-            try decoder.decode("")
+    func invalidFormatEmptyString() async {
+        await #expect(throws: JWTError.self) {
+            try await decoder.decode("")
         }
     }
 
     // MARK: - Invalid Base64
 
     @Test("Decode throws error for invalid base64 in payload")
-    func invalidBase64() {
+    func invalidBase64() async {
         let invalidToken = "header.!!invalid-base64!!.signature"
 
-        #expect(throws: JWTError.self) {
-            try decoder.decode(invalidToken)
+        await #expect(throws: JWTError.self) {
+            try await decoder.decode(invalidToken)
         }
     }
 
     // MARK: - Missing Claims
 
     @Test("Decode throws error for missing required claims")
-    func missingClaims() {
+    func missingClaims() async {
         // Token con payload incompleto: {"sub":"123","email":"test@test.com"}
         // Falta: role, exp, iat, iss
         let tokenMissingClaims = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20ifQ.SIGNATURE"
 
-        #expect(throws: Error.self) {
-            try decoder.decode(tokenMissingClaims)
+        await #expect(throws: Error.self) {
+            try await decoder.decode(tokenMissingClaims)
         }
     }
 
     // MARK: - Invalid Issuer
 
     @Test("Decode throws error for invalid issuer")
-    func invalidIssuer() {
+    func invalidIssuer() async {
         // Token con issuer diferente: {"sub":"123","email":"test@edugo.com","role":"student","exp":9999999999,"iat":1706054400,"iss":"wrong-issuer"}
         let tokenWrongIssuer = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMiLCJlbWFpbCI6InRlc3RAZWR1Z28uY29tIiwicm9sZSI6InN0dWRlbnQiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTcwNjA1NDQwMCwiaXNzIjoid3JvbmctaXNzdWVyIn0.SIGNATURE"
 
-        #expect(throws: JWTError.invalidIssuer) {
-            try decoder.decode(tokenWrongIssuer)
+        await #expect(throws: JWTError.invalidIssuer) {
+            try await decoder.decode(tokenWrongIssuer)
         }
     }
 
     // MARK: - Payload Properties
 
     @Test("Payload isExpired returns false for valid token")
-    func payloadNotExpired() throws {
-        let payload = try decoder.decode(validToken)
+    func payloadNotExpired() async throws {
+        let payload = try await decoder.decode(validToken)
 
         #expect(payload.isExpired == false)
     }
@@ -170,12 +170,12 @@ struct JWTDecoderTests {
     // MARK: - Base64URL Decoding
 
     @Test("Decode handles base64url characters correctly")
-    func base64URLCharacters() {
+    func base64URLCharacters() async {
         // Token con caracteres base64url (- y _)
         // Este es un token válido con estos caracteres
         let tokenWithBase64URL = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMCIsImVtYWlsIjoidGVzdEBlZHVnby5jb20iLCJyb2xlIjoic3R1ZGVudCIsImV4cCI6OTk5OTk5OTk5OSwiaWF0IjoxNzA2MDU0NDAwLCJpc3MiOiJlZHVnby1tb2JpbGUifQ.SIGNATURE"
 
-        let payload = try? decoder.decode(tokenWithBase64URL)
+        let payload = try? await decoder.decode(tokenWithBase64URL)
 
         #expect(payload != nil)
         #expect(payload?.email == "test@edugo.com")
@@ -205,23 +205,23 @@ struct JWTDecoderTests {
     // MARK: - Mock Decoder
 
     @Test("MockJWTDecoder returns configured payload")
-    func mockDecoderReturnsPayload() throws {
+    func mockDecoderReturnsPayload() async throws {
         let mockDecoder = MockJWTDecoder()
         let expectedPayload = JWTPayload.fixture()
         mockDecoder.payloadToReturn = expectedPayload
 
-        let result = try mockDecoder.decode("any_token")
+        let result = try await mockDecoder.decode("any_token")
 
         #expect(result == expectedPayload)
     }
 
     @Test("MockJWTDecoder throws configured error")
-    func mockDecoderThrowsError() {
+    func mockDecoderThrowsError() async {
         let mockDecoder = MockJWTDecoder()
         mockDecoder.errorToThrow = JWTError.invalidFormat
 
-        #expect(throws: JWTError.invalidFormat) {
-            try mockDecoder.decode("any_token")
+        await #expect(throws: JWTError.invalidFormat) {
+            try await mockDecoder.decode("any_token")
         }
     }
 
@@ -232,9 +232,9 @@ struct JWTDecoderTests {
         let decoder = DefaultJWTDecoder()
 
         // Decodificar múltiples veces (ya estamos en @MainActor)
-        let result1 = try decoder.decode(validToken)
-        let result2 = try decoder.decode(validToken)
-        let result3 = try decoder.decode(validToken)
+        let result1 = try await decoder.decode(validToken)
+        let result2 = try await decoder.decode(validToken)
+        let result3 = try await decoder.decode(validToken)
 
         let results = [result1, result2, result3]
 

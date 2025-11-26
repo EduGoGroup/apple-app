@@ -16,7 +16,7 @@ protocol JWTDecoder: Sendable {
     /// - Parameter token: JWT token en formato string
     /// - Returns: Payload decodificado con claims
     /// - Throws: JWTError si el token es inválido
-    func decode(_ token: String) throws -> JWTPayload
+    func decode(_ token: String) async throws -> JWTPayload
 }
 
 // MARK: - Payload
@@ -81,13 +81,13 @@ final class DefaultJWTDecoder: JWTDecoder {
     /// Issuers válidos: edugo-central (api-admin) y edugo-mobile (legacy)
     private let validIssuers = ["edugo-central", "edugo-mobile"]
 
-    func decode(_ token: String) throws -> JWTPayload {
-        logger.debug("Decoding JWT token")
+    func decode(_ token: String) async throws -> JWTPayload {
+        await logger.debug("Decoding JWT token")
 
         // 1. Separar en segmentos (header.payload.signature)
         let segments = token.components(separatedBy: ".")
         guard segments.count == 3 else {
-            logger.error("JWT format invalid", metadata: [
+            await logger.error("JWT format invalid", metadata: [
                 "segments": segments.count.description
             ])
             throw JWTError.invalidFormat
@@ -96,7 +96,7 @@ final class DefaultJWTDecoder: JWTDecoder {
         // 2. Decodificar payload (segmento 1)
         let payloadSegment = segments[1]
         guard let payloadData = base64URLDecode(payloadSegment) else {
-            logger.error("Failed to decode base64URL payload")
+            await logger.error("Failed to decode base64URL payload")
             throw JWTError.invalidBase64
         }
 
@@ -108,7 +108,7 @@ final class DefaultJWTDecoder: JWTDecoder {
 
         // 4. Validar issuer (acepta edugo-central o edugo-mobile)
         guard let issuer = dto.iss, validIssuers.contains(issuer) else {
-            logger.error("Invalid issuer", metadata: [
+            await logger.error("Invalid issuer", metadata: [
                 "expected": validIssuers.joined(separator: " o "),
                 "actual": dto.iss ?? "nil"
             ])
@@ -125,7 +125,7 @@ final class DefaultJWTDecoder: JWTDecoder {
             iss: dto.iss ?? ""
         )
 
-        logger.debug("JWT decoded successfully", metadata: [
+        await logger.debug("JWT decoded successfully", metadata: [
             "userId": payload.sub,
             "role": payload.role
         ])
@@ -198,19 +198,28 @@ extension JWTPayload {
 }
 
 /// Mock JWT Decoder para testing
-final class MockJWTDecoder: JWTDecoder, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado NSLock, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo es sincrónico.
+///
+/// Nota: JWTDecoder.decode es sincrónico (no async), por lo que no puede ser actor.
+/// @MainActor protege el estado mutable y mantiene compatibilidad con tests existentes.
+@MainActor
+final class MockJWTDecoder: JWTDecoder, Sendable {
     var payloadToReturn: JWTPayload?
     var errorToThrow: Error?
-    private let lock = NSLock()
 
     func decode(_ token: String) throws -> JWTPayload {
-        lock.lock()
-        defer { lock.unlock() }
-
         if let error = errorToThrow {
             throw error
         }
         return payloadToReturn ?? .fixture()
+    }
+
+    func reset() {
+        payloadToReturn = nil
+        errorToThrow = nil
     }
 }
 #endif

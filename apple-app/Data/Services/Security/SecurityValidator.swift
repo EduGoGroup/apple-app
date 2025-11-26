@@ -9,6 +9,7 @@
 import Foundation
 
 /// Protocol para validar seguridad del dispositivo
+@MainActor
 protocol SecurityValidator: Sendable {
     /// Indica si el dispositivo tiene jailbreak
     var isJailbroken: Bool { get async }
@@ -21,7 +22,15 @@ protocol SecurityValidator: Sendable {
 }
 
 /// Implementación de validación de seguridad
-final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. Usa FileManager que no es thread-safe
+/// 2. Los métodos internos ya están marcados @MainActor
+/// 3. Se accede principalmente desde interceptors (@MainActor)
+@MainActor
+final class DefaultSecurityValidator: SecurityValidator {
 
     var isJailbroken: Bool {
         get async {
@@ -29,9 +38,7 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
             // En simulador siempre retornar false
             return false
             #else
-            await MainActor.run {
-                checkSuspiciousPaths() || checkSuspiciousFiles()
-            }
+            checkSuspiciousPaths() || checkSuspiciousFiles()
             #endif
         }
     }
@@ -63,7 +70,6 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
 
     // MARK: - Private Jailbreak Checks
 
-    @MainActor
     private func checkSuspiciousPaths() -> Bool {
         let suspiciousPaths = [
             "/Applications/Cydia.app",
@@ -86,7 +92,6 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
         return false
     }
 
-    @MainActor
     private func checkSuspiciousFiles() -> Bool {
         // Intentar escribir fuera del sandbox
         let testPath = "/private/test_jailbreak.txt"
@@ -106,36 +111,15 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
 // MARK: - Testing
 
 #if DEBUG
-final class MockSecurityValidator: SecurityValidator, @unchecked Sendable {
-    private var _isJailbrokenValue = false
-    private var _isDebuggerAttachedValue = false
-    private let lock = NSLock()
-
-    var isJailbrokenValue: Bool {
-        get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _isJailbrokenValue
-        }
-        set {
-            lock.lock()
-            defer { lock.unlock() }
-            _isJailbrokenValue = newValue
-        }
-    }
-
-    var isDebuggerAttachedValue: Bool {
-        get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _isDebuggerAttachedValue
-        }
-        set {
-            lock.lock()
-            defer { lock.unlock() }
-            _isDebuggerAttachedValue = newValue
-        }
-    }
+/// Mock de SecurityValidator para testing
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado NSLock, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo tiene métodos sincrónicos.
+@MainActor
+final class MockSecurityValidator: SecurityValidator {
+    var isJailbrokenValue = false
+    var isDebuggerAttachedValue = false
 
     var isJailbroken: Bool {
         get async { isJailbrokenValue }
@@ -147,6 +131,11 @@ final class MockSecurityValidator: SecurityValidator, @unchecked Sendable {
 
     var isTampered: Bool {
         get async { isJailbrokenValue || isDebuggerAttachedValue }
+    }
+
+    func reset() {
+        isJailbrokenValue = false
+        isDebuggerAttachedValue = false
     }
 }
 #endif

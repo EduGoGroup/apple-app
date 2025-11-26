@@ -13,22 +13,27 @@ import Foundation
 /// Permite verificar que el código loggea correctamente sin generar logs reales.
 /// Útil para testing unitario de componentes que usan logging.
 ///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado NSLock, usado actor interno.
+/// FASE 3 - Fix Copilot: Eliminado Task.detached(.high) y timing arbitrario.
+/// Logging ahora es sincrónico en el actor para garantizar determinismo en tests.
+///
 /// ## Uso en Tests
 /// ```swift
-/// func testLoginLogsCorrectly() async {
+/// @Test func testLoginLogsCorrectly() async {
 ///     // Given
 ///     let mockLogger = MockLogger()
 ///     let repository = AuthRepositoryImpl(..., logger: mockLogger)
 ///
 ///     // When
-///     await repository.login(...)
+///     await repository.login(...) // Logging async por actor
 ///
-///     // Then
-///     #expect(mockLogger.contains(level: "info", message: "Login"))
-///     #expect(mockLogger.count(level: "error") == 0)
+///     // Then - Verificación determinista
+///     let hasInfo = await mockLogger.contains(level: "info", message: "Login")
+///     #expect(hasInfo)
 /// }
 /// ```
-final class MockLogger: Logger, @unchecked Sendable {
+actor MockLogger: Logger {
     // MARK: - LogEntry
 
     /// Representa un entry de log almacenado
@@ -41,7 +46,7 @@ final class MockLogger: Logger, @unchecked Sendable {
         let line: Int
         let timestamp: Date
 
-        init(
+        nonisolated init(
             level: String,
             message: String,
             metadata: [String: String]?,
@@ -61,15 +66,7 @@ final class MockLogger: Logger, @unchecked Sendable {
 
     // MARK: - Properties
 
-    /// Entries de log almacenados
     private var _entries: [LogEntry] = []
-    private let lock = NSLock()
-
-    var entries: [LogEntry] {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries
-    }
 
     // MARK: - Logger Implementation
 
@@ -135,47 +132,34 @@ final class MockLogger: Logger, @unchecked Sendable {
 
     // MARK: - Testing Helpers
 
+    /// Obtiene todos los entries almacenados
+    var entries: [LogEntry] {
+        _entries
+    }
+
     /// Limpia todos los entries almacenados
     func clear() {
-        lock.lock()
-        defer { lock.unlock() }
         _entries.removeAll()
     }
 
     /// Verifica si existe un entry con el nivel y mensaje especificados
-    /// - Parameters:
-    ///   - level: Nivel del log
-    ///   - message: Texto a buscar en el mensaje (búsqueda parcial)
-    /// - Returns: true si existe al menos un entry que coincida
     func contains(level: String, message: String) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.contains { $0.level == level && $0.message.contains(message) }
+        _entries.contains { $0.level == level && $0.message.contains(message) }
     }
 
     /// Cuenta cuántos entries hay de un nivel específico
-    /// - Parameter level: Nivel a contar
-    /// - Returns: Número de entries con ese nivel
     func count(level: String) -> Int {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.filter { $0.level == level }.count
+        _entries.filter { $0.level == level }.count
     }
 
     /// Obtiene el último entry loggeado
     var lastEntry: LogEntry? {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.last
+        _entries.last
     }
 
     /// Obtiene todos los entries de un nivel específico
-    /// - Parameter level: Nivel a filtrar
-    /// - Returns: Array de entries con ese nivel
     func entries(forLevel level: String) -> [LogEntry] {
-        lock.lock()
-        defer { lock.unlock() }
-        return _entries.filter { $0.level == level }
+        _entries.filter { $0.level == level }
     }
 
     // MARK: - Private Helpers
@@ -188,15 +172,14 @@ final class MockLogger: Logger, @unchecked Sendable {
         function: String,
         line: Int
     ) {
-        lock.lock()
-        defer { lock.unlock() }
-        _entries.append(LogEntry(
+        let entry = LogEntry(
             level: level,
             message: message,
             metadata: metadata,
             file: file,
             function: function,
             line: line
-        ))
+        )
+        _entries.append(entry)
     }
 }

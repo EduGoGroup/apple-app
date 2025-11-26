@@ -24,6 +24,21 @@ import OSLog
 /// logger.info("Request started")
 /// logger.error("Request failed", metadata: ["url": url])
 /// ```
+///
+/// # ============================================================
+/// # EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA
+/// # ============================================================
+/// Tipo: SDK de Apple no marcado Sendable
+/// Componente: os.Logger
+/// Justificación: Apple documenta que os.Logger es thread-safe internamente.
+///                El logger es inmutable (let) y todas las operaciones de logging
+///                son atómicas según la documentación oficial de Apple.
+/// Referencia: https://developer.apple.com/documentation/os/logger
+///             https://developer.apple.com/videos/play/wwdc2020/10168/
+/// Ticket: N/A (limitación del SDK de Apple)
+/// Fecha: 2025-11-26
+/// Revisión: Revisar cuando Apple actualice el SDK para marcar os.Logger como Sendable
+/// # ============================================================
 final class OSLogger: Logger, @unchecked Sendable {
     // MARK: - Properties
 
