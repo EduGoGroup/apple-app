@@ -206,7 +206,7 @@ extension JWTPayload {
 /// Nota: JWTDecoder.decode es sincrónico (no async), por lo que no puede ser actor.
 /// @MainActor protege el estado mutable y mantiene compatibilidad con tests existentes.
 @MainActor
-final class MockJWTDecoder: JWTDecoder, Sendable {
+final class MockJWTDecoder: JWTDecoder {
     var payloadToReturn: JWTPayload?
     var errorToThrow: Error?
 

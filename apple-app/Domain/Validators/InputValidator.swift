@@ -42,11 +42,11 @@ final class DefaultInputValidator: InputValidator {
     }
 
     func isValidPassword(_ password: String) -> Bool {
-        return password.count >= 6
+        password.count >= 6
     }
 
     func isValidName(_ name: String) -> Bool {
-        return name.count >= 2 && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        name.count >= 2 && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     // MARK: - SPEC-008: Security Validations

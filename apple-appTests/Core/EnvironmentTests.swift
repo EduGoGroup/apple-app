@@ -19,7 +19,6 @@ typealias AppEnvironment = apple_app.AppEnvironment
 @MainActor
 @Suite("Environment Configuration Tests")
 struct EnvironmentTests {
-
     // MARK: - Environment Detection Tests
 
     @Test("El ambiente actual es válido")

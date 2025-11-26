@@ -99,7 +99,6 @@ enum AuthEndpoints: Sendable {
 // MARK: - Request Bodies
 
 extension AuthEndpoints {
-
     /// Request body para login
     /// Mapea a `LoginRequest` existente en DTOs
     struct LoginRequestBody: Encodable, Sendable {
@@ -136,7 +135,6 @@ extension AuthEndpoints {
 // MARK: - Response Bodies
 
 extension AuthEndpoints {
-
     /// Response de login exitoso
     /// Compatible con `LoginResponse` existente en DTOs
     struct LoginResponseBody: Decodable, Sendable {
@@ -213,7 +211,6 @@ extension AuthEndpoints {
 // MARK: - Mappers a Domain
 
 extension AuthEndpoints.LoginResponseBody {
-
     /// Convierte la respuesta de login a TokenInfo del dominio
     func toTokenInfo() -> TokenInfo {
         TokenInfo(
@@ -230,7 +227,6 @@ extension AuthEndpoints.LoginResponseBody {
 }
 
 extension AuthEndpoints.RefreshResponseBody {
-
     /// Actualiza un TokenInfo existente con el nuevo access token
     /// - Parameter current: TokenInfo actual (el refresh token no cambia)
     /// - Returns: TokenInfo actualizado
@@ -244,7 +240,6 @@ extension AuthEndpoints.RefreshResponseBody {
 }
 
 extension AuthEndpoints.UserResponseBody {
-
     /// Convierte el response body a entidad User del dominio
     func toUser() -> User {
         User(
@@ -260,7 +255,6 @@ extension AuthEndpoints.UserResponseBody {
 // MARK: - Convenience Factory Methods
 
 extension AuthEndpoints {
-
     /// Crea un URLRequest configurado para este endpoint
     /// - Parameter body: Body opcional para enviar
     /// - Returns: URLRequest configurado

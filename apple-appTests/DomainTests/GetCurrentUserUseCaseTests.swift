@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("GetCurrentUserUseCase Tests")
 struct GetCurrentUserUseCaseTests {
-    
     @Test("Get current user should succeed when session is active")
     func testGetCurrentUserWithActiveSession() async throws {
         // Given

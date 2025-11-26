@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("AuthRepository Protocol Tests")
 struct AuthRepositoryTests {
-    
     @Test("MockAuthRepository should track login calls")
     func testLoginTracking() async throws {
         // Given

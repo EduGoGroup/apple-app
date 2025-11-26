@@ -40,7 +40,6 @@ import Security
 /// Revisión: No requiere revisión (inmutable por diseño)
 /// # ============================================================
 final class SecureSessionDelegate: NSObject, URLSessionDelegate, @unchecked Sendable {
-
     // MARK: - Dependencies
 
     private let pinnedPublicKeyHashes: Set<String>
@@ -136,7 +135,6 @@ import CommonCrypto
 /// FASE 1 - Refactoring: Eliminado nonisolated(unsafe), usado actor interno
 /// para proteger estado mutable de forma thread-safe.
 final class MockSecureSessionDelegate: NSObject, URLSessionDelegate, Sendable {
-
     /// Actor interno para estado mutable thread-safe
     actor State {
         var shouldAcceptChallenge = true

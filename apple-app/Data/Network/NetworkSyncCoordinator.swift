@@ -22,7 +22,6 @@ import Foundation
 /// coordinator.startMonitoring()
 /// ```
 actor NetworkSyncCoordinator {
-
     // MARK: - Dependencies
 
     private let networkMonitor: NetworkMonitor

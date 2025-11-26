@@ -14,7 +14,6 @@ import Foundation
 @Suite("APIClient Tests", .serialized)
 @MainActor
 struct APIClientTests {
-    
     // Nota: Este test necesita ajustar el JSON mock para coincidir con User CodingKeys
     // El modelo usa snake_case (display_name, photo_url, is_email_verified)
     @Test("APIClient should successfully decode response", .disabled("JSON mock necesita snake_case CodingKeys"))

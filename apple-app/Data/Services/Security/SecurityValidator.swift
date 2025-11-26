@@ -31,7 +31,6 @@ protocol SecurityValidator: Sendable {
 /// 3. Se accede principalmente desde interceptors (@MainActor)
 @MainActor
 final class DefaultSecurityValidator: SecurityValidator {
-
     var isJailbroken: Bool {
         get async {
             #if targetEnvironment(simulator)

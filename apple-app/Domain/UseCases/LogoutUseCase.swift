@@ -30,6 +30,6 @@ final class DefaultLogoutUseCase: LogoutUseCase {
     func execute() async -> Result<Void, AppError> {
         // Delegación directa al repositorio
         // No requiere validaciones adicionales
-        return await authRepository.logout()
+        await authRepository.logout()
     }
 }

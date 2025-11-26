@@ -15,7 +15,6 @@ import Foundation
 @Suite("Auth Performance Tests")
 @MainActor
 struct AuthPerformanceTests {
-
     // MARK: - JWT Decoding Performance
 
     @Test("JWT decoding debe ser < 10ms")

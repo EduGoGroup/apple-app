@@ -33,7 +33,6 @@ import SwiftUI
 /// }
 /// ```
 struct SyncIndicator: View {
-
     // MARK: - Properties
 
     /// Cantidad de elementos siendo sincronizados

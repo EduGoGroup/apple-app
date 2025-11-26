@@ -12,7 +12,6 @@ import Foundation
 
 @Suite("ConflictResolver Tests")
 struct ConflictResolverTests {
-
     @Test("SimpleConflictResolver - serverWins strategy")
     func simpleResolverServerWins() async {
         // Given

@@ -67,7 +67,6 @@ enum BiometricError: Error, LocalizedError {
 /// 3. Simplifica el código eliminando los wrappers MainActor.run
 @MainActor
 final class LocalAuthenticationService: BiometricAuthService {
-
     var isAvailable: Bool {
         get async {
             let context = LAContext()

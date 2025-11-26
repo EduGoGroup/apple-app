@@ -13,7 +13,6 @@ import Testing
 @MainActor
 @Suite("User Tests")
 struct UserTests {
-
     @Test("User has correct properties")
     func userProperties() {
         let user = User.fixture(
@@ -96,7 +95,7 @@ struct UserTests {
         let user = User.studentFixture
 
         Task {
-            let _ = user.email // Puede usarse en async context
+            _ = user.email // Puede usarse en async context
         }
     }
 

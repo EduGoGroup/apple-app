@@ -85,7 +85,7 @@ enum Endpoint: Sendable {
     /// @available(*, deprecated, message: "Usar la propiedad fullURL en su lugar")
     func url(baseURL: URL) -> URL {
         // Ignorar el baseURL pasado y usar el correcto según el tipo de endpoint
-        return self.baseURL.appendingPathComponent(path)
+        self.baseURL.appendingPathComponent(path)
     }
 
     /// URL completa del endpoint (sin necesidad de pasar baseURL)

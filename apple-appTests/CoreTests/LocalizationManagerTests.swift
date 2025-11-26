@@ -14,7 +14,6 @@ import Foundation
 @Suite("LocalizationManager Tests")
 @MainActor
 struct LocalizationManagerTests {
-
     // MARK: - Initialization Tests
 
     @Test("Inicialización con idioma predeterminado")
@@ -96,7 +95,6 @@ struct LocalizationManagerTests {
 /// Tests para Language enum
 @Suite("Language Enum Tests")
 struct LanguageEnumTests {
-
     @Test("Código de idioma español")
     func testSpanishCode() {
         #expect(Language.spanish.code == "es")

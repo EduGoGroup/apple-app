@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("ValidationError Tests")
 struct ValidationErrorTests {
-    
     // MARK: - Tests de mensajes localizados
     // Nota: userMessage depende del locale del sistema, verificamos via String(localized:)
 

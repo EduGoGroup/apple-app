@@ -35,7 +35,6 @@ struct CachedResponse: Sendable {
 /// 3. Dictionary simple más eficiente que NSCache
 @MainActor
 final class ResponseCache {
-
     // MARK: - Storage
 
     private var storage: [String: CachedResponse] = [:]

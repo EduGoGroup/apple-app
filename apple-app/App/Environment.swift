@@ -50,7 +50,6 @@ enum AuthenticationMode: Sendable, Equatable {
 /// }
 /// ```
 enum AppEnvironment {
-
     // MARK: - Environment Type
 
     /// Tipos de ambiente soportados

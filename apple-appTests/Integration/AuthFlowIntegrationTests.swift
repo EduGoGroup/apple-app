@@ -13,7 +13,6 @@ import Foundation
 @Suite("Auth Flow Integration Tests")
 @MainActor
 struct AuthFlowIntegrationTests {
-
     // MARK: - Full Login Flow
 
     @Test("Complete login flow with Real API")

@@ -31,7 +31,6 @@ import Observation
 @MainActor
 @Observable
 final class NetworkState {
-
     // MARK: - Properties
 
     /// Indica si hay conexión a internet

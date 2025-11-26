@@ -179,7 +179,7 @@ struct DSVisualEffectFactory {
         // }
 
         // Usa Materials (iOS 18+ / macOS 15+)
-        return DSVisualEffectLegacy(style: style, shape: shape, isInteractive: isInteractive)
+        DSVisualEffectLegacy(style: style, shape: shape, isInteractive: isInteractive)
     }
 }
 

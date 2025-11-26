@@ -9,7 +9,6 @@
 import SwiftUI
 
 struct ContentView: View {
-
     // MARK: - Environment
 
     @EnvironmentObject private var container: DependencyContainer

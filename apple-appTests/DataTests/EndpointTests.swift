@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("Endpoint Tests")
 struct EndpointTests {
-
     // Los paths dependen de AppEnvironment.authMode:
     // - dummyJSON: "/auth/..."
     // - realAPI: "/v1/auth/..."

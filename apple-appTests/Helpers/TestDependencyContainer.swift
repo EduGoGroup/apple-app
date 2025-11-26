@@ -34,7 +34,6 @@ import Foundation
 /// 3. Los tests Swift Testing se ejecutan en main actor por defecto
 @MainActor
 final class TestDependencyContainer: DependencyContainer {
-
     /// Tipos registrados para verificación
     private var registeredTypeKeys: Set<String> = []
 

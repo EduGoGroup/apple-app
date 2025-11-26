@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("PreferencesRepository Protocol Tests")
 struct PreferencesRepositoryTests {
-
     @Test("MockPreferencesRepository should return default preferences initially")
     func testDefaultPreferences() async throws {
         // Given

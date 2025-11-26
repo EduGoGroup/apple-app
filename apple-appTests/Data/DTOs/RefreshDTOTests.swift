@@ -13,7 +13,6 @@ import Foundation
 @MainActor
 @Suite("RefreshDTO Tests")
 struct RefreshDTOTests {
-
     // MARK: - RefreshRequest Tests
 
     @Test("RefreshRequest has correct properties")

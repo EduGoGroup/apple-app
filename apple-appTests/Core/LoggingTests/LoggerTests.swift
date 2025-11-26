@@ -13,7 +13,6 @@ import Testing
 @MainActor
 @Suite("Logger System Tests")
 struct LoggerTests {
-
     // MARK: - MockLogger Tests
 
     @Test("MockLogger almacena entries correctamente")
@@ -172,12 +171,12 @@ struct LoggerTests {
     @Test("LoggerFactory crea loggers para cada categoría")
     func loggerFactoryCreatesLoggers() {
         // When/Then - No debería crashear
-        let _ = LoggerFactory.network
-        let _ = LoggerFactory.auth
-        let _ = LoggerFactory.data
-        let _ = LoggerFactory.ui
-        let _ = LoggerFactory.business
-        let _ = LoggerFactory.system
+        _ = LoggerFactory.network
+        _ = LoggerFactory.auth
+        _ = LoggerFactory.data
+        _ = LoggerFactory.ui
+        _ = LoggerFactory.business
+        _ = LoggerFactory.system
 
         // Si llegamos aquí, los loggers se crearon exitosamente
         #expect(true)

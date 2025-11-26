@@ -27,7 +27,6 @@ import Testing
 /// ```
 @MainActor
 final class IntegrationTestCase {
-
     // MARK: - Properties
 
     let container: DependencyContainer

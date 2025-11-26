@@ -34,7 +34,6 @@ import Foundation
 ///   thread-safety en operaciones con Keychain y estado de UI.
 @MainActor
 protocol AuthRepository: Sendable {
-
     // MARK: - Authentication
 
     /// Autentica al usuario con email y contraseña
@@ -136,7 +135,6 @@ protocol AuthRepository: Sendable {
 // MARK: - Default Implementations
 
 extension AuthRepository {
-
     /// Verifica si el usuario está autenticado con un token válido
     func isAuthenticated() async -> Bool {
         await getValidAccessToken() != nil

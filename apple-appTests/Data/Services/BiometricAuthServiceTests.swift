@@ -12,7 +12,6 @@ import LocalAuthentication
 
 @Suite("Biometric Auth Service Tests")
 struct BiometricAuthServiceTests {
-
     // MARK: - Mock Service Tests
 
     @Test("Mock biometric returns success when configured")

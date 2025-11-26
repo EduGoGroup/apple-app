@@ -19,10 +19,6 @@ struct LogoutRequest: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case refreshToken = "refresh_token"
     }
-
-    init(refreshToken: String) {
-        self.refreshToken = refreshToken
-    }
 }
 
 // MARK: - Logout Response

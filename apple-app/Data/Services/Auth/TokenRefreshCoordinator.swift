@@ -22,7 +22,6 @@ import Foundation
 /// solo se ejecuta UN refresh. Los demás esperan al resultado del refresh en progreso.
 @MainActor
 final class TokenRefreshCoordinator {
-
     // MARK: - Dependencies
 
     private let apiClient: APIClient
@@ -129,7 +128,6 @@ final class TokenRefreshCoordinator {
             try await keychainService.saveToken(newTokenInfo.accessToken, for: accessTokenKey)
 
             return newTokenInfo
-
         } catch {
             // Limpiar tokens si refresh falla
             try? await keychainService.deleteToken(for: accessTokenKey)

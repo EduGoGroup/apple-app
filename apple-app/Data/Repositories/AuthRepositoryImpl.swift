@@ -45,7 +45,6 @@ private actor TokenStore {
 /// - @MainActor garantiza thread-safety sin locks manuales
 @MainActor
 final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
-
     // MARK: - Dependencies
 
     private let apiClient: APIClient
@@ -123,7 +122,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             try? await keychainService.saveToken(password, for: storedPasswordKey)
 
             return .success(user)
-
         } catch let error as NetworkError {
             await logger.error("Login failed - Network error", metadata: [
                 "error": error.localizedDescription
@@ -172,7 +170,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             // 4. Login normal con credenciales
             await logger.info("Biometric auth successful, performing login")
             return await login(email: email, password: password)
-
         } catch {
             await logger.error("Biometric login failed", metadata: [
                 "error": error.localizedDescription
@@ -219,7 +216,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             await logger.info("Current user retrieved from JWT", metadata: ["userId": user.id])
 
             return .success(user)
-
         } catch {
             // Si hay cualquier error (JWT inválido, keychain, etc), intentar refresh
             await logger.warning("Error retrieving current user, attempting refresh", metadata: [
@@ -281,7 +277,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
             await logger.info("Token refresh successful")
             return .success(newTokens)
-
         } catch let error as NetworkError {
             await logger.error("Token refresh failed - Network error", metadata: [
                 "error": error.localizedDescription
@@ -405,7 +400,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             await tokenStore.setTokens(tokenInfo)
 
             return .success(tokenInfo)
-
         } catch {
             return .failure(.network(.unauthorized))
         }

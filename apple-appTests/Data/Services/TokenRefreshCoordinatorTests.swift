@@ -13,7 +13,6 @@ import Foundation
 @MainActor
 @Suite("Token Refresh Coordinator Tests")
 struct TokenRefreshCoordinatorTests {
-
     // MARK: - Helper para crear mocks
 
     func createMockedCoordinator(

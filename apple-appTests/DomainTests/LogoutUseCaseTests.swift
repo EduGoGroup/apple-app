@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("LogoutUseCase Tests")
 struct LogoutUseCaseTests {
-    
     @Test("Logout should succeed when repository succeeds")
     func testLogoutSuccess() async throws {
         // Given

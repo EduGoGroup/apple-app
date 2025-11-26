@@ -215,14 +215,12 @@ final class DefaultAPIClient: APIClient {
                 ])
                 throw NetworkError.decodingError
             }
-
         } catch let error as NetworkError {
             // SPEC-004: Encolar request si no hay conexión (para retry posterior)
             if error == .noConnection,
                let queue = offlineQueue,
                let url = request.url,
                let method = request.httpMethod {
-
                 let queuedRequest = QueuedRequest(
                     url: url,
                     method: method,
