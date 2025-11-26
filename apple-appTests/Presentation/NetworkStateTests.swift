@@ -16,7 +16,7 @@ struct NetworkStateTests {
     @MainActor
     func initialStateConnected() async {
         // Usar mock helper para evitar race conditions con inicialización asíncrona
-        let sut = NetworkState.mock(
+        let sut = await NetworkState.mock(
             isConnected: true,
             isSyncing: false,
             syncingItemsCount: 0
@@ -32,7 +32,7 @@ struct NetworkStateTests {
     @MainActor
     func initialStateDisconnected() async {
         // Usar mock helper para evitar race conditions
-        let sut = NetworkState.mock(isConnected: false)
+        let sut = await NetworkState.mock(isConnected: false)
 
         // Then
         #expect(sut.isConnected == false)
@@ -42,7 +42,7 @@ struct NetworkStateTests {
     @MainActor
     func forceSyncOnlyWhenConnected() async {
         // Usar mock para estado inicial offline
-        let sut = NetworkState.mock(isConnected: false)
+        let sut = await NetworkState.mock(isConnected: false)
 
         // When - Sin conexión
         await sut.forceSyncNow()
@@ -62,7 +62,7 @@ struct NetworkStateTests {
     @MainActor
     func stopMonitoringCancelsTask() async {
         // Usar mock helper
-        let sut = NetworkState.mock()
+        let sut = await NetworkState.mock()
 
         // When
         sut.stopMonitoring()
@@ -73,10 +73,10 @@ struct NetworkStateTests {
 
     @Test("Mock helper crea estado correctamente")
     @MainActor
-    func mockHelperCreatesStateCorrectly() {
+    func mockHelperCreatesStateCorrectly() async {
         // Given & When
-        let sutOnline = NetworkState.mock(isConnected: true, isSyncing: false)
-        let sutOffline = NetworkState.mock(isConnected: false, isSyncing: true, syncingItemsCount: 5)
+        let sutOnline = await NetworkState.mock(isConnected: true, isSyncing: false)
+        let sutOffline = await NetworkState.mock(isConnected: false, isSyncing: true, syncingItemsCount: 5)
 
         // Then
         #expect(sutOnline.isConnected == true)
