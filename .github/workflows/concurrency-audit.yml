@@ -3,7 +3,7 @@ name: Swift 6 Concurrency Audit
 on:
   pull_request:
     paths:
-      - '**.swift'
+      - "**.swift"
   push:
     branches:
       - main
@@ -20,11 +20,11 @@ jobs:
 
       - name: ❌ BLOQUEAR - nonisolated(unsafe) PROHIBIDO
         run: |
-          echo "🔍 Buscando nonisolated(unsafe)..."
-          violations=$(grep -rn "nonisolated(unsafe)" --include="*.swift" apple-app apple-appTests || true)
+          echo "🔍 Buscando nonisolated(unsafe) en código (ignorando comentarios)..."
+          violations=$(grep -rn "nonisolated(unsafe)" --include="*.swift" apple-app apple-appTests | grep -v "//.*nonisolated(unsafe)" | grep -v "///.*nonisolated(unsafe)" || true)
 
           if [ -n "$violations" ]; then
-            echo "::error::❌ PROHIBIDO: Se encontró nonisolated(unsafe)"
+            echo "::error::❌ PROHIBIDO: Se encontró nonisolated(unsafe) en código"
             echo ""
             echo "VIOLACIONES:"
             echo "$violations"
@@ -36,7 +36,7 @@ jobs:
             exit 1
           fi
 
-          echo "✅ No se encontró nonisolated(unsafe)"
+          echo "✅ No se encontró nonisolated(unsafe) en código"
 
       - name: ⚠️  ADVERTIR - @unchecked Sendable sin documentación
         run: |
