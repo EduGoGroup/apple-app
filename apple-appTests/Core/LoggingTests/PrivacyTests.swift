@@ -231,11 +231,8 @@ struct PrivacyTests {
         logger.debug("Debug level")
         logger.info("Info level")
         logger.notice("Notice level")
-        await logger.waitForPendingLogs()
         logger.warning("Warning level")
-        await logger.waitForPendingLogs()
         logger.error("Error level")
-        await logger.waitForPendingLogs()
         logger.critical("Critical level")
         await logger.waitForPendingLogs()
 
