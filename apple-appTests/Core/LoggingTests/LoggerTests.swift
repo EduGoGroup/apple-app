@@ -29,9 +29,9 @@ struct LoggerTests {
         // Then
         let entries = await logger.entries
         #expect(entries.count == 3)
-        #expect(entries[0].level == .debug)
-        #expect(entries[1].level == .info)
-        #expect(entries[2].level == .error)
+        #expect(entries[0].level == "debug")
+        #expect(entries[1].level == "info")
+        #expect(entries[2].level == "error")
     }
 
     @Test("MockLogger contains() funciona correctamente")
@@ -42,9 +42,9 @@ struct LoggerTests {
         await logger.error("Network error occurred")
 
         // Then
-        let hasInfo = await logger.contains(message: "logged in")
-        let hasError = await logger.contains(message: "Network")
-        let hasDebug = await logger.contains(message: "anything")
+        let hasInfo = await logger.contains(level: "info", message: "logged in")
+        let hasError = await logger.contains(level: "error", message: "Network")
+        let hasDebug = await logger.contains(level: "debug", message: "anything")
 
         #expect(hasInfo)
         #expect(hasError)
@@ -63,15 +63,15 @@ struct LoggerTests {
         await logger.error("Error 3")
 
         // Then
-        let debugEntries = await logger.entries(for: .debug)
-        let infoEntries = await logger.entries(for: .info)
-        let errorEntries = await logger.entries(for: .error)
-        let warningEntries = await logger.entries(for: .warning)
+        let debugCount = await logger.count(level: "debug")
+        let infoCount = await logger.count(level: "info")
+        let errorCount = await logger.count(level: "error")
+        let warningCount = await logger.count(level: "warning")
 
-        #expect(debugEntries.count == 2)
-        #expect(infoEntries.count == 1)
-        #expect(errorEntries.count == 3)
-        #expect(warningEntries.count == 0)
+        #expect(debugCount == 2)
+        #expect(infoCount == 1)
+        #expect(errorCount == 3)
+        #expect(warningCount == 0)
     }
 
     @Test("MockLogger clear() limpia entries")
@@ -118,10 +118,10 @@ struct LoggerTests {
 
         // Then
         let entries = await logger.entries
-        let entry = entries.last
-        #expect(entry?.file.contains("LoggerTests.swift") == true)
-        #expect(entry?.function.contains("mockLoggerStoresContext") == true)
-        #expect((entry?.line ?? 0) > 0)
+        let lastEntry = await logger.lastEntry
+        #expect(lastEntry?.file.contains("LoggerTests.swift") == true)
+        #expect(lastEntry?.function.contains("mockLoggerStoresContext") == true)
+        #expect((lastEntry?.line ?? 0) > 0)
     }
 
     @Test("MockLogger todos los niveles de log")
@@ -140,12 +140,12 @@ struct LoggerTests {
         // Then
         let entries = await logger.entries
         #expect(entries.count == 6)
-        #expect(entries[0].level == .debug)
-        #expect(entries[1].level == .info)
-        #expect(entries[2].level == .notice)
-        #expect(entries[3].level == .warning)
-        #expect(entries[4].level == .error)
-        #expect(entries[5].level == .critical)
+        #expect(entries[0].level == "debug")
+        #expect(entries[1].level == "info")
+        #expect(entries[2].level == "notice")
+        #expect(entries[3].level == "warning")
+        #expect(entries[4].level == "error")
+        #expect(entries[5].level == "critical")
     }
 
     // MARK: - LogCategory Tests

@@ -26,8 +26,7 @@ struct PrivacyTests {
         await logger.logToken(token)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("eyJh"), "Debería mostrar primeros 4 caracteres")
         #expect(message.contains("9MDIyfQ") == false, "NO debería mostrar el token completo")
@@ -44,8 +43,7 @@ struct PrivacyTests {
         await logger.logToken(shortToken)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("***"), "Token corto debería ser ***")
     }
@@ -60,8 +58,7 @@ struct PrivacyTests {
         await logger.logToken(token, label: "AccessToken")
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("AccessToken:"), "Debería usar el label personalizado")
     }
@@ -78,8 +75,7 @@ struct PrivacyTests {
         await logger.logEmail(email)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("us***"), "Debería mostrar primeros 2 caracteres")
         #expect(message.contains("@example.com"), "Debería mantener el dominio")
@@ -96,8 +92,7 @@ struct PrivacyTests {
         await logger.logEmail(shortEmail)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("@b.com"), "Debería mantener el dominio")
     }
@@ -112,8 +107,7 @@ struct PrivacyTests {
         await logger.logEmail(invalidEmail)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("***"), "Email inválido debería ser ***")
     }
@@ -130,8 +124,7 @@ struct PrivacyTests {
         await logger.logUserId(userId)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("550e"), "Debería mostrar primeros 4 caracteres")
         #expect(message.contains("0000"), "Debería mostrar últimos 4 caracteres")
@@ -149,8 +142,7 @@ struct PrivacyTests {
         await logger.logUserId(shortId)
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         let message = lastEntry?.message ?? ""
         #expect(message.contains("***"), "ID corto debería ser ***")
     }
@@ -180,8 +172,7 @@ struct PrivacyTests {
         await logger.info("User action performed", metadata: metadata)
 
         // Then
-        let entries = await logger.entries
-        let entry = entries.last
+        let entry = await logger.lastEntry
         #expect(entry?.metadata?["userId"] == "123")
         #expect(entry?.metadata?["action"] == "login")
         #expect(entry?.metadata?["status"] == "success")
@@ -196,8 +187,7 @@ struct PrivacyTests {
         await logger.info("Simple message")
 
         // Then
-        let entries = await logger.entries
-        let lastEntry = entries.last
+        let lastEntry = await logger.lastEntry
         #expect(lastEntry?.metadata == nil)
         #expect(lastEntry?.message == "Simple message")
     }
@@ -213,8 +203,7 @@ struct PrivacyTests {
         await logger.info("Test message")
 
         // Then
-        let entries = await logger.entries
-        let entry = entries.last
+        let entry = await logger.lastEntry
         #expect(entry?.file.contains("PrivacyTests.swift") == true)
         #expect(entry?.function.contains("loggerCapturesContext") == true)
         #expect((entry?.line ?? 0) > 0)
@@ -238,11 +227,11 @@ struct PrivacyTests {
         // Then
         let entries = await logger.entries
         #expect(entries.count == 6)
-        #expect(entries[0].level == .debug)
-        #expect(entries[1].level == .info)
-        #expect(entries[2].level == .notice)
-        #expect(entries[3].level == .warning)
-        #expect(entries[4].level == .error)
-        #expect(entries[5].level == .critical)
+        #expect(entries[0].level == "debug")
+        #expect(entries[1].level == "info")
+        #expect(entries[2].level == "notice")
+        #expect(entries[3].level == "warning")
+        #expect(entries[4].level == "error")
+        #expect(entries[5].level == "critical")
     }
 }
