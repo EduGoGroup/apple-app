@@ -14,83 +14,86 @@ import SwiftUI
 @Suite("ValidationError Tests")
 struct ValidationErrorTests {
     
+    // MARK: - Tests de mensajes localizados
+    // Nota: userMessage depende del locale del sistema, verificamos via String(localized:)
+
     @Test("ValidationError emptyEmail should have correct messages")
     func testEmptyEmailMessages() async throws {
         // Given
         let error = ValidationError.emptyEmail
-        
-        // Then
-        #expect(error.userMessage == "El email es requerido.")
+
+        // Then - userMessage usa locale del sistema
+        #expect(error.userMessage == String(localized: "error.validation.emptyEmail"))
         #expect(error.technicalMessage == "Validation failed: Email field is empty")
     }
-    
+
     @Test("ValidationError invalidEmailFormat should have correct messages")
     func testInvalidEmailFormatMessages() async throws {
         // Given
         let error = ValidationError.invalidEmailFormat
-        
+
         // Then
-        #expect(error.userMessage == "El formato del email es inválido.")
+        #expect(error.userMessage == String(localized: "error.validation.invalidEmailFormat"))
         #expect(error.technicalMessage == "Validation failed: Email format is invalid")
     }
-    
+
     @Test("ValidationError emptyPassword should have correct messages")
     func testEmptyPasswordMessages() async throws {
         // Given
         let error = ValidationError.emptyPassword
-        
+
         // Then
-        #expect(error.userMessage == "La contraseña es requerida.")
+        #expect(error.userMessage == String(localized: "error.validation.emptyPassword"))
         #expect(error.technicalMessage == "Validation failed: Password field is empty")
     }
-    
+
     @Test("ValidationError passwordTooShort should have correct messages")
     func testPasswordTooShortMessages() async throws {
         // Given
         let error = ValidationError.passwordTooShort
-        
+
         // Then
-        #expect(error.userMessage == "La contraseña debe tener al menos 6 caracteres.")
+        #expect(error.userMessage == String(localized: "error.validation.passwordTooShort"))
         #expect(error.technicalMessage == "Validation failed: Password length < 6 characters")
     }
-    
+
     @Test("ValidationError passwordMismatch should have correct messages")
     func testPasswordMismatchMessages() async throws {
         // Given
         let error = ValidationError.passwordMismatch
-        
+
         // Then
-        #expect(error.userMessage == "Las contraseñas no coinciden.")
+        #expect(error.userMessage == String(localized: "error.validation.passwordMismatch"))
         #expect(error.technicalMessage == "Validation failed: Passwords do not match")
     }
-    
+
     @Test("ValidationError emptyName should have correct messages")
     func testEmptyNameMessages() async throws {
         // Given
         let error = ValidationError.emptyName
-        
+
         // Then
-        #expect(error.userMessage == "El nombre es requerido.")
+        #expect(error.userMessage == String(localized: "error.validation.emptyName"))
         #expect(error.technicalMessage == "Validation failed: Name field is empty")
     }
-    
+
     @Test("ValidationError nameTooShort should have correct messages")
     func testNameTooShortMessages() async throws {
         // Given
         let error = ValidationError.nameTooShort
-        
+
         // Then
-        #expect(error.userMessage == "El nombre debe tener al menos 2 caracteres.")
+        #expect(error.userMessage == String(localized: "error.validation.nameTooShort"))
         #expect(error.technicalMessage == "Validation failed: Name length < 2 characters")
     }
-    
+
     @Test("ValidationError requiredField should include field name")
     func testRequiredFieldMessages() async throws {
         // Given
         let error = ValidationError.requiredField("Teléfono")
-        
-        // Then
-        #expect(error.userMessage == "El campo 'Teléfono' es requerido.")
+
+        // Then - requiredField usa String(format:) con el nombre del campo
+        #expect(error.userMessage == String(format: String(localized: "error.validation.requiredField"), "Teléfono"))
         #expect(error.technicalMessage == "Validation failed: Required field 'Teléfono' is empty")
     }
     

@@ -39,12 +39,13 @@ final class apple_appTests: XCTestCase {
     }
 
     // NetworkError noConnection debería tener mensaje correcto
+    // Nota: userMessage depende del locale del sistema, verificamos via String(localized:)
     func testNetworkErrorMessage() async throws {
         // Given
         let error = NetworkError.noConnection
 
-        // Then
-        XCTAssertEqual(error.userMessage, "No hay conexión a internet. Verifica tu red.")
+        // Then - usa el valor localizado del sistema actual
+        XCTAssertEqual(error.userMessage, String(localized: "error.network.noConnection"))
     }
 
     // LoginUseCase debería rechazar email vacío
