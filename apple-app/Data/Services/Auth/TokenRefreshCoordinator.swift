@@ -8,12 +8,20 @@
 
 import Foundation
 
-/// Coordina el refresh de tokens
+/// Coordina el refresh de tokens con deduplicación de requests concurrentes
 ///
-/// Nota: Implementación simplificada compatible con Swift 6 strict concurrency.
-/// La versión con actor completo se implementará en una fase futura cuando
-/// los servicios soporten mejor concurrency.
-final class TokenRefreshCoordinator: @unchecked Sendable {
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Usa @MainActor porque:
+/// 1. APIClient es @MainActor (requisito de dependencia)
+/// 2. Se llama principalmente desde interceptors en main thread
+/// 3. Deduplicación de refreshes se mantiene con Task tracking
+///
+/// ## Deduplicación
+/// Si múltiples requests piden token simultáneamente y el token está expirado,
+/// solo se ejecuta UN refresh. Los demás esperan al resultado del refresh en progreso.
+@MainActor
+final class TokenRefreshCoordinator {
 
     // MARK: - Dependencies
 
@@ -24,6 +32,9 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
     // Claves de Keychain
     private let accessTokenKey = "access_token"
     private let refreshTokenKey = "refresh_token"
+
+    // Task para deduplicar refreshes concurrentes
+    private var ongoingRefresh: Task<TokenInfo, Error>?
 
     // MARK: - Initialization
 
@@ -40,7 +51,6 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
     // MARK: - Public API
 
     /// Obtiene un token válido, refrescándolo si es necesario
-    @MainActor
     func getValidToken() async throws -> TokenInfo {
         // 1. Obtener token actual
         let currentToken = try getCurrentTokenInfo()
@@ -50,13 +60,27 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
             return currentToken
         }
 
-        // 3. Refresh necesario
-        return try await performRefresh(currentToken.refreshToken)
+        // 3. Si hay un refresh en progreso, esperar a ese
+        if let existingRefresh = ongoingRefresh {
+            return try await existingRefresh.value
+        }
+
+        // 4. Iniciar nuevo refresh y deduplicar
+        let refreshTask = Task {
+            defer { self.ongoingRefresh = nil }
+            return try await self.performRefresh(currentToken.refreshToken)
+        }
+
+        ongoingRefresh = refreshTask
+        return try await refreshTask.value
     }
 
     /// Fuerza un refresh inmediato
-    @MainActor
     func forceRefresh() async throws -> TokenInfo {
+        // Cancelar refresh en progreso si existe
+        ongoingRefresh?.cancel()
+        ongoingRefresh = nil
+
         let currentToken = try getCurrentTokenInfo()
         return try await performRefresh(currentToken.refreshToken)
     }
@@ -64,7 +88,6 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
     // MARK: - Private Methods
 
     /// Obtiene el TokenInfo actual desde Keychain y JWT
-    @MainActor
     private func getCurrentTokenInfo() throws -> TokenInfo {
         // 1. Leer tokens de Keychain
         guard let accessToken = try keychainService.getToken(for: accessTokenKey) else {
@@ -86,7 +109,6 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
     }
 
     /// Ejecuta el refresh de token llamando al API
-    @MainActor
     private func performRefresh(_ refreshToken: String) async throws -> TokenInfo {
         do {
             // 1. Llamar API de refresh
@@ -122,13 +144,16 @@ final class TokenRefreshCoordinator: @unchecked Sendable {
 
 #if DEBUG
 /// Mock Token Refresh Coordinator para testing
-final class MockTokenRefreshCoordinator: @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Marcado como @MainActor para alinearse con implementación real
+@MainActor
+final class MockTokenRefreshCoordinator {
     var tokenToReturn: TokenInfo?
     var errorToThrow: Error?
     var getValidTokenCallCount = 0
     var forceRefreshCallCount = 0
 
-    @MainActor
     func getValidToken() async throws -> TokenInfo {
         getValidTokenCallCount += 1
 
@@ -139,7 +164,6 @@ final class MockTokenRefreshCoordinator: @unchecked Sendable {
         return tokenToReturn ?? .fixture()
     }
 
-    @MainActor
     func forceRefresh() async throws -> TokenInfo {
         forceRefreshCallCount += 1
 
@@ -148,6 +172,14 @@ final class MockTokenRefreshCoordinator: @unchecked Sendable {
         }
 
         return tokenToReturn ?? .fixture()
+    }
+
+    // Helpers para configurar mock
+    func reset() {
+        tokenToReturn = nil
+        errorToThrow = nil
+        getValidTokenCallCount = 0
+        forceRefreshCallCount = 0
     }
 }
 #endif
