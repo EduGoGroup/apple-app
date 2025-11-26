@@ -76,7 +76,7 @@ struct ConflictResolverTests {
     @Test("DefaultConflictResolver - serverWins strategy")
     func defaultResolverServerWins() async {
         // Given
-        let sut = DefaultConflictResolver()
+        let sut = await DefaultConflictResolver()
         let conflict = SyncConflict(
             localData: "local".data(using: .utf8)!,
             serverData: "server".data(using: .utf8)!,
@@ -97,7 +97,7 @@ struct ConflictResolverTests {
     @MainActor
     func defaultResolverClientWins() async {
         // Given
-        let sut = DefaultConflictResolver()
+        let sut = await DefaultConflictResolver()
         let conflict = SyncConflict(
             localData: "local".data(using: .utf8)!,
             serverData: "server".data(using: .utf8)!,
