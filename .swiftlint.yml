@@ -1,0 +1,171 @@
+# SwiftLint Configuration for EduGo Apple App
+# Versión: 0.62.2
+# Fecha: 2025-11-26
+
+# ============================================================
+# REGLAS DESHABILITADAS
+# ============================================================
+disabled_rules:
+  - trailing_whitespace # Se maneja con editor
+  - todo # TODOs son válidos en desarrollo
+  - line_length # Manejado con opt_in más abajo
+  - cyclomatic_complexity # Permitimos complejidad moderada
+
+# ============================================================
+# REGLAS OPT-IN (Activadas explícitamente)
+# ============================================================
+opt_in_rules:
+  - empty_count # Usar .isEmpty en vez de .count == 0
+  - explicit_init # Evitar .init() redundante
+  - force_unwrapping # Alertar sobre force unwrap (!)
+  - implicit_return # Return implícito en closures
+  - sorted_first_last # .first en vez de .sorted().first
+  - vertical_whitespace_closing_braces # Spacing consistente
+  - vertical_whitespace_opening_braces
+  - unneeded_parentheses_in_closure_argument # Simplificar closures
+  - redundant_type_annotation # Evitar anotaciones redundantes
+  - toggle_bool # Usar .toggle() en vez de = !value
+  - unused_import # Detectar imports no usados
+
+# ============================================================
+# CONFIGURACIÓN DE LÍMITES
+# ============================================================
+
+# Longitud de línea
+line_length:
+  warning: 120
+  error: 150
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_comments: true
+
+# Longitud de función
+function_body_length:
+  warning: 40
+  error: 60
+
+# Longitud de archivo
+file_length:
+  warning: 500
+  error: 800
+  ignore_comment_only_lines: true
+
+# Longitud de tipo (class/struct)
+type_body_length:
+  warning: 300
+  error: 500
+
+# Número de parámetros
+function_parameter_count:
+  warning: 5
+  error: 7
+
+# Nivel de anidación
+nesting:
+  type_level:
+    warning: 2
+    error: 3
+  function_level:
+    warning: 3
+    error: 5
+
+# Nombre de identificadores
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - URL
+    - url
+    - jwt
+    - api
+    - os
+
+# Nombre de tipos
+type_name:
+  min_length: 3
+  max_length: 50
+  excluded:
+    - JWT
+    - API
+    - URL
+    - OS
+
+# ============================================================
+# EXCLUSIONES DE ARCHIVOS/DIRECTORIOS
+# ============================================================
+excluded:
+  - DerivedData
+  - .build
+  - .swiftpm
+  - Pods
+  - Carthage
+  - vendor
+  - node_modules
+  - apple-app/DesignSystem/Generated # Código autogenerado
+  - fastlane
+
+# ============================================================
+# INCLUSIONES ESPECÍFICAS
+# ============================================================
+included:
+  - apple-app
+  - apple-appTests
+
+# ============================================================
+# REGLAS PERSONALIZADAS
+# ============================================================
+custom_rules:
+  # Prohibir nonisolated(unsafe) - Concurrencia Swift 6
+  no_nonisolated_unsafe:
+    name: "No usar nonisolated(unsafe)"
+    regex: "^(?!\\s*///).*nonisolated\\s*\\(\\s*unsafe\\s*\\)"
+    message: "PROHIBIDO usar nonisolated(unsafe). Ver docs/revision/03-REGLAS-DESARROLLO-IA.md Regla 1"
+    severity: error
+    match_kinds:
+      - identifier
+      - keyword
+
+  # Documentar @unchecked Sendable
+  unchecked_sendable_must_document:
+    name: "@unchecked Sendable debe estar documentado"
+    regex: "@unchecked\\s+Sendable(?![\\s\\S]{0,500}# EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA)"
+    message: "Todo @unchecked Sendable debe tener documentación según Regla 7 (docs/revision/03-REGLAS-DESARROLLO-IA.md)"
+    severity: warning
+
+  # Alertar sobre NSLock
+  no_nslock_in_new_code:
+    name: "Evitar NSLock en código nuevo"
+    regex: "NSLock\\(\\)"
+    message: "Usar actor en vez de NSLock. Ver docs/revision/03-REGLAS-DESARROLLO-IA.md Regla 3"
+    severity: warning
+
+  # ViewModels deben ser @Observable @MainActor
+  viewmodel_must_be_mainactor:
+    name: "ViewModels deben ser @MainActor"
+    regex: "class\\s+\\w*ViewModel(?![\\s\\S]{0,100}@MainActor)"
+    message: "ViewModels deben ser @Observable @MainActor. Ver Regla 4"
+    severity: warning
+
+# ============================================================
+# CONFIGURACIÓN DE REPORTER
+# ============================================================
+reporter: "xcode" # Formato compatible con Xcode
+
+# ============================================================
+# NOTAS
+# ============================================================
+# Para ejecutar SwiftLint manualmente:
+#   ./lint.sh              # Lint completo
+#   ./lint.sh --fix        # Auto-fix de issues
+#   ./lint.sh --strict     # Tratar warnings como errores
+#
+# Para ejecutar en archivo específico:
+#   swiftlint lint --path apple-app/Core/Logging/Logger.swift
+#
+# Para ver reglas activas:
+#   swiftlint rules
