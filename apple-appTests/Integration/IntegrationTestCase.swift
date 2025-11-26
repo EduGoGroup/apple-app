@@ -40,6 +40,8 @@ final class IntegrationTestCase {
 
     // MARK: - Initialization
 
+    // swiftlint:disable:next function_body_length
+    // Justificación: Configuración completa de DI para integration tests requiere registro de todas las dependencias.
     init() {
         // Crear mocks primero
         let api = MockAPIClient()

@@ -151,6 +151,9 @@ final class DefaultAPIClient: APIClient {
 
     // MARK: - SPEC-004: Retry Logic
 
+    // swiftlint:disable:next function_body_length
+    // Justificación: Esta función maneja retry, interceptors, validación y cache en un flujo cohesivo.
+    // Refactorizar en múltiples funciones reduciría legibilidad del flujo de retry recursivo.
     private func executeWithRetry<T: Decodable>(request: URLRequest, attempt: Int = 0) async throws -> T {
         do {
             // Ejecutar request

@@ -12,7 +12,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct apple_appApp: App {
+struct EduGoApp: App {
     // MARK: - Dependency Container
 
     @StateObject private var container: DependencyContainer
