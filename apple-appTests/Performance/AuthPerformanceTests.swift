@@ -29,7 +29,7 @@ struct AuthPerformanceTests {
 
         // Ejecutar múltiples veces para promedio
         for _ in 0..<100 {
-            _ = try decoder.decode(validToken)
+            _ = try await decoder.decode(validToken)
         }
 
         let elapsed = Date().timeIntervalSince(start)
@@ -97,13 +97,13 @@ struct AuthPerformanceTests {
         let start = Date()
 
         // Save
-        try keychain.saveToken(token, for: key)
+        try await keychain.saveToken(token, for: key)
 
         // Get
-        _ = try keychain.getToken(for: key)
+        _ = try await keychain.getToken(for: key)
 
         // Delete
-        try keychain.deleteToken(for: key)
+        try await keychain.deleteToken(for: key)
 
         let elapsed = Date().timeIntervalSince(start) * 1000.0 // En ms
 
