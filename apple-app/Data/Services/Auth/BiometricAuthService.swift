@@ -122,7 +122,12 @@ final class LocalAuthenticationService: BiometricAuthService, @unchecked Sendabl
 
 #if DEBUG
 /// Mock Biometric Service para testing
-final class MockBiometricService: BiometricAuthService, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo tiene métodos sincrónicos.
+@MainActor
+final class MockBiometricService: BiometricAuthService {
     var isAvailableValue = true
     var biometryTypeValue: LABiometryType = .faceID
     var authenticateResult: Bool = true
@@ -145,6 +150,14 @@ final class MockBiometricService: BiometricAuthService, @unchecked Sendable {
         }
 
         return authenticateResult
+    }
+
+    func reset() {
+        isAvailableValue = true
+        biometryTypeValue = .faceID
+        authenticateResult = true
+        authenticateError = nil
+        authenticateCallCount = 0
     }
 }
 #endif

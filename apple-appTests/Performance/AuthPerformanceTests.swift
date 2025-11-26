@@ -44,10 +44,11 @@ struct AuthPerformanceTests {
     @Test("Token refresh debe ser < 500ms")
     func tokenRefreshPerformance() async throws {
         let mockKeychain = MockKeychainService()
+
+        // Configurar token que necesita refresh
         let mockJWT = MockJWTDecoder()
         let mockAPI = MockAPIClient()
 
-        // Configurar token que necesita refresh
         let expiringPayload = JWTPayload(
             sub: "123",
             email: "test@test.com",

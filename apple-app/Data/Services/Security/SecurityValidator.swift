@@ -106,36 +106,15 @@ final class DefaultSecurityValidator: SecurityValidator, @unchecked Sendable {
 // MARK: - Testing
 
 #if DEBUG
-final class MockSecurityValidator: SecurityValidator, @unchecked Sendable {
-    private var _isJailbrokenValue = false
-    private var _isDebuggerAttachedValue = false
-    private let lock = NSLock()
-
-    var isJailbrokenValue: Bool {
-        get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _isJailbrokenValue
-        }
-        set {
-            lock.lock()
-            defer { lock.unlock() }
-            _isJailbrokenValue = newValue
-        }
-    }
-
-    var isDebuggerAttachedValue: Bool {
-        get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _isDebuggerAttachedValue
-        }
-        set {
-            lock.lock()
-            defer { lock.unlock() }
-            _isDebuggerAttachedValue = newValue
-        }
-    }
+/// Mock de SecurityValidator para testing
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado NSLock, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo tiene métodos sincrónicos.
+@MainActor
+final class MockSecurityValidator: SecurityValidator {
+    var isJailbrokenValue = false
+    var isDebuggerAttachedValue = false
 
     var isJailbroken: Bool {
         get async { isJailbrokenValue }
@@ -147,6 +126,11 @@ final class MockSecurityValidator: SecurityValidator, @unchecked Sendable {
 
     var isTampered: Bool {
         get async { isJailbrokenValue || isDebuggerAttachedValue }
+    }
+
+    func reset() {
+        isJailbrokenValue = false
+        isDebuggerAttachedValue = false
     }
 }
 #endif

@@ -198,19 +198,28 @@ extension JWTPayload {
 }
 
 /// Mock JWT Decoder para testing
-final class MockJWTDecoder: JWTDecoder, @unchecked Sendable {
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado NSLock, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo es sincrónico.
+///
+/// Nota: JWTDecoder.decode es sincrónico (no async), por lo que no puede ser actor.
+/// @MainActor protege el estado mutable y mantiene compatibilidad con tests existentes.
+@MainActor
+final class MockJWTDecoder: JWTDecoder, Sendable {
     var payloadToReturn: JWTPayload?
     var errorToThrow: Error?
-    private let lock = NSLock()
 
     func decode(_ token: String) throws -> JWTPayload {
-        lock.lock()
-        defer { lock.unlock() }
-
         if let error = errorToThrow {
             throw error
         }
         return payloadToReturn ?? .fixture()
+    }
+
+    func reset() {
+        payloadToReturn = nil
+        errorToThrow = nil
     }
 }
 #endif
