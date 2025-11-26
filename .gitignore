@@ -30,3 +30,7 @@ playground.xcworkspace
 # Los archivos xcconfig ahora se versionan para CI/CD
 # Configs/*.xcconfig
 # !Configs/Base.xcconfig
+
+# Test outputs
+test_output.log
+test_output.txt
