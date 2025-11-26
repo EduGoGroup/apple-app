@@ -36,11 +36,11 @@ protocol NetworkMonitor: Sendable {
 /// 3. Actor garantiza acceso thread-safe al monitor y su estado
 ///
 /// FASE 1 - Refactoring: Eliminado @unchecked Sendable, convertido a actor
+/// FASE 3 - Fix Copilot: Eliminado dead code (currentPath, updatePath) y corregido handler overwrites
 actor DefaultNetworkMonitor: NetworkMonitor {
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "com.edugo.network.monitor")
-    private var currentPath: NWPath?
 
     nonisolated var isConnected: Bool {
         get async {
@@ -66,12 +66,6 @@ actor DefaultNetworkMonitor: NetworkMonitor {
     }
 
     init() {
-        // Configurar path update handler para cachear el estado
-        monitor.pathUpdateHandler = { [weak self] path in
-            Task { [weak self] in
-                await self?.updatePath(path)
-            }
-        }
         monitor.start(queue: queue)
     }
 
@@ -80,10 +74,6 @@ actor DefaultNetworkMonitor: NetworkMonitor {
     }
 
     // MARK: - Private Helpers
-
-    private func updatePath(_ path: NWPath) {
-        currentPath = path
-    }
 
     private nonisolated func connectionType(from path: NWPath) -> ConnectionType {
         if path.usesInterfaceType(.wifi) {
@@ -100,28 +90,30 @@ actor DefaultNetworkMonitor: NetworkMonitor {
     // MARK: - Observable
 
     /// Stream de cambios de conectividad
+    ///
+    /// FASE 3 - Fix Copilot: Corregido para usar polling en vez de sobreescribir pathUpdateHandler.
+    /// Esto permite múltiples observers sin perder listeners previos.
     nonisolated func connectionStream() -> AsyncStream<Bool> {
         AsyncStream { continuation in
-            // Handler Sendable para emitir cambios
-            let handler: @Sendable (NWPath) -> Void = { path in
-                let isConnected = path.status == .satisfied
-                continuation.yield(isConnected)
-            }
-
-            // Configurar el handler en el queue del monitor
-            queue.async {
-                self.monitor.pathUpdateHandler = handler
-
+            let task = Task {
                 // Emitir valor inicial
-                let currentPath = self.monitor.currentPath
-                continuation.yield(currentPath.status == .satisfied)
+                let initial = await self.isConnected
+                continuation.yield(initial)
+
+                // Polling cada segundo para detectar cambios
+                var lastValue = initial
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(1))
+                    let current = await self.isConnected
+                    if current != lastValue {
+                        continuation.yield(current)
+                        lastValue = current
+                    }
+                }
             }
 
-            continuation.onTermination = { @Sendable [queue, monitor = self.monitor] _ in
-                // Limpiar el handler
-                queue.async {
-                    monitor.pathUpdateHandler = nil
-                }
+            continuation.onTermination = { @Sendable _ in
+                task.cancel()
             }
         }
     }

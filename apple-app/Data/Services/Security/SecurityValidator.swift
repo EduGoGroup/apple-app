@@ -9,6 +9,7 @@
 import Foundation
 
 /// Protocol para validar seguridad del dispositivo
+@MainActor
 protocol SecurityValidator: Sendable {
     /// Indica si el dispositivo tiene jailbreak
     var isJailbroken: Bool { get async }
