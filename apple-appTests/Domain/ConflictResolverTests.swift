@@ -17,8 +17,8 @@ struct ConflictResolverTests {
         // Given
         let sut = SimpleConflictResolver()
         let conflict = SyncConflict(
-            localData: "local".data(using: .utf8)!,
-            serverData: "server".data(using: .utf8)!,
+            localData: Data("local".utf8),
+            serverData: Data("server".utf8),
             timestamp: Date(),
             endpoint: "/api/test",
             metadata: [:]
@@ -37,8 +37,8 @@ struct ConflictResolverTests {
         // Given
         let sut = SimpleConflictResolver()
         let conflict = SyncConflict(
-            localData: "local".data(using: .utf8)!,
-            serverData: "server".data(using: .utf8)!,
+            localData: Data("local".utf8),
+            serverData: Data("server".utf8),
             timestamp: Date(),
             endpoint: "/api/test",
             metadata: [:]
@@ -57,8 +57,8 @@ struct ConflictResolverTests {
         // Given
         let sut = SimpleConflictResolver()
         let conflict = SyncConflict(
-            localData: "local".data(using: .utf8)!,
-            serverData: "server".data(using: .utf8)!,
+            localData: Data("local".utf8),
+            serverData: Data("server".utf8),
             timestamp: Date(),
             endpoint: "/api/test",
             metadata: [:]
@@ -77,8 +77,8 @@ struct ConflictResolverTests {
         // Given
         let sut = await DefaultConflictResolver()
         let conflict = SyncConflict(
-            localData: "local".data(using: .utf8)!,
-            serverData: "server".data(using: .utf8)!,
+            localData: Data("local".utf8),
+            serverData: Data("server".utf8),
             timestamp: Date(),
             endpoint: "/api/test",
             metadata: [:]
@@ -98,8 +98,8 @@ struct ConflictResolverTests {
         // Given
         let sut = await DefaultConflictResolver()
         let conflict = SyncConflict(
-            localData: "local".data(using: .utf8)!,
-            serverData: "server".data(using: .utf8)!,
+            localData: Data("local".utf8),
+            serverData: Data("server".utf8),
             timestamp: Date(),
             endpoint: "/api/test",
             metadata: [:]
@@ -128,8 +128,8 @@ struct ConflictResolverTests {
     @MainActor
     func syncConflictCreation() {
         // Given
-        let localData = "local".data(using: .utf8)!
-        let serverData = "server".data(using: .utf8)!
+        let localData = Data("local".utf8)
+        let serverData = Data("server".utf8)
         let timestamp = Date()
         let endpoint = "/api/users/123"
 

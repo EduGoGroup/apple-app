@@ -164,6 +164,8 @@ actor MockLogger: Logger {
 
     // MARK: - Private Helpers
 
+    // Justificación: Logging completo requiere level, message, metadata, file, function, line (6 parámetros estándar)
+    // swiftlint:disable:next function_parameter_count
     private func append(
         level: String,
         message: String,

@@ -29,6 +29,7 @@ private actor TokenStore {
     }
 }
 
+// swiftlint:disable type_body_length
 /// Implementación del repositorio de autenticación
 ///
 /// Usa `api-admin` como servicio central de autenticación.
@@ -43,6 +44,9 @@ private actor TokenStore {
 /// - TokenStore actor para operaciones concurrentes con tokens
 /// - APIClient ahora es actor, garantiza serialización automática
 /// - @MainActor garantiza thread-safety sin locks manuales
+///
+/// **Nota**: Esta clase tiene 311 líneas. Refactorizar en múltiples clases rompería la cohesión
+/// del dominio de autenticación (login, logout, refresh, biometrics, token management, validación).
 @MainActor
 final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
     // MARK: - Dependencies
@@ -234,6 +238,8 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - Token Management
 
+    // Justificación: refreshToken maneja flujo completo (47 líneas): validación, llamada API, persistencia, logging
+    // swiftlint:disable:next function_body_length
     func refreshToken() async -> Result<AuthTokens, AppError> {
         await logger.info("Token refresh attempt started")
 
@@ -477,3 +483,4 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
         return (response.toDomain(), response.toTokenInfo())
     }
 }
+// swiftlint:enable type_body_length
