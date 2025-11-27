@@ -1,361 +1,185 @@
 # CLAUDE.md
 
-Guía para Claude Code al trabajar con este proyecto.
+Guía rápida para trabajar con este proyecto Apple multi-plataforma.
 
 ---
 
-## 🎯 Proyecto Multi-Plataforma
+## 🎯 Proyecto
 
-**App nativa Apple** con soporte para:
-- ✅ **iOS 18+** (iPhone)
-- ✅ **iPadOS 18+** (iPad)
-- ✅ **macOS 15+**
-- ✅ **visionOS 2+** (Vision Pro)
-
-**Estrategia de versiones**:
-- Versión mínima: iOS 18 / macOS 15 / visionOS 2
-- Optimización progresiva: Si detecta iOS 26+ / macOS 26+, usa características modernas (Liquid Glass)
-- Degradación elegante: Usa Materials tradicionales en versiones anteriores
+**App nativa Apple** con soporte para iOS 18+, iPadOS 18+, macOS 15+ y visionOS 2+
+Pero aprovechar todo lo nuevo en las versiones 26+ de los S.O. asi como swift 6.2 a noviembre del 2025
 
 ---
 
-## 🏗️ Arquitectura
-
-**Clean Architecture** con tres capas:
+## 🏗️ Arquitectura: Clean Architecture
 
 ```
 Presentation (SwiftUI + ViewModels)
-    ↓ depende de
-Domain (Use Cases + Entities + Protocols)
-    ↑ implementado por
+    ↓
+Domain (Use Cases + Entities + Protocols) ← CAPA PURA
+    ↑
 Data (Repositories + APIClient + Services)
 ```
 
-**Regla clave**: Las dependencias apuntan hacia Domain. Domain es puro (sin frameworks externos).
-
-### Estructura de Carpetas
-
+**Estructura de carpetas:**
 ```
 apple-app/
-├── App/                    # Config (ambientes, URLs)
-├── Core/DI/                # DependencyContainer
-├── Domain/                 # ⚠️ CAPA PURA - Sin frameworks
-│   ├── Entities/           # User, Theme, UserPreferences
-│   ├── Errors/             # AppError (jerarquía completa)
-│   ├── Repositories/       # Protocols
-│   ├── UseCases/           # Lógica de negocio
-│   └── Validators/         # InputValidator
-├── Data/                   # Implementaciones
-│   ├── Network/            # APIClient, Endpoint
-│   ├── Services/           # KeychainService
-│   ├── Repositories/       # Implementaciones de protocols
-│   └── DTOs/               # Transformación API ↔ Domain
-├── Presentation/           # UI
-│   ├── Scenes/             # Vistas por feature
-│   └── Navigation/         # NavigationCoordinator, Routes
-└── DesignSystem/          
-    ├── Tokens/             # Colors, Spacing, Typography
-    └── Components/         # DSButton, DSTextField, DSCard
+├── App/              # Config (ambientes, URLs)
+├── Core/DI/          # DependencyContainer
+├── Domain/           # ⚠️ PURO - Sin frameworks externos
+│   ├── Entities/     # User, Theme, UserPreferences
+│   ├── Errors/       # AppError
+│   ├── Repositories/ # Protocols
+│   └── UseCases/     # Lógica de negocio
+├── Data/             # Implementaciones
+│   ├── Network/      # APIClient, Endpoint
+│   ├── Services/     # KeychainService
+│   └── Repositories/ # Implementaciones
+├── Presentation/     # UI
+│   ├── Scenes/       # Vistas por feature
+│   └── Navigation/   # NavigationCoordinator
+└── DesignSystem/     # Tokens + Components
 ```
 
 ---
 
-## 🚀 Comandos de Desarrollo
-
-### Ejecución Rápida
+## 🚀 Comandos Básicos
 
 ```bash
-# Script recomendado (ajustado para simuladores disponibles)
-./run.sh         # iPhone 16 Pro (iOS 18.0)
-./run.sh ipad    # iPad Pro 11" (iOS 18.0)
+./run.sh         # iPhone 16 Pro
+./run.sh ipad    # iPad Pro 11"
 ./run.sh macos   # macOS
 
-# Desde Xcode
-⌘ + R  # Run
-⌘ + B  # Build
-⌘ + U  # Tests
-```
-
-### Compilación Manual
-
-```bash
-# iOS
-xcodebuild -scheme apple-app \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
-  build
-
-# iPad
-xcodebuild -scheme apple-app \
-  -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M4),OS=18.0' \
-  build
-
-# macOS
-xcodebuild -scheme apple-app \
-  -destination 'platform=macOS' \
-  build
+# Desde Xcode: ⌘+R (Run), ⌘+B (Build), ⌘+U (Tests)
 ```
 
 ---
 
-## 🔑 Conceptos Clave
+## ⚡ REGLAS CRÍTICAS DE DESARROLLO
 
-### 1. Dependency Injection
+> **Principio fundamental: "RESOLVER, NO EVITAR"**
+> 
+> Cuando el compilador marca un error de concurrencia, la solución es **RESOLVER el diseño**, NO silenciarlo.
 
-Usa **DependencyContainer** (`Core/DI/`):
+### ❌ PROHIBICIONES ABSOLUTAS
 
-**Scopes**:
-- `.singleton`: Services, Repositories
-- `.factory`: Use Cases, ViewModels
+1. **NUNCA usar `nonisolated(unsafe)`** (eliminado 100% del proyecto)
+2. **NUNCA usar `@unchecked Sendable`** sin justificación documentada
+3. **NUNCA usar `NSLock`** en código nuevo (usar `actor`)
 
-**Registro** (en `apple_appApp.swift`):
+### ✅ PATRONES OBLIGATORIOS
+
+#### 1. ViewModels: `@Observable @MainActor`
 ```swift
-container.register(AuthRepository.self, scope: .singleton) {
-    AuthRepositoryImpl(
-        apiClient: container.resolve(APIClient.self),
-        keychainService: container.resolve(KeychainService.self)
-    )
+@Observable
+@MainActor
+final class MyViewModel {
+    var state: ViewState<Data> = .idle
+    nonisolated init() { }
+    func loadData() async { }
 }
 ```
 
-**Resolución** (en vistas):
+#### 2. Repositories/Services con estado: `actor`
 ```swift
-@EnvironmentObject var container: DependencyContainer
-let useCase = container.resolve(LoginUseCase.self)
+actor UserRepository {
+    private var cache: [UUID: User] = [:]
+    func getUser(id: UUID) async throws -> User { }
+}
 ```
 
-### 2. Use Cases
-
-Toda la lógica de negocio vive aquí:
-
+#### 3. Services sin estado: `struct Sendable`
 ```swift
-// ✅ Retornan Result para manejo explícito de errores
+struct ValidationService: Sendable {
+    func validate(_ input: String) -> Bool { }
+}
+```
+
+#### 4. Mocks para Testing: `actor` o `@MainActor`
+```swift
+@MainActor
+final class MockAuthRepository: AuthRepository {
+    var loginResult: Result<User, Error>?
+    var callCount = 0
+}
+```
+
+#### 5. Use Cases: Retornan `Result`, NO throws
+```swift
+// ✅ CORRECTO
 func execute() async -> Result<User, AppError>
 
-// ❌ NO usar throws
+// ❌ PROHIBIDO
 func execute() async throws -> User
 ```
 
-### 3. ViewModels
+### 📋 Checklist Antes de Programar
 
-- Usan `@Observable` (iOS 17+)
-- Estados explícitos: `.idle`, `.loading`, `.success`, `.error`
-- Delegan lógica a Use Cases
+Antes de crear una clase/struct, preguntarse:
 
-```swift
-@Observable
-final class LoginViewModel {
-    var state: ViewState<User> = .idle
-    
-    func login(email: String, password: String) async {
-        state = .loading
-        let result = await loginUseCase.execute(email: email, password: password)
-        // ...
-    }
-}
-```
+1. ¿Tiene estado mutable (`var`)? → Considerar `actor` o `@MainActor`
+2. ¿Se usa desde múltiples contextos? → DEBE ser `actor`
+3. ¿Es un ViewModel? → DEBE tener `@Observable @MainActor`
+4. ¿Es un mock de testing? → DEBE ser `actor` o `@MainActor`
+5. ¿Voy a usar `@unchecked Sendable`? → DETENER. Justificar o rediseñar.
 
-### 4. Navegación
+### 📖 Documentación Completa
 
-```swift
-@EnvironmentObject var coordinator: NavigationCoordinator
+**Ver `docs/revision/03-REGLAS-DESARROLLO-IA.md`** para:
+- Justificación técnica de cada regla
+- Ejemplos completos de código
+- Formato de documentación de excepciones
+- Árbol de decisión para resolver errores de concurrencia
 
-coordinator.navigate(to: .home)
-coordinator.back()
-coordinator.popToRoot()
-```
+---
+
+## 🔑 Convenciones de Código
+
+**Nomenclatura:**
+- Protocols: `AuthRepository`
+- Implementations: `AuthRepositoryImpl`
+- Use Cases: `LoginUseCase`
+- ViewModels: `LoginViewModel`
+- Views: `LoginView`
+
+**Swift moderno:**
+- ✅ `async/await` (NO callbacks)
+- ✅ `@Observable` (NO `ObservableObject`)
+- ✅ `Result<T, AppError>` en Use Cases
 
 ---
 
 ## 🎨 Design System
 
-### Componentes
-
 ```swift
-// Botones
+// Componentes
 DSButton(title: "Login", style: .primary) { }
-
-// Inputs
 DSTextField(placeholder: "Email", text: $email)
-
-// Cards
 DSCard { Text("Contenido") }
-```
 
-### Tokens
-
-```swift
+// Tokens
 DSColors.accent, .textPrimary, .error
-DSSpacing.small, .medium, .large, .xl
+DSSpacing.small, .medium, .large
 DSTypography.title, .body
-```
 
-### Efectos Visuales (Multi-versión)
-
-```swift
-// Detecta automáticamente iOS 18 vs iOS 26+
-Text("Contenido")
-    .dsGlassEffect(.prominent, shape: .capsule)
-    
-// iOS 18-25: Usa Materials + sombras
-// iOS 26+: Usa Liquid Glass
+// Efectos (detecta iOS 18 vs 26+)
+Text("Contenido").dsGlassEffect(.prominent, shape: .capsule)
 ```
 
 ---
 
-## 🔐 Autenticación
+## 🔐 Backend de Pruebas
 
-**Backend actual**: DummyJSON (https://dummyjson.com)
+**API:** https://dummyjson.com  
+**Usuario:** `emilys` / `emilyspass`
 
-**Credenciales de prueba**:
-- Username: `emilys`
-- Password: `emilyspass`
-
-**Flujo**:
-1. LoginView → LoginViewModel → LoginUseCase
-2. AuthRepositoryImpl → API + Keychain
-3. APIClient inyecta token automáticamente
-4. Refresh automático en 401
-
----
-
-## ✅ Testing
-
-```swift
-// Use Cases
-@Test func loginSuccess() async {
-    let mockRepo = MockAuthRepository()
-    mockRepo.loginResult = .success(User.mock)
-    let sut = DefaultLoginUseCase(authRepository: mockRepo)
-    
-    let result = await sut.execute(email: "test@test.com", password: "123")
-    #expect(result == .success(User.mock))
-}
-
-// ViewModels (con DI)
-@Test func viewModelLogin() async {
-    let container = TestDependencyContainer()
-    container.registerMock(AuthRepository.self, mock: mockRepo)
-    
-    let sut = LoginViewModel(loginUseCase: container.resolve(LoginUseCase.self))
-    await sut.login(email: "test@test.com", password: "123")
-    
-    #expect(sut.state == .success(User.mock))
-}
+**Flujo:**
 ```
-
----
-
-## 📋 Convenciones
-
-- **Protocols**: `AuthRepository`
-- **Implementations**: `AuthRepositoryImpl`, `DefaultAPIClient`
-- **Use Cases**: `LoginUseCase`
-- **ViewModels**: `LoginViewModel`
-- **Views**: `LoginView`
-
-**Swift**:
-- ✅ async/await (NO callbacks)
-- ✅ `@Observable` (NO `ObservableObject`)
-- ✅ `Result<T, AppError>` (NO throws en Use Cases)
-
----
-
-## ⚡ Swift 6 Concurrencia
-
-**Estado**: ✅ Migración completa a Swift 6 concurrency model (Fase 3 completada)
-
-### Reglas Obligatorias
-
-**PROHIBICIONES ABSOLUTAS**:
-- ❌ **NUNCA** usar `nonisolated(unsafe)` (eliminado 100% del proyecto)
-- ❌ **NUNCA** usar `NSLock` en código nuevo (usar `actor` en su lugar)
-- ❌ **NUNCA** silenciar warnings de concurrencia sin justificación documentada
-
-**PATRONES OBLIGATORIOS**:
-
-1. **ViewModels**: SIEMPRE `@Observable @MainActor`
-   ```swift
-   @Observable
-   @MainActor
-   final class MyViewModel {
-       var state: ViewState<Data> = .idle
-       
-       nonisolated init() { }  // Init puede ser nonisolated
-       
-       func loadData() async { }  // Ya está en @MainActor
-   }
-   ```
-
-2. **Repositories/Services con estado**: SIEMPRE `actor`
-   ```swift
-   actor UserRepository {
-       private var cache: [UUID: User] = [:]
-       
-       func getUser(id: UUID) async throws -> User {
-           // Acceso thread-safe automático
-       }
-   }
-   ```
-
-3. **Services sin estado**: Puede ser `struct Sendable` o `@MainActor`
-   ```swift
-   struct ValidationService: Sendable {
-       func validate(_ input: String) -> Bool {
-           // Sin estado mutable, thread-safe por diseño
-       }
-   }
-   ```
-
-4. **Mocks para Testing**: SIEMPRE `actor` o `@MainActor`
-   ```swift
-   @MainActor
-   final class MockAuthRepository: AuthRepository {
-       var loginResult: Result<User, Error>?
-       var callCount = 0
-       
-       func login() async throws -> User {
-           callCount += 1
-           // ...
-       }
-   }
-   ```
-
-5. **Network Interceptors**: SIEMPRE `@MainActor`
-   ```swift
-   @MainActor
-   final class AuthInterceptor: RequestInterceptor {
-       func intercept(_ request: URLRequest) async throws -> URLRequest {
-           // ...
-       }
-   }
-   ```
-
-### Excepciones Documentadas
-
-Solo **4 usos** de `@unchecked Sendable` en todo el proyecto (todos justificados):
-
-1. **OSLogger** - SDK de Apple no marcado Sendable (thread-safe garantizado)
-2. **SecureSessionDelegate** - URLSessionDelegate con datos inmutables
-3. **ObserverWrapper** (2 usos) - NSObjectProtocol del SDK de Apple
-
-**Formato obligatorio para documentar excepciones**:
-```swift
-// ============================================================
-// EXCEPCIÓN DE CONCURRENCIA DOCUMENTADA
-// ============================================================
-// Tipo: SDK de Apple no marcado Sendable
-// Componente: os.Logger
-// Justificación: [explicación técnica detallada]
-// Referencia: [link a documentación oficial]
-// Ticket: N/A (o número de ticket)
-// Fecha: 2025-11-26
-// Revisión: [cuándo revisar]
-// ============================================================
+LoginView → LoginViewModel → LoginUseCase
+         → AuthRepositoryImpl → API + Keychain
+         → APIClient (inyecta token automático)
+         → Refresh automático en 401
 ```
-
-### Referencia Completa
-
-Ver `docs/revision/03-REGLAS-DESARROLLO-IA.md` para reglas detalladas y ejemplos.
 
 ---
 
@@ -363,21 +187,37 @@ Ver `docs/revision/03-REGLAS-DESARROLLO-IA.md` para reglas detalladas y ejemplos
 
 1. **Domain**: Crear Use Case + Protocol (si necesita datos)
 2. **Data**: Implementar Repository + Endpoint (si llama API)
-3. **Presentation**: Crear View + ViewModel (**@MainActor obligatorio**)
+3. **Presentation**: Crear View + ViewModel (`@MainActor` obligatorio)
 4. **DI**: Registrar en `setupDependencies()`
 5. **Navigation**: Agregar Route (si es nueva pantalla)
-6. **Tests**: Use Case + ViewModel (**mocks como actor/@MainActor**)
+6. **Tests**: Use Case + ViewModel (mocks como `actor`/`@MainActor`)
 
 ---
 
 ## 📚 Documentación Extendida
 
-- `README.md`: Visión general
-- `docs/01-arquitectura.md`: Arquitectura detallada
-- `docs/03-plan-sprints.md`: Roadmap
+- `README.md` - Visión general del proyecto
+- `docs/01-arquitectura.md` - Arquitectura detallada
+- `docs/revision/03-REGLAS-DESARROLLO-IA.md` - **Reglas completas de concurrencia**
+- `docs/03-plan-sprints.md` - Roadmap y planificación
 
 ---
 
-**Versión**: 0.1.0 (Pre-release)  
-**Estado**: Sprint 3-4 en progreso (MVP iPhone funcional)  
-**Última actualización**: 2025-01-23
+## 🧪 Testing
+
+```swift
+// Use Cases
+@Test func loginSuccess() async {
+    let mockRepo = MockAuthRepository()
+    mockRepo.loginResult = .success(User.mock)
+    let sut = DefaultLoginUseCase(authRepository: mockRepo)
+    let result = await sut.execute(email: "test@test.com", password: "123")
+    #expect(result == .success(User.mock))
+}
+```
+
+---
+
+**Versión:** 0.1.0 (Pre-release)  
+**Estado:** Sprint 3-4 (MVP iPhone funcional)  
+**Última actualización:** 2025-11-27
