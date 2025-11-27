@@ -118,8 +118,11 @@ private struct AuthenticatedApp: View {
         case .sidebar:
             tabletNavigation
         case .spatial:
-            // visionOS navegación espacial (implementar en Fase 3)
-            tabletNavigation // Fallback temporal
+            #if os(visionOS)
+            spatialNavigation
+            #else
+            tabletNavigation // Fallback si no es visionOS
+            #endif
         }
     }
 
@@ -300,6 +303,13 @@ private struct AuthenticatedApp: View {
 
         case .home:
             // Usar layout específico según plataforma
+            #if os(visionOS)
+            VisionOSHomeView(
+                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                logoutUseCase: container.resolve(LogoutUseCase.self),
+                authState: authState
+            )
+            #else
             if PlatformCapabilities.isIPad {
                 IPadHomeView(
                     getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
@@ -313,6 +323,7 @@ private struct AuthenticatedApp: View {
                     authState: authState
                 )
             }
+            #endif
 
         case .settings:
             // Usar layout específico según plataforma
@@ -329,6 +340,67 @@ private struct AuthenticatedApp: View {
             }
         }
     }
+
+    // MARK: - visionOS Spatial Navigation
+
+    #if os(visionOS)
+    private var spatialNavigation: some View {
+        NavigationSplitView {
+            spatialSidebar
+        } detail: {
+            destination(for: selectedRoute)
+                .ornament(attachmentAnchor: .scene(.bottom)) {
+                    VisionOSConfiguration.navigationOrnament(
+                        onHome: { selectedRoute = .home },
+                        onSettings: { selectedRoute = .settings }
+                    )
+                }
+                .ornament(attachmentAnchor: .scene(.top)) {
+                    VisionOSConfiguration.actionsOrnament(
+                        onRefresh: {
+                            Task {
+                                // Refrescar vista actual
+                            }
+                        },
+                        onShare: {
+                            // TODO: Implementar share
+                        }
+                    )
+                }
+        }
+    }
+
+    private var spatialSidebar: some View {
+        List {
+            Section("Navegación") {
+                Button {
+                    selectedRoute = .home
+                } label: {
+                    Label("Inicio", systemImage: "house.fill")
+                }
+                .tag(Route.home)
+
+                Button {
+                    selectedRoute = .settings
+                } label: {
+                    Label("Configuración", systemImage: "gear")
+                }
+                .tag(Route.settings)
+            }
+
+            Section("Cuenta") {
+                Button(role: .destructive) {
+                    Task {
+                        await performLogout()
+                    }
+                } label: {
+                    Label("Cerrar Sesión", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+            }
+        }
+        .navigationTitle("EduGo")
+    }
+    #endif
 
     // MARK: - Logout
 
