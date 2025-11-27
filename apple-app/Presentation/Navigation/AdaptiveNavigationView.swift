@@ -243,28 +243,36 @@ private struct AuthenticatedApp: View {
     #if os(macOS)
     @ToolbarContentBuilder
     private var macOSToolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
-            Button {
-                toggleSidebar()
-            } label: {
-                Label("Toggle Sidebar", systemImage: "sidebar.left")
+        MacOSToolbarConfiguration.mainToolbarContent(
+            onSidebarToggle: {
+                MacOSWindowControls.toggleSidebar()
+            },
+            onRefresh: {
+                Task {
+                    await refreshCurrentView()
+                }
+            },
+            onSearch: {
+                // TODO: Implementar búsqueda
+                print("Search triggered")
             }
-        }
-
-        ToolbarItem(placement: .automatic) {
-            Button {
-                // Acción de refresh (implementar según necesidad)
-            } label: {
-                Label("Refresh", systemImage: "arrow.clockwise")
-            }
-        }
+        )
     }
 
-    private func toggleSidebar() {
-        NSApp.keyWindow?.firstResponder?.tryToPerform(
-            #selector(NSSplitViewController.toggleSidebar(_:)),
-            with: nil
-        )
+    /// Refresca la vista actual según la ruta seleccionada
+    private func refreshCurrentView() async {
+        switch selectedRoute {
+        case .home:
+            // Refrescar home - recargar datos del usuario
+            if let homeViewModel = container.resolve(GetCurrentUserUseCase.self) as? any AnyObject {
+                // Trigger reload
+            }
+        case .settings:
+            // Refrescar settings
+            break
+        case .login:
+            break
+        }
     }
     #endif
 
