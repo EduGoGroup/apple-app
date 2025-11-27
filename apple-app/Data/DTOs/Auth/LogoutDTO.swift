@@ -23,7 +23,7 @@ struct LogoutRequest: Codable, Sendable {
 
 // MARK: - Logout Response
 
-/// El API retorna 204 No Content, por lo que no hay response body
+// El API retorna 204 No Content, por lo que no hay response body
 
 // MARK: - Testing
 

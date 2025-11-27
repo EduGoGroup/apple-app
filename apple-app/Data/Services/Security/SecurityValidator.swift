@@ -82,10 +82,8 @@ final class DefaultSecurityValidator: SecurityValidator {
             "/private/var/stash"
         ]
 
-        for path in suspiciousPaths {
-            if FileManager.default.fileExists(atPath: path) {
-                return true
-            }
+        for path in suspiciousPaths where FileManager.default.fileExists(atPath: path) {
+            return true
         }
 
         return false

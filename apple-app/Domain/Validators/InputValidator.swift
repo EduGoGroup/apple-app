@@ -67,10 +67,8 @@ final class DefaultInputValidator: InputValidator {
             "\";"
         ]
 
-        for pattern in sqlPatterns {
-            if input.range(of: pattern, options: .regularExpression) != nil {
-                return false
-            }
+        for pattern in sqlPatterns where input.range(of: pattern, options: .regularExpression) != nil {
+            return false
         }
 
         return true
@@ -89,10 +87,8 @@ final class DefaultInputValidator: InputValidator {
 
         let lowercased = input.lowercased()
 
-        for pattern in xssPatterns {
-            if lowercased.contains(pattern) {
-                return false
-            }
+        for pattern in xssPatterns where lowercased.contains(pattern) {
+            return false
         }
 
         return true
@@ -111,10 +107,8 @@ final class DefaultInputValidator: InputValidator {
 
         let lowercased = path.lowercased()
 
-        for pattern in dangerousPatterns {
-            if lowercased.contains(pattern) {
-                return false
-            }
+        for pattern in dangerousPatterns where lowercased.contains(pattern) {
+            return false
         }
 
         return true

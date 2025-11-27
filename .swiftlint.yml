@@ -150,7 +150,7 @@ custom_rules:
   # ViewModels deben ser @Observable @MainActor
   viewmodel_must_be_mainactor:
     name: "ViewModels deben ser @MainActor"
-    regex: "class\\s+\\w*ViewModel(?![\\s\\S]{0,100}@MainActor)"
+    regex: "(?<!@MainActor[\\s\\S]{0,100})(final\\s+)?class\\s+\\w*ViewModel"
     message: "ViewModels deben ser @Observable @MainActor. Ver Regla 4"
     severity: warning
 
