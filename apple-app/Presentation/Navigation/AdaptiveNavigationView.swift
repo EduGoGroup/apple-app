@@ -3,7 +3,8 @@
 //  apple-app
 //
 //  Created on 16-11-25.
-//  Refactored on 23-11-25.
+//  Refactored on 27-11-25.
+//  SPEC-006: Enhanced with iPad/macOS/visionOS optimization
 //
 
 import SwiftUI
@@ -12,7 +13,13 @@ import SwiftUI
 ///
 /// Arquitectura:
 /// - NO autenticado: Muestra LoginView fullscreen (sin sidebar)
-/// - Autenticado: Muestra navegación completa con sidebar (iPad/Mac) o tabs (iPhone)
+/// - Autenticado: Muestra navegación completa adaptada por plataforma:
+///   - iPhone: TabView
+///   - iPad: NavigationSplitView con sidebar colapsable
+///   - macOS: NavigationSplitView con toolbar y sidebar fijo
+///   - visionOS: Window groups con navegación espacial
+///
+/// - Important: Usa PlatformCapabilities para detección de plataforma
 struct AdaptiveNavigationView: View {
     @State private var authState = AuthenticationState()
     @State private var isCheckingSession = true
@@ -91,26 +98,29 @@ private struct LoginFlow: View {
     }
 }
 
-// MARK: - Authenticated App (Con Sidebar)
+// MARK: - Authenticated App (Adaptativo por Plataforma)
 
 private struct AuthenticatedApp: View {
     @Environment(AuthenticationState.self) private var authState
     @EnvironmentObject var container: DependencyContainer
     @State private var selectedRoute: Route = .home
+    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
+
+    // Environment values para Size Classes
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
-        #if os(iOS)
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            // iPhone: NavigationStack simple
+        // Usar PlatformCapabilities para determinar el estilo de navegación
+        switch PlatformCapabilities.recommendedNavigationStyle {
+        case .tabs:
             phoneNavigation
-        } else {
-            // iPad: NavigationSplitView con sidebar
+        case .sidebar:
             tabletNavigation
+        case .spatial:
+            // visionOS navegación espacial (implementar en Fase 3)
+            tabletNavigation // Fallback temporal
         }
-        #else
-        // macOS: NavigationSplitView con sidebar
-        desktopNavigation
-        #endif
     }
 
     // MARK: - iPhone Navigation
@@ -129,53 +139,74 @@ private struct AuthenticatedApp: View {
                 }
                 .tag(Route.settings)
         }
+        .tint(DSColors.accent)
     }
 
     // MARK: - iPad/Mac Navigation
 
     private var tabletNavigation: some View {
-        NavigationSplitView {
-            sidebar
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            // Sidebar
+            sidebarContent
+                .navigationSplitViewColumnWidth(
+                    min: sidebarMinWidth,
+                    ideal: sidebarIdealWidth,
+                    max: sidebarMaxWidth
+                )
         } detail: {
+            // Detail view
             destination(for: selectedRoute)
+                .navigationTitle(navigationTitle)
+                #if os(macOS)
+                .toolbar {
+                    macOSToolbar
+                }
+                #endif
         }
+        .navigationSplitViewStyle(.balanced)
     }
 
-    private var desktopNavigation: some View {
-        NavigationSplitView {
-            sidebar
-                .frame(minWidth: 200, idealWidth: 250, maxWidth: 300)
-        } detail: {
-            destination(for: selectedRoute)
-        }
+    // MARK: - Sidebar Configuration
+
+    private var sidebarMinWidth: CGFloat {
+        #if os(macOS)
+        return 200
+        #else
+        return 250
+        #endif
     }
 
-    // MARK: - Sidebar
+    private var sidebarIdealWidth: CGFloat {
+        #if os(macOS)
+        return 250
+        #else
+        // iPad: Más ancho para mejor usabilidad con dedos
+        return 320
+        #endif
+    }
 
-    private var sidebar: some View {
+    private var sidebarMaxWidth: CGFloat {
+        #if os(macOS)
+        return 300
+        #else
+        return 400
+        #endif
+    }
+
+    // MARK: - Sidebar Content
+
+    private var sidebarContent: some View {
         List {
             Section("Navegación") {
-                #if os(macOS)
-                Button {
-                    selectedRoute = .home
-                } label: {
-                    Label("Inicio", systemImage: "house.fill")
-                }
-
-                Button {
-                    selectedRoute = .settings
-                } label: {
-                    Label("Configuración", systemImage: "gear")
-                }
-                #else
                 NavigationLink(value: Route.home) {
                     Label("Inicio", systemImage: "house.fill")
                 }
+                .tag(Route.home)
 
                 NavigationLink(value: Route.settings) {
                     Label("Configuración", systemImage: "gear")
                 }
-                #endif
+                .tag(Route.settings)
             }
 
             Section("Cuenta") {
@@ -187,11 +218,67 @@ private struct AuthenticatedApp: View {
                     Label("Cerrar Sesión", systemImage: "rectangle.portrait.and.arrow.right")
                 }
             }
+
+            // Información de plataforma (solo en DEBUG)
+            #if DEBUG
+            Section("Debug") {
+                DisclosureGroup("Platform Info") {
+                    Text(PlatformCapabilities.debugDescription)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundColor(.secondary)
+                }
+            }
+            #endif
         }
         .navigationTitle("EduGo")
         #if os(macOS)
         .listStyle(.sidebar)
+        #else
+        .listStyle(.insetGrouped)
         #endif
+    }
+
+    // MARK: - macOS Toolbar
+
+    #if os(macOS)
+    @ToolbarContentBuilder
+    private var macOSToolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigation) {
+            Button {
+                toggleSidebar()
+            } label: {
+                Label("Toggle Sidebar", systemImage: "sidebar.left")
+            }
+        }
+
+        ToolbarItem(placement: .automatic) {
+            Button {
+                // Acción de refresh (implementar según necesidad)
+            } label: {
+                Label("Refresh", systemImage: "arrow.clockwise")
+            }
+        }
+    }
+
+    private func toggleSidebar() {
+        NSApp.keyWindow?.firstResponder?.tryToPerform(
+            #selector(NSSplitViewController.toggleSidebar(_:)),
+            with: nil
+        )
+    }
+    #endif
+
+    // MARK: - Navigation Title
+
+    private var navigationTitle: String {
+        switch selectedRoute {
+        case .home:
+            return "Inicio"
+        case .settings:
+            return "Configuración"
+        case .login:
+            return ""
+        }
     }
 
     // MARK: - Destinations
@@ -204,17 +291,34 @@ private struct AuthenticatedApp: View {
             EmptyView()
 
         case .home:
-            HomeView(
-                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
-                logoutUseCase: container.resolve(LogoutUseCase.self),
-                authState: authState
-            )
+            // Usar layout específico según plataforma
+            if PlatformCapabilities.isIPad {
+                IPadHomeView(
+                    getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                    logoutUseCase: container.resolve(LogoutUseCase.self),
+                    authState: authState
+                )
+            } else {
+                HomeView(
+                    getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                    logoutUseCase: container.resolve(LogoutUseCase.self),
+                    authState: authState
+                )
+            }
 
         case .settings:
-            SettingsView(
-                updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
-                preferencesRepository: container.resolve(PreferencesRepository.self)
-            )
+            // Usar layout específico según plataforma
+            if PlatformCapabilities.isIPad {
+                IPadSettingsView(
+                    updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
+                    preferencesRepository: container.resolve(PreferencesRepository.self)
+                )
+            } else {
+                SettingsView(
+                    updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
+                    preferencesRepository: container.resolve(PreferencesRepository.self)
+                )
+            }
         }
     }
 
@@ -272,4 +376,13 @@ private struct AuthenticatedApp: View {
 
     return AdaptiveNavigationView()
         .environmentObject(container)
+}
+
+#Preview("Platform Detection") {
+    VStack(spacing: DSSpacing.large) {
+        Text("Platform: \(String(describing: PlatformCapabilities.currentDevice))")
+        Text("Navigation Style: \(String(describing: PlatformCapabilities.recommendedNavigationStyle))")
+        Text("Screen Size: \(PlatformCapabilities.screenCapabilities.screenSize.debugDescription)")
+    }
+    .padding()
 }

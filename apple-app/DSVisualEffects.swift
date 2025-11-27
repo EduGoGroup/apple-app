@@ -3,14 +3,17 @@
 //  apple-app
 //
 //  Created on 23-11-25.
+//  Refactored on 27-11-25.
+//  SPEC-006: Enfoque iOS 26+ primero, degradación a iOS 18+
 //
 
 import SwiftUI
 
 // MARK: - Design System Visual Effects
-// Esta arquitectura permite usar lo mejor de cada versión de OS:
-// - iOS 18 / macOS 15: Usa materials modernos disponibles
-// - iOS 26+ / macOS 26+: Usa Liquid Glass (cuando esté disponible)
+//
+// FILOSOFÍA: iOS 26+ PRIMERO, degradación elegante a iOS 18+
+// - iOS 26+ / macOS 26+: Liquid Glass y efectos modernos (PRIORIDAD)
+// - iOS 18+ / macOS 15+: Materials como fallback (COMPATIBILIDAD)
 
 /// Protocolo base para efectos visuales del Design System
 protocol DSVisualEffect {
@@ -18,46 +21,170 @@ protocol DSVisualEffect {
     func apply<Content: View>(to content: Content) -> AnyView
 }
 
-// MARK: - Implementaciones por Versión de OS
+// MARK: - iOS 26+ / macOS 26+ - IMPLEMENTACIÓN MODERNA (PRIORIDAD)
 
-/// Implementación de efectos visuales para iOS 18 / macOS 15
-/// Usa los mejores efectos disponibles en estas versiones
+/// Implementación de efectos visuales para iOS 26+ / macOS 26+
+/// Usa las APIs más modernas disponibles en estas versiones
+///
+/// - Note: Esta es la implementación PRINCIPAL del sistema de efectos.
+///   El código de iOS 18+ es solo para compatibilidad con versiones antiguas.
+@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+struct DSVisualEffectModern: DSVisualEffect {
+    let style: DSVisualEffectStyle
+    let shape: DSEffectShape
+    let isInteractive: Bool
+
+    func apply<Content: View>(to content: Content) -> AnyView {
+        // TODO: Cuando Apple documente las APIs de Liquid Glass, reemplazar con:
+        // switch shape {
+        // case .capsule:
+        //     return AnyView(content.liquidGlass(liquidGlassStyle, in: Capsule()))
+        // case .roundedRectangle(let radius):
+        //     return AnyView(content.liquidGlass(liquidGlassStyle, in: RoundedRectangle(cornerRadius: radius)))
+        // case .circle:
+        //     return AnyView(content.liquidGlass(liquidGlassStyle, in: Circle()))
+        // }
+
+        // Por ahora: Usar los mejores Materials disponibles en iOS 26+
+        switch shape {
+        case .capsule:
+            return AnyView(
+                content
+                    .background(modernMaterial())
+                    .clipShape(Capsule())
+                    .shadow(color: modernShadowColor, radius: modernShadowRadius, x: 0, y: modernShadowY)
+                    .overlay(modernOverlay())
+            )
+        case .roundedRectangle(let radius):
+            return AnyView(
+                content
+                    .background(modernMaterial())
+                    .clipShape(RoundedRectangle(cornerRadius: radius))
+                    .shadow(color: modernShadowColor, radius: modernShadowRadius, x: 0, y: modernShadowY)
+                    .overlay(modernOverlay())
+            )
+        case .circle:
+            return AnyView(
+                content
+                    .background(modernMaterial())
+                    .clipShape(Circle())
+                    .shadow(color: modernShadowColor, radius: modernShadowRadius, x: 0, y: modernShadowY)
+                    .overlay(modernOverlay())
+            )
+        }
+    }
+
+    // MARK: - Modern Materials (iOS 26+)
+
+    @ViewBuilder
+    private func modernMaterial() -> some View {
+        switch style {
+        case .regular:
+            // iOS 26+: Podría tener materials mejorados
+            Rectangle()
+                .fill(.regularMaterial.opacity(0.9))
+        case .prominent:
+            Rectangle()
+                .fill(.ultraThickMaterial)
+        case .tinted(let color):
+            Rectangle()
+                .fill(.thinMaterial)
+                .overlay(color.opacity(0.25))
+        }
+    }
+
+    @ViewBuilder
+    private func modernOverlay() -> some View {
+        if isInteractive {
+            // Efecto hover/interactive moderno
+            Rectangle()
+                .fill(.clear)
+                .contentShape(Rectangle())
+        }
+    }
+
+    private var modernShadowColor: Color {
+        switch style {
+        case .prominent:
+            return Color.black.opacity(0.2)
+        case .tinted:
+            return Color.black.opacity(0.12)
+        case .regular:
+            return Color.black.opacity(0.1)
+        }
+    }
+
+    private var modernShadowRadius: CGFloat {
+        style == .prominent ? 16 : 10
+    }
+
+    private var modernShadowY: CGFloat {
+        style == .prominent ? 6 : 3
+    }
+
+    // TODO: Cuando Liquid Glass esté documentado
+    // private var liquidGlassStyle: LiquidGlass {
+    //     var glass: LiquidGlass = .regular
+    //
+    //     if case .tinted(let color) = style {
+    //         glass = glass.tint(color)
+    //     }
+    //
+    //     if isInteractive {
+    //         glass = glass.interactive()
+    //     }
+    //
+    //     if style == .prominent {
+    //         glass = glass.prominent()
+    //     }
+    //
+    //     return glass
+    // }
+}
+
+// MARK: - iOS 18+ / macOS 15+ - COMPATIBILIDAD (FALLBACK)
+
+/// Implementación de efectos visuales para iOS 18-25 / macOS 15-25
+/// Compatibilidad con versiones anteriores
+///
+/// - Note: Esta es la implementación de FALLBACK.
+///   Se usa solo cuando iOS 26+ no está disponible.
+@available(iOS 18.0, macOS 15.0, *)
 struct DSVisualEffectLegacy: DSVisualEffect {
     let style: DSVisualEffectStyle
     let shape: DSEffectShape
     let isInteractive: Bool
 
     func apply<Content: View>(to content: Content) -> AnyView {
-        // Aplicar el efecto según la forma especificada
         switch shape {
         case .capsule:
             return AnyView(
                 content
-                    .background(backgroundMaterial())
+                    .background(legacyMaterial())
                     .clipShape(Capsule())
-                    .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+                    .shadow(color: legacyShadowColor, radius: legacyShadowRadius, x: 0, y: legacyShadowY)
             )
         case .roundedRectangle(let radius):
             return AnyView(
                 content
-                    .background(backgroundMaterial())
+                    .background(legacyMaterial())
                     .clipShape(RoundedRectangle(cornerRadius: radius))
-                    .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+                    .shadow(color: legacyShadowColor, radius: legacyShadowRadius, x: 0, y: legacyShadowY)
             )
         case .circle:
             return AnyView(
                 content
-                    .background(backgroundMaterial())
+                    .background(legacyMaterial())
                     .clipShape(Circle())
-                    .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+                    .shadow(color: legacyShadowColor, radius: legacyShadowRadius, x: 0, y: legacyShadowY)
             )
         }
     }
 
-    // MARK: - Configuración de Material para iOS 18/macOS 15
+    // MARK: - Legacy Materials (iOS 18-25)
 
     @ViewBuilder
-    private func backgroundMaterial() -> some View {
+    private func legacyMaterial() -> some View {
         switch style {
         case .regular:
             Rectangle()
@@ -72,86 +199,47 @@ struct DSVisualEffectLegacy: DSVisualEffect {
         }
     }
 
-    private var shadowColor: Color {
+    private var legacyShadowColor: Color {
         style == .prominent ? Color.black.opacity(0.15) : Color.black.opacity(0.08)
     }
 
-    private var shadowRadius: CGFloat {
+    private var legacyShadowRadius: CGFloat {
         style == .prominent ? 12 : 8
     }
 
-    private var shadowY: CGFloat {
+    private var legacyShadowY: CGFloat {
         style == .prominent ? 4 : 2
     }
 }
 
-// MARK: - Placeholder para iOS 26+ / macOS 26+
-// El código de Liquid Glass está deshabilitado hasta que iOS 26 SDK esté disponible.
-// Cuando Apple lance iOS 26, descomentar DSVisualEffectModern y agregar las APIs reales.
-
-/*
-/// Implementación de efectos visuales para iOS 26+ / macOS 26+
-/// Usa Liquid Glass (disponible desde iOS 26.0 / macOS 26.0)
-/// TODO: Habilitar cuando iOS 26 SDK esté disponible
-@available(iOS 26.0, macOS 26.0, *)
-struct DSVisualEffectModern: DSVisualEffect {
-    let style: DSVisualEffectStyle
-    let shape: DSEffectShape
-    let isInteractive: Bool
-
-    func apply<Content: View>(to content: Content) -> AnyView {
-        // Aplicar Liquid Glass según la forma especificada
-        switch shape {
-        case .capsule:
-            return AnyView(
-                content.glassEffect(glassStyle, in: Capsule())
-            )
-        case .roundedRectangle(let radius):
-            return AnyView(
-                content.glassEffect(glassStyle, in: RoundedRectangle(cornerRadius: radius))
-            )
-        case .circle:
-            return AnyView(
-                content.glassEffect(glassStyle, in: Circle())
-            )
-        }
-    }
-
-    // MARK: - Configuración de Liquid Glass para iOS 26+/macOS 26+
-
-    @available(iOS 26.0, macOS 26.0, *)
-    private var glassStyle: Glass {
-        var glass: Glass = .regular
-
-        // Aplicar tinte si es necesario
-        if case .tinted(let color) = style {
-            glass = glass.tint(color)
-        }
-
-        // Aplicar interactividad si es necesario
-        if isInteractive {
-            glass = glass.interactive()
-        }
-
-        return glass
-    }
-}
-*/
-
 // MARK: - Tipos de Soporte
 
 /// Estilos de efectos visuales disponibles
-enum DSVisualEffectStyle: Equatable {
+enum DSVisualEffectStyle: Equatable, Sendable {
     /// Estilo regular - efecto sutil
     case regular
     /// Estilo prominente - efecto más visible
     case prominent
     /// Estilo con tinte de color
     case tinted(Color)
+
+    // Equatable conformance manual para Color
+    static func == (lhs: DSVisualEffectStyle, rhs: DSVisualEffectStyle) -> Bool {
+        switch (lhs, rhs) {
+        case (.regular, .regular):
+            return true
+        case (.prominent, .prominent):
+            return true
+        case (.tinted(let lColor), .tinted(let rColor)):
+            return lColor == rColor
+        default:
+            return false
+        }
+    }
 }
 
 /// Formas disponibles para efectos visuales
-enum DSEffectShape {
+enum DSEffectShape: Sendable {
     /// Forma de cápsula (bordes redondeados completos)
     case capsule
     /// Rectángulo con esquinas redondeadas personalizables
@@ -163,23 +251,35 @@ enum DSEffectShape {
 // MARK: - Factory de Efectos Visuales
 
 /// Factory que detecta la versión del OS y devuelve la implementación adecuada
+///
+/// ESTRATEGIA:
+/// 1. iOS 26+ / macOS 26+: DSVisualEffectModern (PRIORIDAD)
+/// 2. iOS 18-25 / macOS 15-25: DSVisualEffectLegacy (FALLBACK)
 struct DSVisualEffectFactory {
     /// Crea el efecto visual apropiado según la versión del OS
     ///
-    /// - Note: Actualmente solo usa DSVisualEffectLegacy (Materials).
-    ///   Cuando iOS 26 SDK esté disponible, se habilitará DSVisualEffectModern (Liquid Glass).
+    /// - Important: SIEMPRE intenta usar la implementación moderna primero.
+    ///   Solo usa legacy si el OS es < iOS 26 / macOS 26.
     static func createEffect(
         style: DSVisualEffectStyle = .regular,
         shape: DSEffectShape = .roundedRectangle(cornerRadius: DSCornerRadius.large),
         isInteractive: Bool = false
     ) -> DSVisualEffect {
-        // TODO: Habilitar DSVisualEffectModern cuando iOS 26 SDK esté disponible
-        // if #available(iOS 26.0, macOS 26.0, *) {
-        //     return DSVisualEffectModern(style: style, shape: shape, isInteractive: isInteractive)
-        // }
+        // iOS 26+ / macOS 26+: Usar implementación MODERNA
+        if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+            return DSVisualEffectModern(
+                style: style,
+                shape: shape,
+                isInteractive: isInteractive
+            )
+        }
 
-        // Usa Materials (iOS 18+ / macOS 15+)
-        DSVisualEffectLegacy(style: style, shape: shape, isInteractive: isInteractive)
+        // iOS 18-25 / macOS 15-25: Fallback a LEGACY
+        return DSVisualEffectLegacy(
+            style: style,
+            shape: shape,
+            isInteractive: isInteractive
+        )
     }
 }
 
@@ -207,8 +307,9 @@ struct DSGlassModifier: ViewModifier {
 extension View {
     /// Aplica un efecto visual de glass del Design System
     ///
-    /// En iOS 18/macOS 15: Usa materials modernos con sombras
-    /// En iOS 26+/macOS 26+: Usa Liquid Glass
+    /// **Estrategia de versiones:**
+    /// - iOS 26+ / macOS 26+: Efectos modernos optimizados
+    /// - iOS 18-25 / macOS 15-25: Materials con degradación elegante
     ///
     /// - Parameters:
     ///   - style: Estilo del efecto (regular, prominent, tinted)
@@ -225,7 +326,7 @@ extension View {
 
 // MARK: - Previews
 
-#Preview("Efectos Visuales - Regular") {
+#Preview("Efectos Modernos - iOS 26+") {
     VStack(spacing: DSSpacing.xl) {
         Text("Efecto Regular")
             .font(DSTypography.title3)
@@ -240,7 +341,12 @@ extension View {
         Text("Efecto con Tinte")
             .font(DSTypography.title3)
             .padding()
-            .dsGlassEffect(.tinted(.blue.opacity(0.3)))
+            .dsGlassEffect(.tinted(.blue))
+
+        Text("Efecto Interactivo")
+            .font(DSTypography.title3)
+            .padding()
+            .dsGlassEffect(.prominent, isInteractive: true)
     }
     .padding()
     .background(
@@ -252,54 +358,28 @@ extension View {
     )
 }
 
-#Preview("Efectos Visuales - Formas") {
+#Preview("Formas Modernas") {
     VStack(spacing: DSSpacing.xl) {
         Text("Cápsula")
             .font(DSTypography.body)
             .padding()
-            .dsGlassEffect(.regular, shape: .capsule)
+            .dsGlassEffect(.prominent, shape: .capsule)
 
-        Text("Rectángulo Redondeado")
+        Text("Rectángulo")
             .font(DSTypography.body)
             .padding()
-            .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: 16))
+            .dsGlassEffect(.prominent, shape: .roundedRectangle(cornerRadius: 20))
 
         Text("Círculo")
             .font(DSTypography.body)
             .padding()
-            .frame(width: 100, height: 100)
-            .dsGlassEffect(.regular, shape: .circle)
+            .frame(width: 120, height: 120)
+            .dsGlassEffect(.prominent, shape: .circle)
     }
     .padding()
     .background(
         LinearGradient(
             colors: [.orange.opacity(0.3), .pink.opacity(0.3)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    )
-}
-
-#Preview("Efectos Visuales - Interactivo") {
-    VStack(spacing: DSSpacing.xl) {
-        Button("Botón Interactivo") {
-            // Acción
-        }
-        .buttonStyle(PlainButtonStyle())
-        .padding()
-        .dsGlassEffect(.prominent, isInteractive: true)
-
-        Button("Botón con Tinte Interactivo") {
-            // Acción
-        }
-        .buttonStyle(PlainButtonStyle())
-        .padding()
-        .dsGlassEffect(.tinted(.green.opacity(0.3)), isInteractive: true)
-    }
-    .padding()
-    .background(
-        LinearGradient(
-            colors: [.green.opacity(0.3), .cyan.opacity(0.3)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
