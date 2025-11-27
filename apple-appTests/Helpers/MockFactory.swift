@@ -12,7 +12,6 @@ import Foundation
 /// Factory centralizado para crear mocks y fixtures de testing
 @MainActor
 enum MockFactory {
-
     // MARK: - Domain Entities
 
     /// Crea un User fixture con valores por defecto personalizables
@@ -154,7 +153,6 @@ enum MockFactory {
 // MARK: - Builder Pattern Extensions
 
 extension MockFactory {
-
     /// Builder para User con API fluida
     @MainActor
     struct UserBuilder {

@@ -18,7 +18,6 @@ import SwiftData
 /// conflicto con CachedResponse en ResponseCache.swift
 @Model
 final class CachedHTTPResponse {
-
     // MARK: - Properties
 
     @Attribute(.unique) var endpoint: String

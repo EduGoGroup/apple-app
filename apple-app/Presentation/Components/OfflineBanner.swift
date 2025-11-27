@@ -34,7 +34,6 @@ import SwiftUI
 /// }
 /// ```
 struct OfflineBanner: View {
-
     // MARK: - Environment
 
     @Environment(\.colorScheme) private var colorScheme

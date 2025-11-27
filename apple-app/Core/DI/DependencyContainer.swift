@@ -32,7 +32,6 @@ import SwiftUI
 /// ```
 @MainActor
 public class DependencyContainer: ObservableObject {
-
     // MARK: - Storage
 
     /// Almacena las factories de creación para cada tipo

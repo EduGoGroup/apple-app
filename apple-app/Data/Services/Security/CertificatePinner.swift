@@ -20,7 +20,6 @@ protocol CertificatePinner: Sendable {
 /// Implementación de Certificate Pinning usando public key pinning
 /// nonisolated porque se usa desde URLSessionDelegate que no está en MainActor
 final class DefaultCertificatePinner: CertificatePinner, Sendable {
-
     private let pinnedPublicKeyHashes: Set<String>
 
     init(pinnedPublicKeyHashes: Set<String> = []) {
@@ -104,7 +103,7 @@ final class MockCertificatePinner: CertificatePinner, Sendable {
     nonisolated func validate(_ trust: SecTrust, for host: String) -> Bool {
         // Para contexto nonisolated, usamos un valor fijo
         // El estado real se puede verificar async en tests
-        return true
+        true
     }
 
     /// Configurar resultado para tests (async)

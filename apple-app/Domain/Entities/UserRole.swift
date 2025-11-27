@@ -10,10 +10,10 @@ import Foundation
 
 /// Roles de usuario en el sistema EduGo
 enum UserRole: String, Codable, Sendable {
-    case student = "student"
-    case teacher = "teacher"
-    case admin = "admin"
-    case parent = "parent"
+    case student
+    case teacher
+    case admin
+    case parent
 
     /// Nombre descriptivo del rol para UI
     var displayName: String {

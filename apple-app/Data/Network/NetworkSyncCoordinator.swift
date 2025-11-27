@@ -22,7 +22,6 @@ import Foundation
 /// coordinator.startMonitoring()
 /// ```
 actor NetworkSyncCoordinator {
-
     // MARK: - Dependencies
 
     private let networkMonitor: NetworkMonitor
@@ -54,11 +53,9 @@ actor NetworkSyncCoordinator {
                 networkMonitor.connectionStream()
             }
 
-            for await isConnected in stream {
-                if isConnected {
-                    // Conexión recuperada, procesar cola offline
-                    await offlineQueue.processQueue()
-                }
+            for await isConnected in stream where isConnected {
+                // Conexión recuperada, procesar cola offline
+                await offlineQueue.processQueue()
             }
         }
     }

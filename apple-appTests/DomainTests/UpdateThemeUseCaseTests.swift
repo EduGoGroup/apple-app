@@ -8,13 +8,11 @@
 import Testing
 import SwiftUI
 import Foundation
-import SwiftUI
 @testable import apple_app
 
 @MainActor
 @Suite("UpdateThemeUseCase Tests")
 struct UpdateThemeUseCaseTests {
-    
     @Test("Update theme should call repository")
     func testUpdateThemeCallsRepository() async throws {
         // Given

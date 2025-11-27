@@ -18,7 +18,6 @@ import Foundation
 /// 3. No hay razón para @unchecked cuando la solución correcta es @MainActor
 @MainActor
 final class AuthInterceptor: RequestInterceptor {
-
     // MARK: - Dependencies
 
     private let tokenCoordinator: TokenRefreshCoordinator

@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("LoginUseCase Tests")
 struct LoginUseCaseTests {
-    
     @Test("Login with valid credentials should succeed")
     func testLoginWithValidCredentials() async throws {
         // Given

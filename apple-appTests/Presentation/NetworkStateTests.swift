@@ -11,7 +11,6 @@ import Testing
 
 @Suite("NetworkState Tests")
 struct NetworkStateTests {
-
     @Test("Estado inicial conectado")
     @MainActor
     func initialStateConnected() async {

@@ -16,7 +16,6 @@ import Foundation
 /// para alinearse con el protocolo AuthRepository.
 @MainActor
 final class MockAuthRepository: AuthRepository {
-
     // MARK: - Resultados configurables
 
     var loginResult: Result<User, AppError> = .failure(.system(.unknown))
@@ -29,7 +28,7 @@ final class MockAuthRepository: AuthRepository {
 
     var hasActiveSessionResult: Bool = false
     var isAuthenticatedResult: Bool = false
-    var validAccessToken: String? = nil
+    var validAccessToken: String?
 
     // MARK: - Tracking de llamadas
 

@@ -12,7 +12,6 @@ import Testing
 @Suite("LoginViewModel Tests con DependencyContainer")
 @MainActor
 struct LoginViewModelContainerTests {
-
     @Test("Login con credenciales válidas usando container")
     func loginWithValidCredentialsUsingContainer() async {
         // Given - Setup container con mocks

@@ -13,7 +13,6 @@ import Foundation
 @MainActor
 @Suite("TokenInfo Tests")
 struct TokenInfoTests {
-
     @Test("Token is expired when past expiration date")
     func tokenIsExpired() {
         let token = TokenInfo.expired
@@ -128,7 +127,7 @@ struct TokenInfoTests {
         let token = TokenInfo.fresh
 
         Task {
-            let _ = token.isExpired // Puede usarse en async context
+            _ = token.isExpired // Puede usarse en async context
         }
     }
 

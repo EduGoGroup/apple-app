@@ -9,7 +9,6 @@
 import SwiftUI
 
 struct ContentView: View {
-
     // MARK: - Environment
 
     @EnvironmentObject private var container: DependencyContainer
@@ -72,6 +71,8 @@ struct ContentView: View {
 
     #if DEBUG
     @ViewBuilder
+    // Justificación: Vista de debug con múltiples campos de información (41 líneas)
+    // swiftlint:disable:next function_body_length
     private func debugInfo(_ state: NetworkState) -> some View {
         VStack(spacing: 8) {
             Divider()

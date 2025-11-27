@@ -13,7 +13,6 @@ import Foundation
 @MainActor
 @Suite("JWT Decoder Tests")
 struct JWTDecoderTests {
-
     let decoder = DefaultJWTDecoder()
 
     // Token real de prueba generado con HS256

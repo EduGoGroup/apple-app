@@ -13,7 +13,6 @@ import Testing
 @MainActor
 @Suite("UserRole Tests")
 struct UserRoleTests {
-
     @Test("Role from string value")
     func roleFromString() {
         let student = UserRole(rawValue: "student")
@@ -77,7 +76,7 @@ struct UserRoleTests {
         let role: UserRole = .teacher
 
         Task {
-            let _ = role // Puede usarse en async context
+            _ = role // Puede usarse en async context
         }
     }
 }

@@ -15,7 +15,6 @@ import SwiftData
 /// Se sincroniza con el backend cuando hay conexión.
 @Model
 final class CachedUser {
-
     // MARK: - Properties
 
     @Attribute(.unique) var id: String

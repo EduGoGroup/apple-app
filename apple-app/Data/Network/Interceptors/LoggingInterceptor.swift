@@ -18,7 +18,6 @@ import Foundation
 /// 3. Logger es thread-safe, pero mantener @MainActor es más consistente
 @MainActor
 final class LoggingInterceptor: RequestInterceptor, ResponseInterceptor {
-
     private let logger = LoggerFactory.network
 
     // MARK: - RequestInterceptor

@@ -62,7 +62,7 @@ struct LoginView: View {
                 .padding(DSSpacing.xl)
             }
         }
-        .onChange(of: viewModel.state) { oldValue, newValue in
+        .onChange(of: viewModel.state) { _, newValue in
             if case .success(let user) = newValue {
                 authState.authenticate(user: user)
             }

@@ -27,7 +27,6 @@ import Testing
 /// ```
 @MainActor
 final class IntegrationTestCase {
-
     // MARK: - Properties
 
     let container: DependencyContainer
@@ -41,6 +40,8 @@ final class IntegrationTestCase {
 
     // MARK: - Initialization
 
+    // Justificación: Configuración completa de DI para integration tests requiere registro de todas las dependencias (66 líneas).
+    // swiftlint:disable function_body_length
     init() {
         // Crear mocks primero
         let api = MockAPIClient()
@@ -129,6 +130,7 @@ final class IntegrationTestCase {
 
         self.container = container
     }
+    // swiftlint:enable function_body_length
 
     // MARK: - Convenience Configuration
 

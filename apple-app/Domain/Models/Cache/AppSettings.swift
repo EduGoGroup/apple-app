@@ -15,7 +15,6 @@ import SwiftData
 /// Sincronizable entre dispositivos del mismo usuario.
 @Model
 final class AppSettings {
-
     // MARK: - Properties
 
     @Attribute(.unique) var id: String

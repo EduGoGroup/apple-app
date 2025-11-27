@@ -41,7 +41,6 @@ struct QueuedRequest: Codable, Sendable {
 /// Usa snapshot pattern para evitar race conditions durante procesamiento.
 /// Integra ConflictResolver para manejar conflictos HTTP 409.
 actor OfflineQueue {
-
     // MARK: - Dependencies
 
     private let networkMonitor: NetworkMonitor
@@ -147,12 +146,10 @@ actor OfflineQueue {
         do {
             try await executor(request)
             return true
-
         } catch let error as NetworkError where error.isConflict {
             // ✅ SPEC-013: Manejar conflicto HTTP 409
             await handleConflict(for: request, error: error)
             return false
-
         } catch {
             // Otros errores: mantener en cola para reintentar
             return false

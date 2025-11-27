@@ -22,7 +22,6 @@ protocol LoginWithBiometricsUseCase: Sendable {
 /// Implementación del caso de uso de login biométrico
 @MainActor
 final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
-
     private let authRepository: AuthRepository
 
     init(authRepository: AuthRepository) {
@@ -35,7 +34,7 @@ final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
         // 2. Solicitar autenticación biométrica
         // 3. Recuperar credenciales del Keychain
         // 4. Ejecutar login con credenciales
-        return await authRepository.loginWithBiometrics()
+        await authRepository.loginWithBiometrics()
     }
 }
 

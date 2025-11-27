@@ -31,7 +31,6 @@ private final class TestImplementation: TestProtocol {
 @MainActor
 @Suite("DependencyContainer Tests")
 struct DependencyContainerTests {
-
     @Test("Register y resolve singleton retorna misma instancia")
     func registerAndResolveSingleton() {
         // Given

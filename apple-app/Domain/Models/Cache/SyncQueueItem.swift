@@ -15,7 +15,6 @@ import SwiftData
 /// cuando haya conexión disponible.
 @Model
 final class SyncQueueItem {
-
     // MARK: - Properties
 
     @Attribute(.unique) var id: UUID

@@ -19,15 +19,11 @@ struct LogoutRequest: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case refreshToken = "refresh_token"
     }
-
-    init(refreshToken: String) {
-        self.refreshToken = refreshToken
-    }
 }
 
 // MARK: - Logout Response
 
-/// El API retorna 204 No Content, por lo que no hay response body
+// El API retorna 204 No Content, por lo que no hay response body
 
 // MARK: - Testing
 

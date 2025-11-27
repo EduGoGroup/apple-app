@@ -19,6 +19,17 @@ enum AuthenticationMode: Sendable, Equatable {
     case realAPI    // API Real EduGo (staging/production)
 }
 
+// MARK: - URL Helper
+
+/// Helper privado para crear URLs de forma segura
+/// Falla en compile-time si la URL es inválida (crash temprano en desarrollo)
+private func makeURL(_ string: String) -> URL {
+    guard let url = URL(string: string) else {
+        fatalError("Invalid URL: \(string) - This should never happen with hardcoded URLs")
+    }
+    return url
+}
+
 // MARK: - Environment Configuration (Modern Approach)
 
 /// Sistema de configuración de ambientes usando Conditional Compilation
@@ -50,7 +61,6 @@ enum AuthenticationMode: Sendable, Equatable {
 /// }
 /// ```
 enum AppEnvironment {
-
     // MARK: - Environment Type
 
     /// Tipos de ambiente soportados
@@ -106,11 +116,11 @@ enum AppEnvironment {
     /// Los tokens emitidos aquí funcionan con api-mobile y api-admin.
     static var authAPIBaseURL: URL {
         #if DEBUG
-        return URL(string: "http://localhost:8081")!
+        return makeURL("http://localhost:8081")
         #elseif STAGING
-        return URL(string: "https://staging-api-admin.edugo.com")!
+        return makeURL("https://staging-api-admin.edugo.com")
         #else
-        return URL(string: "https://api-admin.edugo.com")!
+        return makeURL("https://api-admin.edugo.com")
         #endif
     }
 
@@ -120,11 +130,11 @@ enum AppEnvironment {
     /// Usa tokens emitidos por authAPIBaseURL (api-admin).
     static var mobileAPIBaseURL: URL {
         #if DEBUG
-        return URL(string: "http://localhost:9091")!
+        return makeURL("http://localhost:9091")
         #elseif STAGING
-        return URL(string: "https://staging-api-mobile.edugo.com")!
+        return makeURL("https://staging-api-mobile.edugo.com")
         #else
-        return URL(string: "https://api-mobile.edugo.com")!
+        return makeURL("https://api-mobile.edugo.com")
         #endif
     }
 
@@ -134,11 +144,11 @@ enum AppEnvironment {
     /// Mismo servidor que auth, pero para funciones administrativas.
     static var adminAPIBaseURL: URL {
         #if DEBUG
-        return URL(string: "http://localhost:8081")!
+        return makeURL("http://localhost:8081")
         #elseif STAGING
-        return URL(string: "https://staging-api-admin.edugo.com")!
+        return makeURL("https://staging-api-admin.edugo.com")
         #else
-        return URL(string: "https://api-admin.edugo.com")!
+        return makeURL("https://api-admin.edugo.com")
         #endif
     }
 

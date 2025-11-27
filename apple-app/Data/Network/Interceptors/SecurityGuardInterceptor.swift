@@ -26,7 +26,6 @@ import Foundation
 /// 3. Simplifica el modelo de concurrencia del network layer
 @MainActor
 final class SecurityGuardInterceptor: RequestInterceptor {
-
     // MARK: - Dependencies
 
     private let securityValidator: SecurityValidator

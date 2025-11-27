@@ -13,7 +13,6 @@ import Testing
 @MainActor
 @Suite("Privacy & Redaction Tests")
 struct PrivacyTests {
-
     // MARK: - Token Redaction Tests
 
     @Test("Token redaction oculta el centro del token")

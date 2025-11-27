@@ -8,13 +8,11 @@
 import Testing
 import SwiftUI
 import Foundation
-import SwiftUI
 @testable import apple_app
 
 @MainActor
 @Suite("Theme Entity Tests")
 struct ThemeTests {
-    
     @Test("Theme colorScheme for light should return .light")
     func testLightThemeColorScheme() async throws {
         // Given

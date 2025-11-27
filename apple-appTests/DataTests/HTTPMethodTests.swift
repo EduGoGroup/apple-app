@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("HTTPMethod Tests")
 struct HTTPMethodTests {
-    
     @Test("HTTPMethod raw values should match HTTP verbs")
     func testHTTPMethodRawValues() async throws {
         #expect(HTTPMethod.get.rawValue == "GET")

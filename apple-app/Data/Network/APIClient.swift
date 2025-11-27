@@ -151,6 +151,9 @@ final class DefaultAPIClient: APIClient {
 
     // MARK: - SPEC-004: Retry Logic
 
+    // Justificación: Esta función maneja retry, interceptors, validación y cache en un flujo cohesivo (65 líneas).
+    // Refactorizar en múltiples funciones reduciría legibilidad del flujo de retry recursivo.
+    // swiftlint:disable function_body_length
     private func executeWithRetry<T: Decodable>(request: URLRequest, attempt: Int = 0) async throws -> T {
         do {
             // Ejecutar request
@@ -215,14 +218,12 @@ final class DefaultAPIClient: APIClient {
                 ])
                 throw NetworkError.decodingError
             }
-
         } catch let error as NetworkError {
             // SPEC-004: Encolar request si no hay conexión (para retry posterior)
             if error == .noConnection,
                let queue = offlineQueue,
                let url = request.url,
                let method = request.httpMethod {
-
                 let queuedRequest = QueuedRequest(
                     url: url,
                     method: method,
@@ -242,6 +243,7 @@ final class DefaultAPIClient: APIClient {
             throw NetworkError.serverError(0)
         }
     }
+    // swiftlint:enable function_body_length
 }
 
 // MARK: - Helper para codificar Any Encodable

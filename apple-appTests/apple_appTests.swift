@@ -12,8 +12,7 @@ import SwiftUI
 /// Tests básicos de la app
 /// Con Swift 6, usamos @MainActor para acceder a tipos @MainActor
 @MainActor
-final class apple_appTests: XCTestCase {
-
+final class EduGoAppTests: XCTestCase {
     // User entity debería calcular iniciales correctamente
     func testUserInitials() async throws {
         // Given
@@ -78,5 +77,4 @@ final class apple_appTests: XCTestCase {
         XCTAssertTrue(validator.isValidEmail("test@example.com"))
         XCTAssertFalse(validator.isValidEmail("invalid"))
     }
-
 }

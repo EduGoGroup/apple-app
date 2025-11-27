@@ -31,7 +31,6 @@ protocol SecurityValidator: Sendable {
 /// 3. Se accede principalmente desde interceptors (@MainActor)
 @MainActor
 final class DefaultSecurityValidator: SecurityValidator {
-
     var isJailbroken: Bool {
         get async {
             #if targetEnvironment(simulator)
@@ -83,10 +82,8 @@ final class DefaultSecurityValidator: SecurityValidator {
             "/private/var/stash"
         ]
 
-        for path in suspiciousPaths {
-            if FileManager.default.fileExists(atPath: path) {
-                return true
-            }
+        for path in suspiciousPaths where FileManager.default.fileExists(atPath: path) {
+            return true
         }
 
         return false

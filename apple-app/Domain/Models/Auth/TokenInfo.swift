@@ -32,7 +32,6 @@ typealias AuthTokens = TokenInfo
 /// }
 /// ```
 struct TokenInfo: Codable, Sendable, Equatable {
-
     // MARK: - Properties
 
     /// Token de acceso JWT

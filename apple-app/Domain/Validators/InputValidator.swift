@@ -42,11 +42,11 @@ final class DefaultInputValidator: InputValidator {
     }
 
     func isValidPassword(_ password: String) -> Bool {
-        return password.count >= 6
+        password.count >= 6
     }
 
     func isValidName(_ name: String) -> Bool {
-        return name.count >= 2 && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        name.count >= 2 && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     // MARK: - SPEC-008: Security Validations
@@ -67,10 +67,8 @@ final class DefaultInputValidator: InputValidator {
             "\";"
         ]
 
-        for pattern in sqlPatterns {
-            if input.range(of: pattern, options: .regularExpression) != nil {
-                return false
-            }
+        for pattern in sqlPatterns where input.range(of: pattern, options: .regularExpression) != nil {
+            return false
         }
 
         return true
@@ -89,10 +87,8 @@ final class DefaultInputValidator: InputValidator {
 
         let lowercased = input.lowercased()
 
-        for pattern in xssPatterns {
-            if lowercased.contains(pattern) {
-                return false
-            }
+        for pattern in xssPatterns where lowercased.contains(pattern) {
+            return false
         }
 
         return true
@@ -111,10 +107,8 @@ final class DefaultInputValidator: InputValidator {
 
         let lowercased = path.lowercased()
 
-        for pattern in dangerousPatterns {
-            if lowercased.contains(pattern) {
-                return false
-            }
+        for pattern in dangerousPatterns where lowercased.contains(pattern) {
+            return false
         }
 
         return true

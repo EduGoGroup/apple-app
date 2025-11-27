@@ -28,7 +28,6 @@ private final class TestImplementation: TestProtocol {
 @MainActor
 @Suite("TestDependencyContainer Tests")
 struct TestDependencyContainerTests {
-
     @Test("registerMock registra mock correctamente")
     func registerMockWorks() {
         // Given

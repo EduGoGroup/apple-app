@@ -13,7 +13,6 @@ import SwiftUI
 @MainActor
 @Suite("UserPreferences Entity Tests")
 struct UserPreferencesTests {
-    
     @Test("UserPreferences default should have expected values")
     func testDefaultPreferences() async throws {
         // Given

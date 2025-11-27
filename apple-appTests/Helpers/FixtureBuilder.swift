@@ -78,7 +78,7 @@ final class UserBuilder {
 final class TokenInfoBuilder {
     private var accessToken: String = "mock_access_token"
     private var refreshToken: String = "mock_refresh_token"
-    private var expiresAt: Date = Date().addingTimeInterval(900)
+    private var expiresAt = Date().addingTimeInterval(900)
 
     func withAccessToken(_ token: String) -> TokenInfoBuilder {
         self.accessToken = token

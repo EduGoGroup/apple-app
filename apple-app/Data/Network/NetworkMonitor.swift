@@ -38,7 +38,6 @@ protocol NetworkMonitor: Sendable {
 /// FASE 1 - Refactoring: Eliminado @unchecked Sendable, convertido a actor
 /// FASE 3 - Fix Copilot: Eliminado dead code (currentPath, updatePath) y corregido handler overwrites
 actor DefaultNetworkMonitor: NetworkMonitor {
-
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "com.edugo.network.monitor")
 

@@ -13,7 +13,6 @@ import Foundation
 @MainActor
 @Suite("LoginDTO Tests")
 struct LoginDTOTests {
-
     // MARK: - LoginRequest Tests
 
     @Test("LoginRequest has correct properties")

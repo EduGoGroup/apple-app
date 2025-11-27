@@ -14,7 +14,7 @@ import Observation
 @MainActor
 final class NavigationCoordinator {
     /// Path de navegación
-    var path: NavigationPath = NavigationPath()
+    var path = NavigationPath()
 
     /// Navega a una ruta específica
     /// - Parameter route: Ruta de destino

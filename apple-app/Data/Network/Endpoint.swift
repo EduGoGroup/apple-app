@@ -9,6 +9,14 @@
 
 import Foundation
 
+/// Helper privado para crear URLs de forma segura
+private func makeURL(_ string: String) -> URL {
+    guard let url = URL(string: string) else {
+        fatalError("Invalid URL: \(string) - This should never happen with hardcoded URLs")
+    }
+    return url
+}
+
 /// Endpoints disponibles en la API
 ///
 /// ## Arquitectura de URLs
@@ -62,7 +70,7 @@ enum Endpoint: Sendable {
         switch AppEnvironment.authMode {
         case .dummyJSON:
             // DummyJSON tiene su propia URL
-            return URL(string: "https://dummyjson.com")!
+            return makeURL("https://dummyjson.com")
         case .realAPI:
             // Endpoints de auth van a api-admin
             // Endpoints de contenido irían a api-mobile
@@ -85,7 +93,7 @@ enum Endpoint: Sendable {
     /// @available(*, deprecated, message: "Usar la propiedad fullURL en su lugar")
     func url(baseURL: URL) -> URL {
         // Ignorar el baseURL pasado y usar el correcto según el tipo de endpoint
-        return self.baseURL.appendingPathComponent(path)
+        self.baseURL.appendingPathComponent(path)
     }
 
     /// URL completa del endpoint (sin necesidad de pasar baseURL)

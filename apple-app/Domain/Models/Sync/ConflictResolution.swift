@@ -75,7 +75,6 @@ protocol ConflictResolver: Sendable {
 /// Swift 6: Struct simple que implementa resolución sin aislamiento.
 /// Seguro para usar desde cualquier contexto, incluyendo actors.
 struct SimpleConflictResolver: ConflictResolver {
-
     func resolve(
         _ conflict: SyncConflict,
         strategy: ConflictResolutionStrategy
@@ -110,7 +109,6 @@ struct SimpleConflictResolver: ConflictResolver {
 ///
 /// Swift 6: Actor sin @MainActor para permitir uso desde otros actors
 actor DefaultConflictResolver: ConflictResolver {
-
     // MARK: - Public Methods
 
     func resolve(

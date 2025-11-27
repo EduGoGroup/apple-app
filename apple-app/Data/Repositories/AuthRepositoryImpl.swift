@@ -29,6 +29,7 @@ private actor TokenStore {
     }
 }
 
+// swiftlint:disable type_body_length
 /// Implementación del repositorio de autenticación
 ///
 /// Usa `api-admin` como servicio central de autenticación.
@@ -43,9 +44,11 @@ private actor TokenStore {
 /// - TokenStore actor para operaciones concurrentes con tokens
 /// - APIClient ahora es actor, garantiza serialización automática
 /// - @MainActor garantiza thread-safety sin locks manuales
+///
+/// **Nota**: Esta clase tiene 311 líneas. Refactorizar en múltiples clases rompería la cohesión
+/// del dominio de autenticación (login, logout, refresh, biometrics, token management, validación).
 @MainActor
 final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
-
     // MARK: - Dependencies
 
     private let apiClient: APIClient
@@ -123,7 +126,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             try? await keychainService.saveToken(password, for: storedPasswordKey)
 
             return .success(user)
-
         } catch let error as NetworkError {
             await logger.error("Login failed - Network error", metadata: [
                 "error": error.localizedDescription
@@ -172,7 +174,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             // 4. Login normal con credenciales
             await logger.info("Biometric auth successful, performing login")
             return await login(email: email, password: password)
-
         } catch {
             await logger.error("Biometric login failed", metadata: [
                 "error": error.localizedDescription
@@ -219,7 +220,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             await logger.info("Current user retrieved from JWT", metadata: ["userId": user.id])
 
             return .success(user)
-
         } catch {
             // Si hay cualquier error (JWT inválido, keychain, etc), intentar refresh
             await logger.warning("Error retrieving current user, attempting refresh", metadata: [
@@ -238,6 +238,8 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
     // MARK: - Token Management
 
+    // Justificación: refreshToken maneja flujo completo (47 líneas): validación, llamada API, persistencia, logging
+    // swiftlint:disable:next function_body_length
     func refreshToken() async -> Result<AuthTokens, AppError> {
         await logger.info("Token refresh attempt started")
 
@@ -281,7 +283,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
 
             await logger.info("Token refresh successful")
             return .success(newTokens)
-
         } catch let error as NetworkError {
             await logger.error("Token refresh failed - Network error", metadata: [
                 "error": error.localizedDescription
@@ -405,7 +406,6 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
             await tokenStore.setTokens(tokenInfo)
 
             return .success(tokenInfo)
-
         } catch {
             return .failure(.network(.unauthorized))
         }
@@ -483,3 +483,4 @@ final class AuthRepositoryImpl: AuthRepository, AuthTokenProvider {
         return (response.toDomain(), response.toTokenInfo())
     }
 }
+// swiftlint:enable type_body_length

@@ -27,7 +27,6 @@ import Observation
 @Observable
 @MainActor
 final class LocalizationManager {
-
     // MARK: - Properties
 
     /// Idioma actual de la aplicación
@@ -80,5 +79,5 @@ import SwiftUI
 
 /// Extension para usar LocalizationManager en @Environment
 extension EnvironmentValues {
-    @Entry var localization: LocalizationManager = LocalizationManager()
+    @Entry var localization = LocalizationManager()
 }
