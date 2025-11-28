@@ -37,6 +37,7 @@ struct PlatformCapabilities: Sendable {
     }
 
     /// Detecta el tipo de dispositivo actual
+    @MainActor
     static var currentDevice: DeviceType {
         #if os(iOS)
         #if targetEnvironment(simulator)
@@ -108,6 +109,7 @@ struct PlatformCapabilities: Sendable {
 
     #if os(iOS)
     /// Obtiene las capacidades de la pantalla actual
+    @MainActor
     static var screenCapabilities: ScreenCapabilities {
         let screen = UIScreen.main
         let size = screen.bounds.size
@@ -231,6 +233,7 @@ struct PlatformCapabilities: Sendable {
     }
 
     /// Estilo de navegación recomendado para el dispositivo actual
+    @MainActor
     static var recommendedNavigationStyle: NavigationStyle {
         switch currentDevice {
         case .iPhone:
@@ -247,26 +250,31 @@ struct PlatformCapabilities: Sendable {
     // MARK: - Convenience Properties
 
     /// Indica si estamos en iPhone
+    @MainActor
     static var isIPhone: Bool {
         currentDevice == .iPhone
     }
 
     /// Indica si estamos en iPad
+    @MainActor
     static var isIPad: Bool {
         currentDevice == .iPad
     }
 
     /// Indica si estamos en Mac
+    @MainActor
     static var isMac: Bool {
         currentDevice == .mac
     }
 
     /// Indica si estamos en Vision Pro
+    @MainActor
     static var isVision: Bool {
         currentDevice == .vision
     }
 
     /// Indica si el dispositivo soporta múltiples ventanas
+    @MainActor
     static var supportsMultipleWindows: Bool {
         #if os(iOS)
         return UIDevice.current.userInterfaceIdiom == .pad
@@ -305,6 +313,7 @@ extension View {
 
 extension PlatformCapabilities {
     /// Información de debug sobre la plataforma actual
+    @MainActor
     static var debugDescription: String {
         """
         Platform Capabilities:
