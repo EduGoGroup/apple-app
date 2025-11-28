@@ -99,7 +99,7 @@ final class MockService { }
 actor MockService { }  // Si protocolo async
 ```
 
-📖 **Guía Completa**: [`docs/revision/03-REGLAS-DESARROLLO-IA.md`](docs/revision/03-REGLAS-DESARROLLO-IA.md)  
+📖 **Guía Completa**: [`docs/03-REGLAS-DESARROLLO-IA.md`](docs/03-REGLAS-DESARROLLO-IA.md)  
 📊 **Sprint 0**: [`docs/revision/sprint-0-2025-11-28/`](docs/revision/sprint-0-2025-11-28/) - Análisis exhaustivo (25k+ líneas)
 
 ---

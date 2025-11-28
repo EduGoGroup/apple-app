@@ -75,7 +75,7 @@ Data (Repositories + APIClient + SwiftData)
 ### Esenciales
 - [`CLAUDE.md`](CLAUDE.md) - Guía rápida desarrollo
 - [`docs/01-arquitectura.md`](docs/01-arquitectura.md) - Arquitectura completa
-- [`docs/revision/03-REGLAS-DESARROLLO-IA.md`](docs/revision/03-REGLAS-DESARROLLO-IA.md) - Reglas concurrencia
+- [`docs/03-REGLAS-DESARROLLO-IA.md`](docs/03-REGLAS-DESARROLLO-IA.md) - Reglas concurrencia Swift 6
 
 ### Especificaciones
 - [`docs/specs/`](docs/specs/) - Specs activas
