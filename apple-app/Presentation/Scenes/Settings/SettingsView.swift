@@ -82,8 +82,8 @@ struct SettingsView: View {
             )) {
                 ForEach(Theme.allCases, id: \.self) { theme in
                     HStack {
-                        Image(systemName: themeIcon(for: theme))
-                        Text(themeDisplayName(for: theme))
+                        Image(systemName: theme.iconName)
+                        Text(theme.displayName)
                     }
                     .tag(theme)
                 }
@@ -148,28 +148,7 @@ struct SettingsView: View {
     }
 
     // MARK: - Helpers
-
-    private func themeIcon(for theme: Theme) -> String {
-        switch theme {
-        case .light:
-            return "sun.max.fill"
-        case .dark:
-            return "moon.fill"
-        case .system:
-            return "gear"
-        }
-    }
-
-    private func themeDisplayName(for theme: Theme) -> String {
-        switch theme {
-        case .light:
-            return String(localized: "settings.theme.light")
-        case .dark:
-            return String(localized: "settings.theme.dark")
-        case .system:
-            return String(localized: "settings.theme.system")
-        }
-    }
+    // Theme display properties ahora vienen de Theme+UI.swift extension
 }
 
 // MARK: - Previews

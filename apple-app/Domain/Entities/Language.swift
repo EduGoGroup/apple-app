@@ -3,6 +3,7 @@
 //  apple-app
 //
 //  Created on 25-11-25.
+//  Updated on 28-11-25: Removidas propiedades UI para cumplir Clean Architecture
 //  SPEC-010: Localization - Language Enum
 //
 
@@ -10,9 +11,11 @@ import Foundation
 
 /// Idiomas soportados en la aplicación
 ///
-/// Define los idiomas disponibles para la localización de contenido.
-/// Cada idioma tiene un código ISO 639-1 y un nombre para mostrar en UI.
+/// Esta entidad de Domain contiene solo lógica de negocio (códigos ISO, detección).
+/// Para propiedades de presentación (displayName, iconName, flagEmoji),
+/// ver la extensión en `Presentation/Extensions/Language+UI.swift`.
 ///
+/// - Note: Cumple Clean Architecture - Domain Layer puro
 /// - Note: Conforme a iOS 15+ String Catalog (xcstrings)
 enum Language: String, Codable, CaseIterable, Sendable {
     /// Español
@@ -21,49 +24,26 @@ enum Language: String, Codable, CaseIterable, Sendable {
     /// Inglés
     case english = "en"
 
+    // MARK: - Business Logic Properties
+
     /// Código de idioma ISO 639-1
-    nonisolated var code: String {
+    var code: String {
         rawValue
     }
 
-    /// Nombre del idioma en su propio idioma (autoglotónimo)
-    nonisolated var displayName: String {
-        switch self {
-        case .spanish:
-            return "Español"
-        case .english:
-            return "English"
-        }
-    }
-
-    /// Icono SF Symbol representativo del idioma
-    nonisolated var iconName: String {
-        switch self {
-        case .spanish:
-            return "flag.fill" // Bandera genérica
-        case .english:
-            return "flag.fill"
-        }
-    }
-
-    /// Emoji de bandera representativa (opcional, para UI)
-    nonisolated var flagEmoji: String {
-        switch self {
-        case .spanish:
-            return "🇪🇸"
-        case .english:
-            return "🇺🇸"
-        }
-    }
-
     /// Idioma predeterminado de la aplicación
-    nonisolated static var `default`: Language {
+    static var `default`: Language {
         .spanish
     }
 
     /// Detecta el idioma del sistema y retorna el más cercano soportado
+    ///
+    /// Utiliza `Locale.preferredLanguages` del sistema para detectar
+    /// el idioma preferido del usuario y mapear al idioma soportado
+    /// más cercano.
+    ///
     /// - Returns: Language soportado más cercano al idioma del sistema
-    nonisolated static func systemLanguage() -> Language {
+    static func systemLanguage() -> Language {
         let preferredLanguages = Locale.preferredLanguages
 
         for preferredLanguage in preferredLanguages {
@@ -76,5 +56,10 @@ enum Language: String, Codable, CaseIterable, Sendable {
 
         // Fallback al idioma predeterminado
         return .default
+    }
+
+    /// Indica si es el idioma predeterminado
+    var isDefault: Bool {
+        self == .default
     }
 }
