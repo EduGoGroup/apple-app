@@ -347,7 +347,7 @@ private struct ActivityRow: View {
 
 // MARK: - Previews
 
-#Preview("iPad Portrait") {
+#Preview("iPad Portrait", traits: .fixedLayout(width: 1024, height: 1366)) {
     NavigationStack {
         IPadHomeView(
             getCurrentUserUseCase: PreviewMocks.getCurrentUserUseCase,
@@ -355,11 +355,9 @@ private struct ActivityRow: View {
             authState: AuthenticationState()
         )
     }
-    .previewDevice("iPad Pro (12.9-inch) (6th generation)")
-    .previewInterfaceOrientation(.portrait)
 }
 
-#Preview("iPad Landscape") {
+#Preview("iPad Landscape", traits: .fixedLayout(width: 1366, height: 1024)) {
     NavigationStack {
         IPadHomeView(
             getCurrentUserUseCase: PreviewMocks.getCurrentUserUseCase,
@@ -367,8 +365,6 @@ private struct ActivityRow: View {
             authState: AuthenticationState()
         )
     }
-    .previewDevice("iPad Pro (12.9-inch) (6th generation)")
-    .previewInterfaceOrientation(.landscapeLeft)
 }
 
 // MARK: - Preview Mocks

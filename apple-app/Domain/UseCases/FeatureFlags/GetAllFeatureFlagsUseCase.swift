@@ -40,9 +40,6 @@ struct GetAllFeatureFlagsUseCase: Sendable {
     ///
     /// - Returns: `Result` con diccionario de todos los flags y sus valores
     func execute() async -> Result<[FeatureFlag: Bool], AppError> {
-        // Obtener todos los flags del repositorio
-        let allFlags = await repository.getAllFlags()
-
         // Crear use case para validar cada flag individualmente
         let getFlagUseCase = GetFeatureFlagUseCase(repository: repository)
 
