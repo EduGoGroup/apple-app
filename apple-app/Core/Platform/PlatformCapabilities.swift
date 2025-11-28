@@ -189,6 +189,7 @@ struct PlatformCapabilities: Sendable {
         let supportsPencil: Bool
         let supportsHover: Bool
 
+        @MainActor
         static var current: InputCapabilities {
             #if os(macOS)
             return InputCapabilities(
