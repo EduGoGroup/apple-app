@@ -6,6 +6,7 @@
 //  SPEC-009: Feature Flags System - Tests
 //
 
+import Foundation
 import Testing
 @testable import apple_app
 
