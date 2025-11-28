@@ -18,21 +18,7 @@ extension UserRole {
     // MARK: - Display Properties
 
     /// Nombre localizado del rol para mostrar en UI
-    var displayName: LocalizedStringKey {
-        switch self {
-        case .student:
-            return "user.role.student"
-        case .teacher:
-            return "user.role.teacher"
-        case .admin:
-            return "user.role.admin"
-        case .parent:
-            return "user.role.parent"
-        }
-    }
-
-    /// Versión String del displayName
-    var displayNameString: String {
+    var displayName: String {
         switch self {
         case .student:
             return String(localized: "user.role.student")

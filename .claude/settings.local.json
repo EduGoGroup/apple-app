@@ -3,7 +3,10 @@
     "allow": [
       "Bash(git checkout:*)",
       "Bash(./run.sh:*)",
-      "Bash(xcodebuild:*)"
+      "Bash(xcodebuild:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(gh pr checks:*)"
     ],
     "additionalDirectories": [
       "/Users/jhoanmedina/source/Documentation/GuideDesign/Design/Apple",

@@ -45,19 +45,7 @@ extension Theme {
     /// Nombre localizado para mostrar en UI
     ///
     /// - Note: Usa String(localized:) para soporte multiidioma (SPEC-010)
-    var displayName: LocalizedStringKey {
-        switch self {
-        case .light:
-            return "settings.theme.light"
-        case .dark:
-            return "settings.theme.dark"
-        case .system:
-            return "settings.theme.system"
-        }
-    }
-
-    /// Versión String del displayName (para contextos no-SwiftUI)
-    var displayNameString: String {
+    var displayName: String {
         switch self {
         case .light:
             return String(localized: "settings.theme.light")
@@ -65,6 +53,18 @@ extension Theme {
             return String(localized: "settings.theme.dark")
         case .system:
             return String(localized: "settings.theme.system")
+        }
+    }
+
+    /// LocalizedStringKey version para Text() directo
+    var displayNameKey: LocalizedStringKey {
+        switch self {
+        case .light:
+            return "settings.theme.light"
+        case .dark:
+            return "settings.theme.dark"
+        case .system:
+            return "settings.theme.system"
         }
     }
 
