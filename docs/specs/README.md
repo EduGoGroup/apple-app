@@ -1,522 +1,436 @@
-# 📚 Índice de Especificaciones - EduGo App
+# 📚 Índice de Especificaciones - EduGo Apple App
 
-**Última actualización**: 2025-11-23  
-**Total de Especificaciones**: 13  
-**Estimación Total**: 8-10 semanas
-
----
-
-## 🗺️ Roadmap de Implementación
-
-### 🔴 FASE 1: FUNDAMENTOS (Semana 1-2)
-
-Especificaciones críticas que bloquean el resto del desarrollo.
-
-| ID | Nombre | Prioridad | Estimación | Status |
-|----|--------|-----------|------------|--------|
-| [**SPEC-001**](#spec-001-environment-configuration-system) | Environment Configuration | 🔴 P0 | 2-3 días | ⏸️ Pendiente |
-| [**SPEC-002**](#spec-002-professional-logging-system) | Professional Logging | 🔴 P0 | 2-3 días | ⏸️ Pendiente |
-| [**SPEC-008**](#spec-008-security-hardening) | Security Hardening | 🟠 P1 | 2-3 días | ⏸️ Pendiente |
-
-**📍 Comenzar aquí** - Sin dependencias, pueden ejecutarse en paralelo
+**Última actualización**: 2025-11-27  
+**Versión del Proyecto**: 0.1.0 (Pre-release)  
+**Progreso General**: 59% (7 de 13 specs completadas)
 
 ---
 
-### 🟠 FASE 2: CORE FEATURES (Semana 3-4)
+## 📊 NAVEGACIÓN RÁPIDA
 
-Funcionalidades principales que dependen de Fase 1.
-
-| ID | Nombre | Prioridad | Estimación | Dependencias | Status |
-|----|--------|-----------|------------|--------------|--------|
-| [**SPEC-003**](#spec-003-authentication---real-api-migration) | Authentication Migration | 🟠 P1 | 3-4 días | SPEC-001, 002 | ⏸️ Pendiente |
-| [**SPEC-004**](#spec-004-network-layer-enhancement) | Network Layer | 🟠 P1 | 3-4 días | SPEC-001, 002, 003 | ⏸️ Pendiente |
-| [**SPEC-007**](#spec-007-testing-infrastructure) | Testing Infrastructure | 🟠 P1 | 2-3 días | SPEC-001, 002, 003, 004 | ⏸️ Pendiente |
-
----
-
-### 🟡 FASE 3: DATA & PLATFORM (Semana 5-6)
-
-Optimizaciones de datos y plataforma.
-
-| ID | Nombre | Prioridad | Estimación | Dependencias | Status |
-|----|--------|-----------|------------|--------------|--------|
-| [**SPEC-005**](#spec-005-swiftdata-integration) | SwiftData Integration | 🟡 P2 | 2-3 días | SPEC-001 | ⏸️ Pendiente |
-| [**SPEC-006**](#spec-006-platform-optimization) | Platform Optimization | 🟡 P2 | 3-4 días | SPEC-001 | ⏸️ Pendiente |
-| [**SPEC-010**](#spec-010-localization) | Localization | 🟡 P2 | 2 días | - | ⏸️ Pendiente |
-
----
-
-### 🟢 FASE 4: ADVANCED (Semana 7-8)
-
-Funcionalidades avanzadas y optimizaciones finales.
-
-| ID | Nombre | Prioridad | Estimación | Dependencias | Status |
-|----|--------|-----------|------------|--------------|--------|
-| [**SPEC-013**](#spec-013-offline-first-strategy) | Offline-First | 🟡 P2 | 3-4 días | SPEC-004, 005 | ⏸️ Pendiente |
-| [**SPEC-012**](#spec-012-performance-monitoring) | Performance Monitoring | 🟡 P2 | 2 días | SPEC-002, 011 | ⏸️ Pendiente |
-| [**SPEC-009**](#spec-009-feature-flags--remote-config) | Feature Flags | 🟢 P3 | 2 días | SPEC-001, 005 | ⏸️ Pendiente |
-| [**SPEC-011**](#spec-011-analytics--telemetry) | Analytics | 🟢 P3 | 2 días | SPEC-002 | ⏸️ Pendiente |
+```
+📁 docs/specs/
+├── 📊 TRACKING.md                    ← 🎯 FUENTE ÚNICA DE VERDAD (estado actual)
+├── 📋 PENDIENTES.md                  ← Solo especificaciones pendientes
+├── 📖 README.md                      ← Este archivo (índice general)
+│
+├── 📂 archived/                      ← Especificaciones completadas (100%)
+│   ├── completed-specs/
+│   │   ├── environment-configuration/
+│   │   ├── logging-system/
+│   │   ├── network-layer-enhancement/
+│   │   ├── swiftdata-integration/
+│   │   ├── testing-infrastructure/
+│   │   ├── localization/
+│   │   └── offline-first/
+│   └── analysis-reports/
+│       ├── ANALISIS-ESTADO-REAL-2025-11-25.md
+│       ├── AUDITORIA-TECNOLOGIAS-DEPRECADAS.md
+│       └── ESPECIFICACIONES-PENDIENTES-Y-ROADMAP.md
+│
+└── 📂 [specs activas]/              ← Solo especificaciones en progreso/pendientes
+    ├── authentication-migration/    (90% - P1)
+    ├── security-hardening/          (75% - P1)
+    ├── platform-optimization/       (15% - P2)
+    ├── feature-flags/               (10% - P3)
+    ├── analytics/                   (5% - P3)
+    └── performance-monitoring/      (0% - P2)
+```
 
 ---
 
-## 📋 Índice de Especificaciones
+## 🎯 DOCUMENTOS PRINCIPALES
 
-### SPEC-001: Environment Configuration System
+### 1. TRACKING.md - Fuente Única de Verdad
 
-**📂 Carpeta**: [`environment-configuration/`](environment-configuration/)  
-**🔴 Prioridad**: P0 - CRÍTICO  
-**⏱️ Estimación**: 2-3 días  
-**🔗 Dependencias**: Ninguna
+**Ubicación**: `docs/specs/TRACKING.md`  
+**Propósito**: Estado actual verificado de todas las especificaciones  
+**Actualización**: Semanal (cada lunes)
 
-**Objetivo**: Sistema de configuración multi-ambiente con .xcconfig files.
+**Contenido**:
+- ✅ Progreso real (59%)
+- ✅ Estado de cada spec
+- ✅ Tabla consolidada
+- ✅ Métricas del proyecto
+- ✅ Historial de cambios
 
-**Archivos**:
-- [01-analisis-requerimiento.md](environment-configuration/01-analisis-requerimiento.md) - Problemática actual y requerimientos
-- [02-analisis-diseno.md](environment-configuration/02-analisis-diseno.md) - Arquitectura y componentes
-- [03-tareas.md](environment-configuration/03-tareas.md) - Plan de implementación
-- [task-tracker.yaml](environment-configuration/task-tracker.yaml) - Tracking de progreso
-
-**Lo que implementa**:
-- .xcconfig files (Development, Staging, Production, Local, Docker, etc.)
-- Environment.swift para acceso type-safe
-- Xcode schemes y build configurations
-- Secrets management
-
-**Bloquea a**: SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-009
+**📌 Úsalo para**: Saber qué está completo, qué falta, progreso general
 
 ---
 
-### SPEC-002: Professional Logging System
+### 2. PENDIENTES.md - Solo lo que Falta
 
-**📂 Carpeta**: [`logging-system/`](logging-system/)  
-**🔴 Prioridad**: P0 - CRÍTICO  
-**⏱️ Estimación**: 2-3 días  
-**🔗 Dependencias**: Ninguna (puede ejecutarse en paralelo con SPEC-001)
+**Ubicación**: `docs/specs/PENDIENTES.md`  
+**Propósito**: Especificaciones pendientes con requisitos externos y próximos pasos  
+**Actualización**: Al completar cada spec
 
-**Objetivo**: Reemplazar print() con OSLog estructurado.
+**Contenido**:
+- ⚠️ 6 especificaciones en progreso/pendientes
+- ⚠️ Bloqueadores externos (backend, DevOps)
+- ⚠️ Estimaciones de tiempo
+- ⚠️ Roadmap recomendado
 
-**Archivos**:
-- [01-analisis-requerimiento.md](logging-system/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](logging-system/02-analisis-diseno.md)
-- [03-tareas.md](logging-system/03-tareas.md)
-- [task-tracker.yaml](logging-system/task-tracker.yaml)
-
-**Lo que implementa**:
-- Logger protocol + OSLogger implementation
-- LoggerFactory con categorías (network, auth, data, ui, business, system)
-- Privacy extensions (redacción de tokens, emails)
-- MockLogger para testing
-
-**Bloquea a**: SPEC-003, SPEC-004, SPEC-007, SPEC-011, SPEC-012
+**📌 Úsalo para**: Planificar próximas tareas, identificar bloqueadores
 
 ---
 
-### SPEC-003: Authentication - Real API Migration
+### 3. README.md (este archivo)
 
-**📂 Carpeta**: [`authentication-migration/`](authentication-migration/)  
-**🟠 Prioridad**: P1 - ALTA  
-**⏱️ Estimación**: 3-4 días  
-**🔗 Dependencias**: SPEC-001, SPEC-002
-
-**Objetivo**: Migrar de DummyJSON a API real con JWT y biometric auth.
-
-**Archivos**:
-- [01-analisis-requerimiento.md](authentication-migration/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](authentication-migration/02-analisis-diseno.md)
-- [03-tareas.md](authentication-migration/03-tareas.md)
-- [task-tracker.yaml](authentication-migration/task-tracker.yaml)
-
-**Lo que implementa**:
-- TokenInfo model con expiresAt
-- JWTDecoder para validación local
-- TokenRefreshCoordinator (actor) para auto-refresh
-- AuthInterceptor para auto-inject tokens
-- BiometricAuthService (Face ID / Touch ID)
-- Feature flag DummyJSON/RealAPI
-
-**Bloquea a**: SPEC-004, SPEC-007, SPEC-008
+**Propósito**: Índice general de toda la documentación de especificaciones
 
 ---
 
-### SPEC-004: Network Layer Enhancement
+## ✅ ESPECIFICACIONES COMPLETADAS (Archivadas)
 
-**📂 Carpeta**: [`network-layer-enhancement/`](network-layer-enhancement/)  
-**🟠 Prioridad**: P1 - ALTA  
-**⏱️ Estimación**: 3-4 días  
-**🔗 Dependencias**: SPEC-001, SPEC-002, SPEC-003
+**Ubicación**: `docs/specs/archived/completed-specs/`
 
-**Objetivo**: Interceptor chain, retry con backoff, offline queue.
+| Spec | Nombre | Completado | Ver Documentación |
+|------|--------|------------|-------------------|
+| **001** | Environment Configuration | 2025-11-23 | [`environment-configuration/`](archived/completed-specs/environment-configuration/) |
+| **002** | Professional Logging | 2025-11-24 | [`logging-system/`](archived/completed-specs/logging-system/) |
+| **004** | Network Layer Enhancement | 2025-11-25 | [`network-layer-enhancement/`](archived/completed-specs/network-layer-enhancement/) |
+| **005** | SwiftData Integration | 2025-11-25 | [`swiftdata-integration/`](archived/completed-specs/swiftdata-integration/) |
+| **007** | Testing Infrastructure | 2025-11-26 | [`testing-infrastructure/`](archived/completed-specs/testing-infrastructure/) |
+| **010** | Localization | 2025-11-25 | [`localization/`](archived/completed-specs/localization/) |
+| **013** | Offline-First Strategy | 2025-11-25 | [`offline-first/`](archived/completed-specs/offline-first/) |
 
-**Archivos**:
-- [01-analisis-requerimiento.md](network-layer-enhancement/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](network-layer-enhancement/02-analisis-diseno.md)
-- [03-tareas.md](network-layer-enhancement/03-tareas.md)
-- [task-tracker.yaml](network-layer-enhancement/task-tracker.yaml)
-
-**Lo que implementa**:
-- RequestInterceptor + ResponseInterceptor protocols
-- AuthInterceptor, LoggingInterceptor, HeadersInterceptor
-- RetryPolicy con BackoffStrategy (exponential, linear, fixed)
-- OfflineQueue (actor) con persistencia
-- NetworkMonitor para reachability
-
-**Bloquea a**: SPEC-007, SPEC-013
+**Archivos disponibles en cada carpeta**:
+- `SPEC-XXX-COMPLETADO.md` - Resumen de implementación
+- `01-analisis-requerimiento.md` - Análisis original
+- `02-analisis-diseno.md` - Diseño técnico
+- `03-tareas.md` - Tareas ejecutadas
+- `task-tracker.yaml` - Tracking histórico
 
 ---
 
-### SPEC-005: SwiftData Integration
+## 🔄 ESPECIFICACIONES ACTIVAS
 
-**📂 Carpeta**: [`swiftdata-integration/`](swiftdata-integration/)  
-**🟡 Prioridad**: P2 - MEDIA  
-**⏱️ Estimación**: 2-3 días  
-**🔗 Dependencias**: SPEC-001
+### 🔴 PRIORIDAD CRÍTICA (P1)
 
-**Objetivo**: SwiftData para cache, offline data, sync.
+#### SPEC-003: Authentication - Real API Migration (90%)
 
-**Archivos**:
-- [01-analisis-requerimiento.md](swiftdata-integration/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](swiftdata-integration/02-analisis-diseno.md)
-- [03-tareas.md](swiftdata-integration/03-tareas.md)
-- [task-tracker.yaml](swiftdata-integration/task-tracker.yaml)
+**Ubicación**: [`authentication-migration/`](authentication-migration/)  
+**Tiempo Restante**: 3h (bloqueadas por backend)  
+**Estado**: Funcional para producción
 
-**Lo que implementa**:
-- @Model classes (CachedResponse, UserProfile, SyncQueueItem)
-- LocalDataSource protocol
-- SyncCoordinator con conflict resolution
-- Migration desde UserDefaults
-- Testing con in-memory ModelContainer
+**Ver**:
+- [SPEC-003-ESTADO-ACTUAL.md](authentication-migration/SPEC-003-ESTADO-ACTUAL.md)
+- [PLAN-EJECUCION-SPEC-003.md](authentication-migration/PLAN-EJECUCION-SPEC-003.md)
 
-**Bloquea a**: SPEC-009, SPEC-013
+**Bloqueadores**:
+- JWT Signature Validation - Requiere clave pública del servidor
+- Tests E2E - Requiere ambiente staging
 
 ---
 
-### SPEC-006: Platform Optimization
+#### SPEC-008: Security Hardening (75%)
 
-**📂 Carpeta**: [`platform-optimization/`](platform-optimization/)  
-**🟡 Prioridad**: P2 - MEDIA  
-**⏱️ Estimación**: 3-4 días  
-**🔗 Dependencias**: SPEC-001
+**Ubicación**: [`security-hardening/`](security-hardening/)  
+**Tiempo Restante**: 5h  
+**Estado**: Componentes implementados, falta integración
 
-**Objetivo**: Aprovechar APIs de iOS 18-19, macOS 15-16.
+**Ver**:
+- [PLAN-EJECUCION-SPEC-008.md](security-hardening/PLAN-EJECUCION-SPEC-008.md)
+- [APPROACH-MODERNO-ATS-SWIFT6.md](security-hardening/APPROACH-MODERNO-ATS-SWIFT6.md)
 
-**Archivos**:
-- [01-analisis-requerimiento.md](platform-optimization/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](platform-optimization/02-analisis-diseno.md)
-- [03-tareas.md](platform-optimization/03-tareas.md)
-- [task-tracker.yaml](platform-optimization/task-tracker.yaml)
-
-**Lo que implementa**:
-- PlatformCapability detection
-- @available strategy
-- Feature detection pattern
-- Fallback implementations para iOS 17
+**Pendientes**:
+- Certificate hashes reales (requiere hashes de servidores)
+- Security checks en startup
+- Input sanitization en UI
+- Rate limiting
 
 ---
 
-### SPEC-007: Testing Infrastructure
+### 🟡 PRIORIDAD MEDIA (P2)
 
-**📂 Carpeta**: [`testing-infrastructure/`](testing-infrastructure/)  
-**🟠 Prioridad**: P1 - ALTA  
-**⏱️ Estimación**: 2-3 días  
-**🔗 Dependencias**: SPEC-001, SPEC-002, SPEC-003, SPEC-004
+#### SPEC-006: Platform Optimization (15%)
 
-**Objetivo**: Testing utilities, CI/CD, coverage reports.
+**Ubicación**: [`platform-optimization/`](platform-optimization/)  
+**Tiempo Estimado**: 15h
 
-**Archivos**:
-- [01-analisis-requerimiento.md](testing-infrastructure/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](testing-infrastructure/02-analisis-diseno.md)
-- [03-tareas.md](testing-infrastructure/03-tareas.md)
-- [task-tracker.yaml](testing-infrastructure/task-tracker.yaml)
-
-**Lo que implementa**:
-- Testing utilities (mock factories, fixtures, assertions)
-- CI/CD con GitHub Actions
-- Coverage reports (Codecov)
-- Snapshot testing
-- Performance testing
+**Pendientes**:
+- iPad optimization (NavigationSplitView, Size Classes)
+- macOS optimization (Toolbar, Menu bar, Shortcuts)
+- visionOS support (Spatial UI)
 
 ---
 
-### SPEC-008: Security Hardening
+#### SPEC-012: Performance Monitoring (0%)
 
-**📂 Carpeta**: [`security-hardening/`](security-hardening/)  
-**🟠 Prioridad**: P1 - ALTA  
-**⏱️ Estimación**: 2-3 días  
-**🔗 Dependencias**: SPEC-003
+**Ubicación**: [`performance-monitoring/`](performance-monitoring/)  
+**Tiempo Estimado**: 8h
 
-**Objetivo**: SSL pinning, jailbreak detection, eliminar credentials expuestos.
-
-**Archivos**:
-- [01-analisis-requerimiento.md](security-hardening/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](security-hardening/02-analisis-diseno.md)
-- [03-tareas.md](security-hardening/03-tareas.md)
-- [task-tracker.yaml](security-hardening/task-tracker.yaml)
-
-**Lo que implementa**:
-- CertificatePinner para SSL pinning
-- SecurityValidator (jailbreak detection)
-- Input validation
-- Remove TestCredentials de Config.swift
-- Security audit checklist
-
----
-
-### SPEC-009: Feature Flags & Remote Config
-
-**📂 Carpeta**: [`feature-flags/`](feature-flags/)  
-**🟢 Prioridad**: P3 - BAJA  
-**⏱️ Estimación**: 2 días  
-**🔗 Dependencias**: SPEC-001, SPEC-005
-
-**Objetivo**: Feature flags local + remote, A/B testing.
-
-**Archivos**:
-- [01-analisis-requerimiento.md](feature-flags/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](feature-flags/02-analisis-diseno.md)
-- [03-tareas.md](feature-flags/03-tareas.md)
-- [task-tracker.yaml](feature-flags/task-tracker.yaml)
-
-**Lo que implementa**:
-- FeatureFlag enum
-- RemoteConfigService
-- A/B testing support
-- Cache con SwiftData
-
----
-
-### SPEC-010: Localization
-
-**📂 Carpeta**: [`localization/`](localization/)  
-**🟡 Prioridad**: P2 - MEDIA  
-**⏱️ Estimación**: 2 días  
-**🔗 Dependencias**: Ninguna
-
-**Objetivo**: i18n/l10n con string catalogs, plurales, RTL.
-
-**Archivos**:
-- [01-analisis-requerimiento.md](localization/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](localization/02-analisis-diseno.md)
-- [03-tareas.md](localization/03-tareas.md)
-- [task-tracker.yaml](localization/task-tracker.yaml)
-
-**Lo que implementa**:
-- String catalogs (ES, EN)
-- Type-safe keys
-- Pluralization rules
-- RTL support (Arabic)
-- Dynamic language switching
-
----
-
-### SPEC-011: Analytics & Telemetry
-
-**📂 Carpeta**: [`analytics/`](analytics/)  
-**🟢 Prioridad**: P3 - BAJA  
-**⏱️ Estimación**: 2 días  
-**🔗 Dependencias**: SPEC-002
-
-**Objetivo**: Analytics agnóstico con múltiples providers.
-
-**Archivos**:
-- [01-analisis-requerimiento.md](analytics/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](analytics/02-analisis-diseno.md)
-- [03-tareas.md](analytics/03-tareas.md)
-- [task-tracker.yaml](analytics/task-tracker.yaml)
-
-**Lo que implementa**:
-- AnalyticsService protocol
-- Firebase Analytics provider
-- Mixpanel provider
-- Event catalog
-- Privacy compliance (GDPR, CCPA)
-
-**Bloquea a**: SPEC-012
-
----
-
-### SPEC-012: Performance Monitoring
-
-**📂 Carpeta**: [`performance-monitoring/`](performance-monitoring/)  
-**🟡 Prioridad**: P2 - MEDIA  
-**⏱️ Estimación**: 2 días  
-**🔗 Dependencias**: SPEC-002, SPEC-011
-
-**Objetivo**: Métricas de launch time, rendering, network, memory.
-
-**Archivos**:
-- [01-analisis-requerimiento.md](performance-monitoring/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](performance-monitoring/02-analisis-diseno.md)
-- [03-tareas.md](performance-monitoring/03-tareas.md)
-- [task-tracker.yaml](performance-monitoring/task-tracker.yaml)
-
-**Lo que implementa**:
-- PerformanceMonitor protocol
-- App launch tracking
-- Screen render metrics
-- Network performance logging
+**Pendientes**:
+- PerformanceMonitor service
+- Launch time tracking
+- Network metrics
 - Memory monitoring
-- Instruments integration guide
 
 ---
 
-### SPEC-013: Offline-First Strategy
+### 🟢 PRIORIDAD BAJA (P3)
 
-**📂 Carpeta**: [`offline-first/`](offline-first/)  
-**🟡 Prioridad**: P2 - MEDIA  
-**⏱️ Estimación**: 3-4 días  
-**🔗 Dependencias**: SPEC-004, SPEC-005
+#### SPEC-009: Feature Flags & Remote Config (10%)
 
-**Objetivo**: Local-first architecture con sync inteligente.
+**Ubicación**: [`feature-flags/`](feature-flags/)  
+**Tiempo Estimado**: 8h
 
-**Archivos**:
-- [01-analisis-requerimiento.md](offline-first/01-analisis-requerimiento.md)
-- [02-analisis-diseno.md](offline-first/02-analisis-diseno.md)
-- [03-tareas.md](offline-first/03-tareas.md)
-- [task-tracker.yaml](offline-first/task-tracker.yaml)
-
-**Lo que implementa**:
-- OfflineRepository protocol
-- ConflictResolutionStrategy
-- SyncCoordinator (integrado con SPEC-004 OfflineQueue)
-- UI indicators (syncing, offline)
-- Cache invalidation
+**Pendientes**:
+- Feature flags runtime (3h)
+- Remote config (3h) - Requiere backend endpoint
+- Persistencia SwiftData (2h)
 
 ---
 
-## 📊 Matriz de Dependencias
+#### SPEC-011: Analytics & Telemetry (5%)
+
+**Ubicación**: [`analytics/`](analytics/)  
+**Tiempo Estimado**: 8h
+
+**Pendientes**:
+- AnalyticsService protocol
+- Event tracking
+- Firebase integration - Requiere GoogleService-Info.plist
+- Privacy compliance
+
+---
+
+## 📚 DOCUMENTACIÓN HISTÓRICA (Archivada)
+
+**Ubicación**: `docs/specs/archived/analysis-reports/`
+
+| Documento | Propósito | Fecha |
+|-----------|-----------|-------|
+| **ANALISIS-ESTADO-REAL-2025-11-25.md** | Análisis exhaustivo código vs docs | 2025-11-25 |
+| **AUDITORIA-TECNOLOGIAS-DEPRECADAS.md** | Auditoría de tecnologías | 2025-11-25 |
+| **ESPECIFICACIONES-PENDIENTES-Y-ROADMAP.md** | Roadmap detallado original | 2025-11-25 |
+
+**📌 Nota**: Estos documentos son históricos. Para información actual, ver `TRACKING.md` y `PENDIENTES.md`.
+
+---
+
+## 🗺️ ROADMAP DE IMPLEMENTACIÓN
+
+### Sprint Actual (Semana 1-2): Completar Críticas
 
 ```
-SPEC-001 (Environment) ────┬─→ SPEC-003 (Auth) ──→ SPEC-004 (Network) ──→ SPEC-007 (Testing)
-                           │                            │                       
-                           ├─→ SPEC-002 (Logging) ─────┤
-                           │                            │
-                           ├─→ SPEC-005 (SwiftData) ────┼─→ SPEC-013 (Offline-First)
-                           │                            │
-                           ├─→ SPEC-006 (Platform) ─────┘
-                           │
-                           └─→ SPEC-009 (Feature Flags)
+Prioridad 1: SPEC-008 Security (5h)
+Prioridad 2: SPEC-003 Auth (3h) - Cuando backend esté listo
+```
 
-SPEC-003 (Auth) ──→ SPEC-008 (Security)
+**Entregables**:
+- ✅ Security hardening completo
+- ✅ Certificate pinning activo
+- ⏸️ JWT signature validation (bloqueado)
 
-SPEC-002 (Logging) ──→ SPEC-011 (Analytics) ──→ SPEC-012 (Performance)
+---
 
-SPEC-010 (Localization) [sin dependencias]
+### Sprint 2 (Semana 3-4): Plataforma
+
+```
+SPEC-006: Platform Optimization (15h)
+  - iPad optimization
+  - macOS optimization
+  - visionOS support
 ```
 
 ---
 
-## 🚀 Guía de Inicio Rápido
+### Sprint 3 (Semana 5-6): Mejoras
 
-### Para comenzar AHORA:
+```
+SPEC-009: Feature Flags (8h)
+SPEC-011: Analytics (8h)
+SPEC-012: Performance (8h)
+```
 
-1. **Clonar y setup**:
+---
+
+## 📊 MATRIZ DE DEPENDENCIAS
+
+```
+✅ SPEC-001 (Environment) ──┬─→ ✅ SPEC-002 (Logging)
+                            │
+                            ├─→ 🟢 SPEC-003 (Auth) ──→ 🟡 SPEC-008 (Security)
+                            │
+                            ├─→ ✅ SPEC-004 (Network) ──→ ✅ SPEC-013 (Offline)
+                            │
+                            ├─→ ✅ SPEC-005 (SwiftData)
+                            │
+                            ├─→ 🟠 SPEC-006 (Platform)
+                            │
+                            └─→ ⚠️ SPEC-009 (Feature Flags)
+
+✅ SPEC-002 (Logging) ──→ ⚠️ SPEC-011 (Analytics) ──→ ❌ SPEC-012 (Performance)
+
+✅ SPEC-010 (Localization) [sin dependencias]
+✅ SPEC-007 (Testing) [completo]
+```
+
+**Leyenda**:
+- ✅ Completada (archivada)
+- 🟢 Muy avanzada (90%)
+- 🟡 Parcial (75%)
+- 🟠 Básica (15%)
+- ⚠️ Mínima (5-10%)
+- ❌ No iniciada (0%)
+
+---
+
+## 🚀 GUÍA DE INICIO RÁPIDO
+
+### Para Nuevos Desarrolladores
+
+1. **Conocer el estado actual**:
    ```bash
-   cd docs/specs
+   cat docs/specs/TRACKING.md
    ```
 
-2. **Leer roadmap general**:
-   - [specifications-roadmap.md](docs/specifications-roadmap.md)
-
-3. **Comenzar con SPEC-001**:
+2. **Ver qué falta por hacer**:
    ```bash
-   cd environment-configuration
+   cat docs/specs/PENDIENTES.md
+   ```
+
+3. **Explorar specs completadas (referencia)**:
+   ```bash
+   ls docs/specs/archived/completed-specs/
+   ```
+
+4. **Trabajar en spec activa**:
+   ```bash
+   cd docs/specs/security-hardening
    # Leer en orden:
    # 1. 01-analisis-requerimiento.md
-   # 2. 02-analisis-diseno.md  
+   # 2. 02-analisis-diseno.md
    # 3. 03-tareas.md
    ```
 
-4. **Crear branch**:
-   ```bash
-   git checkout -b feature/SPEC-001-environment-config
-   ```
+---
 
-5. **Implementar según tareas**:
-   - Seguir `03-tareas.md` paso a paso
-   - Marcar progreso en `task-tracker.yaml`
+### Para Tech Leads
 
-6. **Tests y PR**:
-   ```bash
-   # Run tests
-   xcodebuild test -scheme apple-app
-   
-   # Create PR
-   git push origin feature/SPEC-001-environment-config
-   ```
+1. **Revisar progreso general**:
+   - Ver `TRACKING.md` - Tabla consolidada
+
+2. **Planificar sprints**:
+   - Ver `PENDIENTES.md` - Roadmap recomendado
+
+3. **Asignar tareas**:
+   - SPEC-008 Security (5h) - Disponible ahora
+   - SPEC-006 Platform (15h) - Siguiente sprint
+   - SPEC-009, 011, 012 - Sprints posteriores
+
+4. **Monitorear bloqueadores**:
+   - SPEC-003: Requiere backend (JWT keys, staging)
+   - SPEC-009: Requiere backend (config endpoint)
+   - SPEC-011: Requiere Firebase setup
 
 ---
 
-## 📝 Convenciones de Documentación
+## 📝 CONVENCIONES DE DOCUMENTACIÓN
 
-Cada especificación sigue el mismo formato:
+### Estructura de Carpetas de Spec Activa
 
-### 01-analisis-requerimiento.md
-- 📋 Resumen Ejecutivo
-- 🎯 Objetivo
-- 🔍 Problemática Actual (con código actual)
-- 💼 Casos de Uso
-- 📊 Requerimientos Funcionales
-- 📊 Requerimientos No Funcionales
-- 🎯 Criterios de Aceptación
-- 📚 Referencias
+```
+spec-nombre/
+├── 01-analisis-requerimiento.md  ← Problemática, objetivos, casos de uso
+├── 02-analisis-diseno.md         ← Arquitectura, componentes, código
+├── 03-tareas.md                  ← Plan de implementación paso a paso
+├── task-tracker.yaml              ← Tracking de progreso
+└── [documentos adicionales]       ← Planes, estados, análisis
+```
 
-### 02-analisis-diseno.md
-- 🏗️ Arquitectura del Sistema
-- 📁 Estructura de Archivos
-- 🧩 Componentes del Sistema (con código)
-- 🔄 Ejemplos de Migration
-- 🧪 Testing Strategy
+### Estructura de Carpeta Archivada (Completada)
 
-### 03-tareas.md
-- 📊 Resumen de Etapas
-- Tareas detalladas por etapa
-- Estimaciones
-- Criterios de validación
+```
+archived/completed-specs/spec-nombre/
+├── SPEC-XXX-COMPLETADO.md        ← ⭐ Resumen de implementación
+├── 01-analisis-requerimiento.md
+├── 02-analisis-diseno.md
+├── 03-tareas.md
+└── [documentos de proceso]
+```
 
-### task-tracker.yaml
-- Metadata de la spec
-- Fases y tareas
-- Acceptance criteria
-- Bloqueadores
+**📌 Leer primero**: `SPEC-XXX-COMPLETADO.md` para resumen rápido.
 
 ---
 
-## 🎯 Recomendaciones
+## 🎯 FLUJO DE TRABAJO RECOMENDADO
 
-### Para Developers Nuevos:
-1. Leer este README completo
-2. Comenzar con SPEC-001 (Environment)
-3. Luego SPEC-002 (Logging)
-4. Seguir orden del roadmap
+### Al Completar una Especificación
 
-### Para Tech Leads:
-1. Revisar roadmap y prioridades
-2. Asignar SPEC-001 y SPEC-002 en paralelo a diferentes devs
-3. SPEC-003 a SPEC-008 son el core, priorizar
-4. SPEC-009 a SPEC-013 pueden ser posteriores
+1. ✅ Crear `SPEC-XXX-COMPLETADO.md` en la carpeta de la spec
+2. ✅ Actualizar `TRACKING.md` (cambiar estado a 100%, agregar fecha)
+3. ✅ Mover carpeta completa a `archived/completed-specs/`
+4. ✅ Actualizar `PENDIENTES.md` (eliminar de lista activa)
+5. ✅ Git commit con mensaje: `docs: SPEC-XXX completada - [nombre]`
 
-### Para QA:
-1. Cada spec tiene Criterios de Aceptación claros
-2. Tests deben estar en verde antes de cerrar spec
-3. Usar `task-tracker.yaml` para tracking
+### Cada Semana (Lunes)
+
+1. 📊 Revisar `TRACKING.md`
+2. 📋 Actualizar progreso de specs en curso
+3. 🎯 Planificar tareas de la semana desde `PENDIENTES.md`
 
 ---
 
-## 📞 Soporte
+## 📞 SOPORTE Y REFERENCIAS
 
-**Preguntas sobre especificaciones**:
-- Leer `01-analisis-requerimiento.md` de la spec correspondiente
-- Revisar casos de uso
-- Consultar referencias técnicas al final
+### Preguntas Frecuentes
 
-**Issues durante implementación**:
-- Verificar dependencias están completas
-- Revisar `02-analisis-diseno.md` para detalles técnicos
-- Buscar en referencias de la industria
+**Q: ¿Cuál es el estado actual del proyecto?**  
+A: Ver `TRACKING.md` - Sección "RESUMEN EJECUTIVO"
+
+**Q: ¿Qué debo hacer ahora?**  
+A: Ver `PENDIENTES.md` - Sección "PRIORIDAD CRÍTICA"
+
+**Q: ¿Cómo se implementó X feature?**  
+A: Ver `archived/completed-specs/[spec]/SPEC-XXX-COMPLETADO.md`
+
+**Q: ¿Por qué está bloqueada una spec?**  
+A: Ver `PENDIENTES.md` - Sección de la spec, "Bloqueadores"
 
 ---
 
-**Versión**: 1.0  
-**Fecha**: 2025-11-23  
-**Autor**: Cascade AI  
-**Total de Archivos**: 52 (13 specs × 4 archivos cada una)
+### Documentos Adicionales del Proyecto
+
+- **Arquitectura General**: `/docs/01-arquitectura.md`
+- **Plan de Sprints**: `/docs/03-plan-sprints.md`
+- **Reglas de Desarrollo IA**: `/docs/revision/03-REGLAS-DESARROLLO-IA.md`
+- **CLAUDE.md del Proyecto**: `/CLAUDE.md`
+
+---
+
+## 📈 MÉTRICAS DE PROGRESO
+
+| Métrica | Valor Actual | Objetivo |
+|---------|--------------|----------|
+| **Specs Completadas** | 7/13 (54%) | 13/13 (100%) |
+| **Progreso Real** | 59% | 100% |
+| **Tests Unitarios** | 177+ ✅ | Mantener >80% |
+| **Code Coverage** | ~70% | >80% |
+| **Specs Archivadas** | 7 | - |
+| **Specs Activas** | 6 | - |
+
+---
+
+## 🔄 HISTORIAL DE CAMBIOS DEL ÍNDICE
+
+| Fecha | Cambio | Impacto |
+|-------|--------|---------|
+| 2025-11-27 | Reorganización completa: archivo de completadas, nuevo PENDIENTES.md | Estructura más clara |
+| 2025-11-26 | Creación de TRACKING.md como fuente única | Eliminación de discordancias |
+| 2025-11-25 | Completadas 5 specs (004, 005, 007, 010, 013) | +40% progreso |
+| 2025-11-24 | SPEC-002 Logging completada | +8% progreso |
+| 2025-11-23 | SPEC-001 Environment completada | +8% progreso |
+| 2025-11-23 | Índice original creado | Estructura inicial |
+
+---
+
+**Versión**: 2.0  
+**Fecha**: 2025-11-27  
+**Autor**: Claude Code + Equipo EduGo  
+**Total de Specs**: 13 (7 archivadas, 6 activas)
+
+---
+
+**📍 PRÓXIMO PASO RECOMENDADO**: Leer `PENDIENTES.md` para ver qué hacer ahora.

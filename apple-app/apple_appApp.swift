@@ -70,25 +70,10 @@ struct EduGoApp: App {
 
     @CommandsBuilder
     private var appCommands: some Commands {
-        // Comandos personalizados
-        CommandMenu("Navegación") {
-            Button("Inicio") {
-                // TODO: Implementar navegación desde menú
-            }
-            .keyboardShortcut("h", modifiers: [.command])
-
-            Button("Configuración") {
-                // TODO: Implementar navegación desde menú
-            }
-            .keyboardShortcut(",", modifiers: [.command])
-
-            Divider()
-
-            Button("Cerrar Sesión") {
-                // TODO: Implementar logout desde menú
-            }
-            .keyboardShortcut("q", modifiers: [.command, .shift])
-        }
+        // SPEC-006: macOS Menu Commands
+        #if os(macOS)
+        MacOSMenuCommands()
+        #endif
     }
 
     // MARK: - Dependency Setup

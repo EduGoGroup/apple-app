@@ -1,64 +1,69 @@
-# 🍎 Proyecto iOS/macOS Nativo - Clean Architecture
+# 🍎 EduGo Apple App - Clean Architecture
 
-**Stack Tecnológico**: Swift 5.9+ | SwiftUI | iOS 17+ | macOS 14+
+**Stack Tecnológico**: Swift 6+ | SwiftUI | iOS 18+ | macOS 15+ | visionOS 2+  
+**Versión**: 0.1.0 (Pre-release)  
+**Última Actualización**: 2025-11-27
 
 ---
 
-## 📋 Tabla de Contenidos
+## 📊 Estado del Proyecto
 
-1. [Visión General](#visión-general)
-2. [Objetivos del Proyecto](#objetivos-del-proyecto)
-3. [Arquitectura](#arquitectura)
-4. [Stack Tecnológico](#stack-tecnológico)
-5. [Características Principales](#características-principales)
-6. [Estructura del Proyecto](#estructura-del-proyecto)
-7. [Roadmap](#roadmap)
-8. [Navegación de Documentación](#navegación-de-documentación)
+**Progreso General**: **59%** (7 de 13 especificaciones completadas)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PROGRESO GENERAL: ████████████████████████░░░░░░░░░░░░ 59% │
+└─────────────────────────────────────────────────────────────┘
+
+✅ Completadas:    7 specs (54%)  │ Infraestructura sólida
+🟢 Muy Avanzadas:  1 spec  (8%)   │ Auth funcional (bloqueado por backend)
+🟡 Parciales:      2 specs (15%)  │ Security + Testing casi listos
+🟠 Pendientes:     3 specs (23%)  │ Platform, Analytics, Performance
+```
+
+### 🎯 Especificaciones Completadas (Archivadas)
+
+| Spec | Nombre | Completado | Ubicación |
+|------|--------|------------|-----------|
+| 001 | Environment Configuration | 2025-11-23 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+| 002 | Professional Logging | 2025-11-24 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+| 004 | Network Layer Enhancement | 2025-11-25 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+| 005 | SwiftData Integration | 2025-11-25 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+| 007 | Testing Infrastructure | 2025-11-26 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+| 010 | Localization | 2025-11-25 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+| 013 | Offline-First Strategy | 2025-11-25 | [`docs/specs/archived/`](docs/specs/archived/completed-specs/) |
+
+### 🔄 Especificaciones Activas
+
+| Spec | Nombre | Progreso | Prioridad | Estado |
+|------|--------|----------|-----------|--------|
+| 003 | Authentication | 90% | P1 🔴 | Funcional (bloqueado por backend) |
+| 008 | Security Hardening | 75% | P1 🔴 | Componentes implementados |
+| 006 | Platform Optimization | 15% | P2 🟡 | Scaffolding básico |
+| 009 | Feature Flags | 10% | P3 🟢 | Solo compile-time |
+| 011 | Analytics | 5% | P3 🟢 | Flags básicos |
+| 012 | Performance Monitoring | 0% | P2 🟡 | Pendiente |
+
+> 📊 **Tracking Completo**: [`/docs/specs/TRACKING.md`](docs/specs/TRACKING.md) - Fuente única de verdad  
+> 📋 **Próximas Tareas**: [`/docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md) - Solo lo que falta
 
 ---
 
 ## 🎯 Visión General
 
-Este proyecto es una **aplicación nativa iOS/macOS** desarrollada con las mejores prácticas y tecnologías más recientes del ecosistema Apple. El objetivo es crear una aplicación ejemplar que demuestre:
+**EduGo Apple App** es una aplicación nativa para el ecosistema Apple desarrollada con **Clean Architecture**, aprovechando las últimas tecnologías de iOS 18+, macOS 15+ y visionOS 2+.
 
-- ✅ **Clean Architecture** aplicada correctamente
-- ✅ **SwiftUI** como framework UI principal
-- ✅ **Observation Framework** (@Observable) para manejo de estado
-- ✅ **Modern Concurrency** (async/await)
-- ✅ **Security-first** (Keychain, Face ID/Touch ID)
-- ✅ **Multi-platform** (iPhone, iPad, macOS) con código compartido
+### Características Clave
 
----
-
-## 🎯 Objetivos del Proyecto
-
-### Objetivo Principal
-Desarrollar una aplicación nativa premium para el ecosistema Apple que aproveche al máximo las capacidades únicas de cada plataforma.
-
-### Objetivos Específicos
-
-1. **Experiencia de Usuario Premium**
-   - Diseño siguiendo Apple Human Interface Guidelines
-   - Animaciones fluidas y naturales
-   - Soporte completo de accesibilidad (VoiceOver, Dynamic Type)
-   - Rendimiento óptimo (60fps, <1s launch time)
-
-2. **Seguridad y Privacidad**
-   - Autenticación biométrica (Face ID/Touch ID)
-   - Almacenamiento seguro en Keychain
-   - Cumplimiento de Privacy Manifest de Apple
-   - Cifrado de datos sensibles
-
-3. **Arquitectura Mantenible**
-   - Clean Architecture con separación clara de capas
-   - Código testeable (>70% coverage en Domain y Data)
-   - Inyección de dependencias nativa de SwiftUI
-   - Sin dependencias innecesarias de terceros
-
-4. **Multi-plataforma Inteligente**
-   - 80% de código compartido entre iPhone, iPad y macOS
-   - UI adaptativa usando Size Classes
-   - Experiencias optimizadas por dispositivo
+- ✅ **Clean Architecture** con Domain/Data/Presentation
+- ✅ **Swift 6** con strict concurrency checking
+- ✅ **SwiftUI + @Observable** para UI reactiva moderna
+- ✅ **Async/Await** nativo (sin Combine ni callbacks)
+- ✅ **SwiftData** para persistencia local
+- ✅ **Offline-First** con sincronización inteligente
+- ✅ **Multi-plataforma**: iPhone, iPad, macOS, visionOS
+- ✅ **Security-First**: Face ID, Keychain, Certificate Pinning
+- ✅ **Testing**: 177+ tests unitarios con Swift Testing
 
 ---
 
@@ -67,412 +72,401 @@ Desarrollar una aplicación nativa premium para el ecosistema Apple que aprovech
 ### Capas de la Aplicación
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    PRESENTATION LAYER                        │
-│  • SwiftUI Views                                            │
-│  • ViewModels (@Observable)                                 │
-│  • Navigation Coordinator                                   │
-└─────────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│                      DOMAIN LAYER                            │
-│  • Use Cases (Business Logic)                               │
-│  • Entities (Domain Models)                                 │
-│  • Repository Protocols                                     │
-└─────────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│                       DATA LAYER                             │
-│  • Repository Implementations                               │
-│  • Data Sources (Remote API, Local Storage)                 │
-│  • Services (Keychain, Biometrics, UserDefaults)            │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│              PRESENTATION LAYER (SwiftUI)                 │
+│  Views + ViewModels (@Observable) + Navigation           │
+│  ↓ ViewModels llaman a →                                 │
+├──────────────────────────────────────────────────────────┤
+│                   DOMAIN LAYER                            │
+│  Entities + Use Cases + Repository Protocols              │
+│  ↓ Use Cases usan →                                       │
+├──────────────────────────────────────────────────────────┤
+│                    DATA LAYER                             │
+│  Repositories + APIClient + Services + SwiftData          │
+│  ↓ APIClient hace →                                       │
+├──────────────────────────────────────────────────────────┤
+│                  NETWORK / STORAGE                        │
+│  URLSession + Keychain + SwiftData + File System         │
+└──────────────────────────────────────────────────────────┘
 ```
 
-### Principios Arquitectónicos
+**Principios**:
+- Domain Layer es **PURO** (sin frameworks externos)
+- Dependencias apuntan **HACIA ADENTRO** (Domain ← Data ← Presentation)
+- Use Cases retornan `Result<T, AppError>` (NO throws)
+- Actors para thread-safety, `@MainActor` para ViewModels
 
-1. **Separation of Concerns**: Cada capa tiene responsabilidades únicas y bien definidas
-2. **Dependency Rule**: Las dependencias apuntan hacia el Domain (núcleo)
-3. **Platform Agnostic Domain**: Lógica de negocio independiente de frameworks
-4. **Testability First**: Domain y Data layers 100% testeables sin UI
-
-**Documentación Completa**: Ver [Arquitectura Detallada](docs/01-arquitectura.md)
-
----
-
-## 🛠️ Stack Tecnológico
-
-### Lenguaje y Frameworks Nativos
-
-| Tecnología | Versión | Propósito |
-|-----------|---------|-----------|
-| **Swift** | 5.9+ | Lenguaje principal |
-| **SwiftUI** | iOS 17+ | Framework de UI declarativa |
-| **Observation** | iOS 17+ | Manejo de estado reactivo con @Observable |
-| **Async/Await** | Swift 5.5+ | Concurrencia moderna |
-| **Keychain Services** | Native | Almacenamiento seguro de credenciales |
-| **LocalAuthentication** | Native | Face ID / Touch ID |
-
-### Herramientas de Desarrollo
-
-| Herramienta | Versión | Propósito |
-|------------|---------|-----------|
-| **Xcode** | 15.0+ | IDE principal |
-| **Swift Package Manager** | Native | Gestión de dependencias (si necesario) |
-| **XCTest** | Native | Testing unitario y de UI |
-| **Instruments** | Native | Profiling y optimización |
-| **SwiftLint** | Latest | Linting y estándares de código |
-| **Fastlane** | Latest | Automatización de builds y releases |
-
-### Dependencias Externas (Mínimas)
-
-- **Firebase** (Opcional): Analytics y Crashlytics
-- **Ninguna otra dependencia obligatoria**: Se priorizan frameworks nativos de Apple
-
-**Documentación Completa**: Ver [Tecnologías y Herramientas](docs/02-tecnologias.md)
+> 📖 **Detalles**: Ver [`/docs/01-arquitectura.md`](docs/01-arquitectura.md)
 
 ---
 
-## 🌍 Configuración de Ambientes
+## 📂 Estructura del Proyecto
 
-El proyecto utiliza un **sistema profesional de configuración multi-ambiente** basado en archivos `.xcconfig`:
+```
+apple-app/
+├── App/                        # Configuración de app
+│   └── Environment.swift       # ✅ Multi-ambiente (.xcconfig)
+├── Core/
+│   ├── DI/                     # Dependency Injection
+│   └── Logging/                # ✅ OSLog profesional
+├── Domain/                     # ⚠️ CAPA PURA - Sin frameworks
+│   ├── Entities/               # User, Theme, UserPreferences
+│   ├── Errors/                 # AppError, NetworkError, etc.
+│   ├── Repositories/           # Protocols
+│   └── UseCases/               # Lógica de negocio
+├── Data/
+│   ├── Network/                # ✅ APIClient + Interceptors + Retry
+│   ├── Services/               # ✅ Keychain, JWT, Biometric
+│   └── Repositories/           # Implementaciones
+├── Presentation/
+│   ├── Scenes/                 # Login, Home, Settings
+│   └── Navigation/             # NavigationCoordinator
+├── DesignSystem/               # Tokens + Components reutilizables
+└── Resources/
+    └── Localization/           # ✅ Localizable.xcstrings
 
-### Ambientes Disponibles
+Tests/
+├── DomainTests/                # 177+ tests unitarios
+├── DataTests/
+└── IntegrationTests/
+```
 
-| Ambiente | Scheme | Display Name | Uso |
-|----------|--------|--------------|-----|
-| **Development** | EduGo-Dev | EduGo α | Desarrollo diario |
-| **Staging** | EduGo-Staging | EduGo β | Testing pre-producción |
-| **Production** | EduGo | EduGo | Producción |
+> 🔍 **Explorar**: Ver estructura completa en [`/docs/01-arquitectura.md`](docs/01-arquitectura.md)
 
-### Cambiar de Ambiente
+---
+
+## 🚀 Inicio Rápido
+
+### Requisitos
+
+- **Xcode**: 16.0+ (con Swift 6.0+)
+- **macOS**: Sequoia 15.0+
+- **Dispositivos**: iOS 18+, macOS 15+, visionOS 2+
+
+### Instalación
 
 ```bash
-# En Xcode: Seleccionar scheme en la barra superior
-# - EduGo-Dev → Para desarrollo
-# - EduGo-Staging → Para testing
-# - EduGo → Para producción
+# 1. Clonar el repositorio
+git clone <repo-url>
+cd apple-app
 
-# Desde terminal
-xcodebuild -scheme EduGo-Dev build
+# 2. Abrir en Xcode
+open apple-app.xcodeproj
+
+# 3. Seleccionar scheme
+# Xcode → Product → Scheme → EduGo-Dev
+
+# 4. Ejecutar
+⌘ + R (iPhone 16 Pro simulator)
 ```
 
-### Acceso desde Código
+### Scripts de Desarrollo
+
+```bash
+# Ejecutar en iPhone
+./run.sh
+
+# Ejecutar en iPad
+./run.sh ipad
+
+# Ejecutar en macOS
+./run.sh macos
+
+# Ejecutar tests
+./run.sh test
+```
+
+---
+
+## 🧪 Testing
+
+### Ejecutar Tests
+
+```bash
+# Todos los tests
+⌘ + U (en Xcode)
+
+# O desde terminal
+xcodebuild test \
+  -scheme EduGo-Dev \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
+```
+
+### Cobertura Actual
+
+| Capa | Tests | Coverage |
+|------|-------|----------|
+| **Domain Layer** | 90+ tests | ~90% |
+| **Data Layer** | 60+ tests | ~80% |
+| **Network Layer** | 27+ tests | ~85% |
+| **Presentation** | - | ~60% |
+| **Total** | **177+ tests** | **~70%** |
+
+**Framework**: Swift Testing (moderno, sin XCTest)
+
+> 📊 **Detalles**: Ver [`/docs/specs/archived/completed-specs/testing-infrastructure/`](docs/specs/archived/completed-specs/testing-infrastructure/)
+
+---
+
+## 🔒 Seguridad
+
+### Características de Seguridad Implementadas
+
+- ✅ **Keychain**: Almacenamiento seguro de tokens
+- ✅ **Face ID / Touch ID**: Autenticación biométrica
+- ✅ **JWT Decoder**: Validación de tokens localmente
+- ✅ **Auto-refresh**: Renovación automática de sesión
+- 🟡 **Certificate Pinning**: Código implementado (falta hashes)
+- 🟡 **Jailbreak Detection**: SecurityValidator implementado
+- 🟡 **Input Validation**: InputValidator completo
+
+> 🔐 **Detalles**: Ver [`/docs/specs/security-hardening/`](docs/specs/security-hardening/)
+
+---
+
+## 🌐 Networking
+
+### Características Implementadas
+
+- ✅ **APIClient** con async/await
+- ✅ **Interceptor Chain** (Auth, Logging, Security)
+- ✅ **Retry Policy** con backoff exponencial
+- ✅ **Offline Queue** con persistencia en SwiftData
+- ✅ **Auto-sync** al recuperar conectividad
+- ✅ **Response Caching** con TTL
+- ✅ **Network Monitor** para reachability
+
+**Backend API**: https://dummyjson.com (demo)  
+**Usuario de prueba**: `emilys` / `emilyspass`
+
+> 🌐 **Detalles**: Ver [`/docs/specs/archived/completed-specs/network-layer-enhancement/`](docs/specs/archived/completed-specs/network-layer-enhancement/)
+
+---
+
+## 💾 Persistencia
+
+### SwiftData Integration
+
+- ✅ **4 Modelos @Model**: CachedUser, CachedHTTPResponse, SyncQueueItem, AppSettings
+- ✅ **LocalDataSource**: Protocol + implementación
+- ✅ **ModelContainer**: Configurado en app
+- ✅ **Uso Activo**: OfflineQueue, ResponseCache, Preferences
 
 ```swift
-// API configurada según ambiente
-let apiURL = AppEnvironment.apiBaseURL
-
-// Feature flags
-if AppEnvironment.analyticsEnabled {
-    // Inicializar analytics
-}
-
-// Detectar ambiente
-if AppEnvironment.isDevelopment {
-    // Código solo para desarrollo
-}
+// Modelos SwiftData
+@Model final class CachedUser { /* ... */ }
+@Model final class CachedHTTPResponse { /* ... */ }
+@Model final class SyncQueueItem { /* ... */ }
+@Model final class AppSettings { /* ... */ }
 ```
 
-**Documentación Completa**: Ver [Configuración de Ambientes](docs/README-Environment.md)
+> 💾 **Detalles**: Ver [`/docs/specs/archived/completed-specs/swiftdata-integration/`](docs/specs/archived/completed-specs/swiftdata-integration/)
 
 ---
 
-## ✨ Características Principales
+## 🌍 Localización
 
-### Funcionalidades Core
+### Idiomas Soportados
 
-#### 1. Autenticación Segura
-- ✅ Login con email/password
-- ✅ Autenticación biométrica (Face ID/Touch ID)
-- ✅ Refresh automático de tokens
-- ✅ Almacenamiento seguro en Keychain
-- ✅ Logout con limpieza de datos
+- ✅ **Español (es)** - Idioma principal
+- 🔄 **Inglés (en)** - Preparado para expansión
 
-#### 2. Gestión de Preferencias
-- ✅ Cambio de tema (Light/Dark/Sistema)
-- ✅ Persistencia en UserDefaults
-- ✅ Sincronización entre dispositivos (opcional con iCloud)
+**Sistema**: `Localizable.xcstrings` (String Catalogs)  
+**Manager**: `LocalizationManager` centralizado
 
-#### 3. Navegación Adaptativa
-- ✅ **iPhone**: NavigationStack (push/pop)
-- ✅ **iPad**: NavigationSplitView (sidebar + detail)
-- ✅ **macOS**: Sidebar persistente + toolbar
-
-#### 4. Características Apple Nativas
-- ✅ Face ID / Touch ID para autenticación rápida
-- ✅ Soporte completo de Dynamic Type
-- ✅ VoiceOver totalmente funcional
-- ✅ Handoff entre dispositivos (futuro)
-
-#### 5. Sistema de Logging Profesional
-- ✅ OSLog (framework nativo de Apple)
-- ✅ 6 categorías: network, auth, data, ui, business, system
-- ✅ Privacy redaction automática (tokens, emails)
-- ✅ Filtrable en Console.app
-- ✅ Testing con MockLogger
-- ✅ Widgets (Lock Screen y Home Screen) - Fase 2
-
-### Métricas de Calidad
-
-| Métrica | Target | Estado |
-|---------|--------|--------|
-| **Launch Time** | <1 segundo | 🎯 Objetivo |
-| **Frame Rate** | 60fps (120fps ProMotion) | 🎯 Objetivo |
-| **Test Coverage** | >70% (Domain + Data) | 🎯 Objetivo |
-| **Accesibilidad** | 100% VoiceOver | 🎯 Objetivo |
-| **Crash-free Rate** | >99.5% | 🎯 Objetivo |
+> 🌍 **Detalles**: Ver [`/docs/specs/archived/completed-specs/localization/`](docs/specs/archived/completed-specs/localization/)
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📱 Plataformas Soportadas
 
-```
-TemplateAppleNative/
-├── TemplateAppleNative.xcodeproj
-│
-├── Sources/
-│   ├── App/
-│   │   ├── iOS/                    # Entry point iOS
-│   │   ├── macOS/                  # Entry point macOS
-│   │   └── Shared/                 # App configuration
-│   │
-│   ├── Domain/                     # ✅ 100% Testeable, Platform Agnostic
-│   │   ├── Entities/               # User, Theme, UserPreferences
-│   │   ├── UseCases/               # LoginUseCase, LogoutUseCase, etc
-│   │   ├── Repositories/           # Protocols (interfaces)
-│   │   └── Errors/                 # AppError, NetworkError, etc
-│   │
-│   ├── Data/                       # ✅ Implementaciones
-│   │   ├── Repositories/           # AuthRepositoryImpl, etc
-│   │   ├── DataSources/
-│   │   │   ├── Remote/             # APIClient (URLSession)
-│   │   │   └── Local/              # KeychainService, UserDefaults
-│   │   └── DTOs/                   # Data Transfer Objects
-│   │
-│   ├── Presentation/               # ✅ UI + ViewModels
-│   │   ├── Common/                 # Componentes compartidos
-│   │   ├── Authentication/
-│   │   │   ├── Views/              # LoginView, SplashView
-│   │   │   └── ViewModels/         # LoginViewModel
-│   │   ├── Settings/
-│   │   │   ├── Views/              # SettingsView
-│   │   │   └── ViewModels/         # SettingsViewModel
-│   │   ├── Home/
-│   │   │   ├── Views/              # HomeView
-│   │   │   └── ViewModels/         # HomeViewModel
-│   │   └── Navigation/             # NavigationCoordinator, Routes
-│   │
-│   └── DesignSystem/               # ✅ Design System
-│       ├── Tokens/                 # Colors, Spacing, Typography
-│       ├── Components/             # DSButton, DSTextField, DSCard
-│       └── Styles/                 # Custom ViewModifiers
-│
-├── Tests/
-│   ├── DomainTests/                # Tests unitarios de Use Cases
-│   ├── DataTests/                  # Tests de Repositories
-│   ├── PresentationTests/          # Tests de ViewModels
-│   └── UITests/                    # Tests end-to-end
-│
-├── Resources/
-│   ├── Assets.xcassets             # Imágenes y colores
-│   ├── en.lproj/                   # Strings en inglés
-│   └── es.lproj/                   # Strings en español
-│
-└── docs/                           # 📚 Documentación del proyecto
-    ├── 01-arquitectura.md
-    ├── 02-tecnologias.md
-    ├── 03-plan-sprints.md
-    ├── 04-guia-desarrollo.md
-    └── 05-decisiones-arquitectonicas.md
-```
+### Compatibilidad
 
----
+| Plataforma | Versión Mínima | Estado |
+|------------|----------------|--------|
+| **iPhone** | iOS 18.0+ | ✅ Completo |
+| **iPad** | iPadOS 18.0+ | 🟠 Básico (15%) |
+| **macOS** | macOS 15.0+ | 🟠 Básico (15%) |
+| **visionOS** | visionOS 2.0+ | ⚪ Preparado (0%) |
 
-## 🗺️ Roadmap
-
-### Sprint 1-2: Fundación (2 semanas)
-**Objetivo**: Arquitectura base completamente funcional
-
-- ✅ Configuración inicial de Xcode
-- ✅ Domain Layer completo (Entities, Use Cases, Protocols)
-- ✅ Data Layer completo (Repositories, APIClient, Keychain)
-- ✅ Tests unitarios (>70% coverage Domain + Data)
-
-**Entregable**: Arquitectura testeable y validada
-
----
-
-### Sprint 3-4: MVP iPhone (2 semanas)
-**Objetivo**: Aplicación funcional en iPhone
-
-- ✅ Design System (DSButton, DSTextField, colores, spacing)
-- ✅ LoginView + LoginViewModel
-- ✅ HomeView + HomeViewModel
-- ✅ SettingsView + SettingsViewModel
-- ✅ Navegación con NavigationStack
-- ✅ Autenticación con backend mock
-
-**Entregable**: App navegable en simulador iPhone
-
----
-
-### Sprint 5-6: Features Avanzadas (2 semanas)
-**Objetivo**: Integración de características nativas de Apple
-
-- ✅ Face ID / Touch ID implementado
-- ✅ Backend API real integrado
-- ✅ Tokens en Keychain con seguridad
-- ✅ Refresh automático de tokens
-- ✅ Firebase Crashlytics (opcional)
-
-**Entregable**: App con autenticación biométrica funcional
-
----
-
-### Sprint 7-8: Multi-plataforma (2 semanas)
-**Objetivo**: Soporte completo de iPad y macOS
-
-- ✅ iPad con NavigationSplitView
-- ✅ macOS con sidebar y toolbar
-- ✅ Keyboard shortcuts (macOS)
-- ✅ Layouts adaptativos con Size Classes
-
-**Entregable**: App funcional en iPhone, iPad y macOS
-
----
-
-### Sprint 9-10: Calidad y Release (2 semanas)
-**Objetivo**: Aplicación lista para App Store
-
-- ✅ Tests completos (UI Tests end-to-end)
-- ✅ Performance optimization (Instruments)
-- ✅ Accessibility audit completo
-- ✅ CI/CD con GitHub Actions + Fastlane
-- ✅ App Store assets y listing
-
-**Entregable**: Release Candidate en TestFlight
+**Próximos pasos**: SPEC-006 Platform Optimization (15h)
 
 ---
 
 ## 📚 Navegación de Documentación
 
-### Para Desarrolladores
+### Documentos Principales
 
-1. **[Arquitectura Detallada](docs/01-arquitectura.md)**
-   - Capas del sistema
-   - Flujo de datos
-   - Patrones utilizados
-   - Decisiones arquitectónicas
+| Documento | Propósito | Cuándo Leerlo |
+|-----------|-----------|---------------|
+| [`README.md`](README.md) | Este archivo - Visión general | Inicio |
+| [`CLAUDE.md`](CLAUDE.md) | Guía para IA y desarrolladores | Antes de programar |
+| [`/docs/specs/TRACKING.md`](docs/specs/TRACKING.md) | Estado actual de specs | Cada semana |
+| [`/docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md) | Próximas tareas | Planificar sprints |
+| [`/docs/specs/README.md`](docs/specs/README.md) | Índice de especificaciones | Explorar docs |
 
-2. **[Tecnologías y Herramientas](docs/02-tecnologias.md)**
-   - SwiftUI y Observation Framework
-   - Keychain Services
-   - LocalAuthentication
-   - Dependency Injection
+### Documentación Técnica
 
-3. **[Plan de Trabajo por Sprints](docs/03-plan-sprints.md)**
-   - Tareas detalladas por sprint
-   - Estimaciones y dependencias
-   - Criterios de aceptación
-   - Verificación de completitud
+| Documento | Contenido |
+|-----------|-----------|
+| [`/docs/01-arquitectura.md`](docs/01-arquitectura.md) | Arquitectura detallada, capas, flujos |
+| [`/docs/02-tecnologias.md`](docs/02-tecnologias.md) | Stack tecnológico completo |
+| [`/docs/03-plan-sprints.md`](docs/03-plan-sprints.md) | Roadmap de implementación |
+| [`/docs/04-guia-desarrollo.md`](docs/04-guia-desarrollo.md) | Guía para desarrolladores |
 
-4. **[Guía de Desarrollo](docs/04-guia-desarrollo.md)**
-   - Setup del entorno
-   - Estándares de código
-   - Testing guidelines
-   - Comandos útiles
+### Reglas de Desarrollo
 
-5. **[Decisiones Arquitectónicas](docs/05-decisiones-arquitectonicas.md)**
-   - ADRs (Architecture Decision Records)
-   - Rationale de decisiones clave
-   - Trade-offs evaluados
+| Documento | Contenido |
+|-----------|-----------|
+| [`/docs/revision/03-REGLAS-DESARROLLO-IA.md`](docs/revision/03-REGLAS-DESARROLLO-IA.md) | Reglas de concurrencia Swift 6 |
+| [`CLAUDE.md`](CLAUDE.md) | Guía rápida para Claude Code |
 
 ---
 
-## 🚀 Quick Start
+## 🛣️ Roadmap
 
-### Prerequisitos
+### ✅ Sprint 1-2 (COMPLETADO - Nov 2025)
 
-- macOS 14.0+ (Sonoma o superior)
-- Xcode 15.0+
-- Swift 5.9+
-- Cuenta de Apple Developer (para testing en dispositivo)
+- ✅ Environment Configuration (SPEC-001)
+- ✅ Professional Logging (SPEC-002)
+- ✅ Network Layer (SPEC-004)
+- ✅ SwiftData Integration (SPEC-005)
+- ✅ Testing Infrastructure (SPEC-007)
+- ✅ Localization (SPEC-010)
+- ✅ Offline-First (SPEC-013)
 
-### Instalación
+### 🔄 Sprint 3 (En Progreso - Nov-Dic 2025)
 
-```bash
-# 1. Clonar repositorio
-git clone [URL_REPO]
-cd TemplateAppleNative
+**Prioridad Crítica**:
+- 🟡 SPEC-008: Security Hardening (75% → 100%) - 5h
+- 🟢 SPEC-003: Authentication (90% → 100%) - 3h (bloqueado)
 
-# 2. Abrir proyecto en Xcode
-open TemplateAppleNative.xcodeproj
+**Entregables**:
+- ✅ Certificate pinning activo
+- ✅ Security checks en startup
+- ✅ Input sanitization en UI
+- ⏸️ JWT signature validation (cuando backend entregue clave pública)
 
-# 3. Seleccionar scheme y dispositivo
-# Xcode → Scheme: TemplateAppleNative-Dev
-# Xcode → Destination: iPhone 15 Simulator
+### 📅 Sprint 4 (Dic 2025)
 
-# 4. Build y Run
-⌘ + R
-```
+- SPEC-006: Platform Optimization (iPad, macOS, visionOS) - 15h
 
-### Configuración Inicial
+### 📅 Sprint 5 (Ene 2026)
 
-1. **Configurar Firebase** (Opcional)
-   - Descargar `GoogleService-Info.plist` desde Firebase Console
-   - Agregar al proyecto en `Resources/`
+- SPEC-009: Feature Flags & Remote Config - 8h
+- SPEC-011: Analytics & Telemetry - 8h
+- SPEC-012: Performance Monitoring - 8h
 
-2. **Configurar Backend URL**
-   - Editar `Sources/App/Shared/AppConfiguration.swift`
-   - Actualizar `apiURL` según ambiente
-
-3. **Instalar SwiftLint** (Opcional pero recomendado)
-   ```bash
-   brew install swiftlint
-   ```
+> 🗓️ **Roadmap Completo**: Ver [`/docs/03-plan-sprints.md`](docs/03-plan-sprints.md)
 
 ---
 
-## 📊 Estado del Proyecto
+## 🔧 Tecnologías y Herramientas
 
-**Versión Actual**: 0.1.0 (Pre-release)
+### Stack Principal
 
-**Progreso General**: 0%
+- **Lenguaje**: Swift 6.0+ (strict concurrency)
+- **UI Framework**: SwiftUI + @Observable
+- **Concurrency**: async/await (NO Combine)
+- **Persistencia**: SwiftData (NO CoreData)
+- **Networking**: URLSession nativo
+- **Testing**: Swift Testing (NO XCTest legacy)
+- **Logging**: OSLog estructurado
+- **Security**: Keychain, LocalAuthentication
 
-| Fase | Estado | Progreso |
-|------|--------|----------|
-| Sprint 1-2: Fundación | 🔜 Pendiente | 0% |
-| Sprint 3-4: MVP iPhone | ⏸️ No iniciado | 0% |
-| Sprint 5-6: Features Avanzadas | ⏸️ No iniciado | 0% |
-| Sprint 7-8: Multi-plataforma | ⏸️ No iniciado | 0% |
-| Sprint 9-10: Release | ⏸️ No iniciado | 0% |
+### Herramientas de Desarrollo
+
+- **IDE**: Xcode 16.0+
+- **Version Control**: Git
+- **CI/CD**: GitHub Actions (en setup)
+- **Linting**: SwiftLint (configurado)
+- **Dependency Management**: Swift Package Manager
+
+> 🔧 **Stack Completo**: Ver [`/docs/02-tecnologias.md`](docs/02-tecnologias.md)
+
+---
+
+## 📊 Métricas del Proyecto
+
+### Código
+
+| Métrica | Valor |
+|---------|-------|
+| Archivos Swift (main) | 90+ |
+| Archivos Swift (tests) | 36+ |
+| Líneas de código | ~8,000 |
+| Tests unitarios | 177+ |
+| Modelos @Model | 4 |
+| Use Cases | 6+ |
+| Workflows CI/CD | 3 |
+
+### Calidad
+
+| Métrica | Objetivo | Actual |
+|---------|----------|--------|
+| Test Coverage | >70% | ~70% ✅ |
+| SwiftLint Warnings | 0 | 28 🟡 |
+| Build Time | <30s | ~20s ✅ |
+| App Size | <50MB | ~8MB ✅ |
 
 ---
 
 ## 🤝 Contribución
 
-Este es un proyecto de plantilla ejemplar. Las contribuciones son bienvenidas siguiendo estos lineamientos:
+### Flujo de Trabajo
 
-1. **Código**: Seguir estándares de Swift y SwiftUI
-2. **Commits**: Mensajes descriptivos en español
-3. **Tests**: Toda funcionalidad debe tener tests
-4. **Documentación**: Actualizar docs con cambios arquitectónicos
+1. **Revisar especificaciones pendientes**: [`/docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md)
+2. **Seleccionar tarea**: Priorizar SPEC-008 o SPEC-003
+3. **Crear branch**: `git checkout -b feature/SPEC-XXX-descripcion`
+4. **Implementar**: Seguir guías en `/docs/specs/[spec]/`
+5. **Tests**: Asegurar >80% coverage
+6. **PR**: Crear pull request con descripción clara
+
+### Estándares de Código
+
+- ✅ Seguir reglas en [`/docs/revision/03-REGLAS-DESARROLLO-IA.md`](docs/revision/03-REGLAS-DESARROLLO-IA.md)
+- ✅ Usar `@Observable @MainActor` para ViewModels
+- ✅ Use Cases retornan `Result<T, AppError>`
+- ✅ `actor` para servicios con estado mutable
+- ✅ NO usar `nonisolated(unsafe)` (prohibido)
+- ✅ Tests obligatorios para nuevas features
+
+---
+
+## 📞 Contacto y Soporte
+
+### Preguntas Frecuentes
+
+**P: ¿Cuál es el estado actual del proyecto?**  
+R: Ver [`/docs/specs/TRACKING.md`](docs/specs/TRACKING.md) - 59% completado
+
+**P: ¿Qué debo hacer ahora?**  
+R: Ver [`/docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md) - SPEC-008 Security (5h)
+
+**P: ¿Cómo funciona X feature?**  
+R: Ver [`/docs/specs/archived/completed-specs/`](docs/specs/archived/completed-specs/) para specs completadas
+
+**P: ¿Por qué está bloqueada una tarea?**  
+R: Ver [`/docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md) - Sección "Bloqueadores"
 
 ---
 
 ## 📄 Licencia
 
-[Definir licencia según corresponda]
+Copyright © 2025 EduGo. Todos los derechos reservados.
 
 ---
 
-## 📞 Contacto
+## 🔗 Enlaces Rápidos
 
-**Maintainer**: Jhoan Medina
-**Email**: [Contacto]
+- **Tracking de Progreso**: [`/docs/specs/TRACKING.md`](docs/specs/TRACKING.md)
+- **Próximas Tareas**: [`/docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md)
+- **Guía de Desarrollo**: [`CLAUDE.md`](CLAUDE.md)
+- **Arquitectura Completa**: [`/docs/01-arquitectura.md`](docs/01-arquitectura.md)
+- **Roadmap de Sprints**: [`/docs/03-plan-sprints.md`](docs/03-plan-sprints.md)
 
 ---
 
-**Última actualización**: 2025-01-15
-**Versión de documentación**: 1.0.0
+**Última Actualización**: 2025-11-27  
+**Versión**: 0.1.0 (Pre-release)  
+**Estado**: En Desarrollo Activo 🟢

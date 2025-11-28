@@ -3,7 +3,8 @@
 //  apple-app
 //
 //  Created on 16-11-25.
-//  Refactored on 23-11-25.
+//  Refactored on 27-11-25.
+//  SPEC-006: Enhanced with iPad/macOS/visionOS optimization
 //
 
 import SwiftUI
@@ -12,7 +13,13 @@ import SwiftUI
 ///
 /// Arquitectura:
 /// - NO autenticado: Muestra LoginView fullscreen (sin sidebar)
-/// - Autenticado: Muestra navegación completa con sidebar (iPad/Mac) o tabs (iPhone)
+/// - Autenticado: Muestra navegación completa adaptada por plataforma:
+///   - iPhone: TabView
+///   - iPad: NavigationSplitView con sidebar colapsable
+///   - macOS: NavigationSplitView con toolbar y sidebar fijo
+///   - visionOS: Window groups con navegación espacial
+///
+/// - Important: Usa PlatformCapabilities para detección de plataforma
 struct AdaptiveNavigationView: View {
     @State private var authState = AuthenticationState()
     @State private var isCheckingSession = true
@@ -91,26 +98,32 @@ private struct LoginFlow: View {
     }
 }
 
-// MARK: - Authenticated App (Con Sidebar)
+// MARK: - Authenticated App (Adaptativo por Plataforma)
 
 private struct AuthenticatedApp: View {
     @Environment(AuthenticationState.self) private var authState
     @EnvironmentObject var container: DependencyContainer
     @State private var selectedRoute: Route = .home
+    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
+
+    // Environment values para Size Classes
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
-        #if os(iOS)
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            // iPhone: NavigationStack simple
+        // Usar PlatformCapabilities para determinar el estilo de navegación
+        switch PlatformCapabilities.recommendedNavigationStyle {
+        case .tabs:
             phoneNavigation
-        } else {
-            // iPad: NavigationSplitView con sidebar
+        case .sidebar:
             tabletNavigation
+        case .spatial:
+            #if os(visionOS)
+            spatialNavigation
+            #else
+            tabletNavigation // Fallback si no es visionOS
+            #endif
         }
-        #else
-        // macOS: NavigationSplitView con sidebar
-        desktopNavigation
-        #endif
     }
 
     // MARK: - iPhone Navigation
@@ -129,53 +142,250 @@ private struct AuthenticatedApp: View {
                 }
                 .tag(Route.settings)
         }
+        .tint(DSColors.accent)
     }
 
     // MARK: - iPad/Mac Navigation
 
     private var tabletNavigation: some View {
-        NavigationSplitView {
-            sidebar
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            // Sidebar
+            sidebarContent
+                .navigationSplitViewColumnWidth(
+                    min: sidebarMinWidth,
+                    ideal: sidebarIdealWidth,
+                    max: sidebarMaxWidth
+                )
         } detail: {
+            // Detail view
             destination(for: selectedRoute)
+                .navigationTitle(navigationTitle)
+                #if os(macOS)
+                .toolbar {
+                    macOSToolbar
+                }
+                #endif
         }
+        .navigationSplitViewStyle(.balanced)
     }
 
-    private var desktopNavigation: some View {
-        NavigationSplitView {
-            sidebar
-                .frame(minWidth: 200, idealWidth: 250, maxWidth: 300)
-        } detail: {
-            destination(for: selectedRoute)
-        }
+    // MARK: - Sidebar Configuration
+
+    private var sidebarMinWidth: CGFloat {
+        #if os(macOS)
+        return 200
+        #else
+        return 250
+        #endif
     }
 
-    // MARK: - Sidebar
+    private var sidebarIdealWidth: CGFloat {
+        #if os(macOS)
+        return 250
+        #else
+        // iPad: Más ancho para mejor usabilidad con dedos
+        return 320
+        #endif
+    }
 
-    private var sidebar: some View {
+    private var sidebarMaxWidth: CGFloat {
+        #if os(macOS)
+        return 300
+        #else
+        return 400
+        #endif
+    }
+
+    // MARK: - Sidebar Content
+
+    private var sidebarContent: some View {
         List {
             Section("Navegación") {
-                #if os(macOS)
+                NavigationLink(value: Route.home) {
+                    Label("Inicio", systemImage: "house.fill")
+                }
+                .tag(Route.home)
+
+                NavigationLink(value: Route.settings) {
+                    Label("Configuración", systemImage: "gear")
+                }
+                .tag(Route.settings)
+            }
+
+            Section("Cuenta") {
+                Button(role: .destructive) {
+                    Task {
+                        await performLogout()
+                    }
+                } label: {
+                    Label("Cerrar Sesión", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+            }
+
+            // Información de plataforma (solo en DEBUG)
+            #if DEBUG
+            Section("Debug") {
+                DisclosureGroup("Platform Info") {
+                    Text(PlatformCapabilities.debugDescription)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundColor(.secondary)
+                }
+            }
+            #endif
+        }
+        .navigationTitle("EduGo")
+        #if os(macOS)
+        .listStyle(.sidebar)
+        #else
+        .listStyle(.insetGrouped)
+        #endif
+    }
+
+    // MARK: - macOS Toolbar
+
+    #if os(macOS)
+    @ToolbarContentBuilder
+    private var macOSToolbar: some ToolbarContent {
+        MacOSToolbarConfiguration.mainToolbarContent(
+            onSidebarToggle: {
+                MacOSWindowControls.toggleSidebar()
+            },
+            onRefresh: {
+                Task {
+                    await refreshCurrentView()
+                }
+            },
+            onSearch: {
+                // TODO: Implementar búsqueda
+                print("Search triggered")
+            }
+        )
+    }
+
+    /// Refresca la vista actual según la ruta seleccionada
+    private func refreshCurrentView() async {
+        switch selectedRoute {
+        case .home:
+            // Refrescar home - recargar datos del usuario
+            if let homeViewModel = container.resolve(GetCurrentUserUseCase.self) as? any AnyObject {
+                // Trigger reload
+            }
+        case .settings:
+            // Refrescar settings
+            break
+        case .login:
+            break
+        }
+    }
+    #endif
+
+    // MARK: - Navigation Title
+
+    private var navigationTitle: String {
+        switch selectedRoute {
+        case .home:
+            return "Inicio"
+        case .settings:
+            return "Configuración"
+        case .login:
+            return ""
+        }
+    }
+
+    // MARK: - Destinations
+
+    @ViewBuilder
+    private func destination(for route: Route) -> some View {
+        switch route {
+        case .login:
+            // Login nunca debería mostrarse aquí (ya estamos autenticados)
+            EmptyView()
+
+        case .home:
+            // Usar layout específico según plataforma
+            #if os(visionOS)
+            VisionOSHomeView(
+                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                logoutUseCase: container.resolve(LogoutUseCase.self),
+                authState: authState
+            )
+            #else
+            if PlatformCapabilities.isIPad {
+                IPadHomeView(
+                    getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                    logoutUseCase: container.resolve(LogoutUseCase.self),
+                    authState: authState
+                )
+            } else {
+                HomeView(
+                    getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                    logoutUseCase: container.resolve(LogoutUseCase.self),
+                    authState: authState
+                )
+            }
+            #endif
+
+        case .settings:
+            // Usar layout específico según plataforma
+            if PlatformCapabilities.isIPad {
+                IPadSettingsView(
+                    updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
+                    preferencesRepository: container.resolve(PreferencesRepository.self)
+                )
+            } else {
+                SettingsView(
+                    updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
+                    preferencesRepository: container.resolve(PreferencesRepository.self)
+                )
+            }
+        }
+    }
+
+    // MARK: - visionOS Spatial Navigation
+
+    #if os(visionOS)
+    private var spatialNavigation: some View {
+        NavigationSplitView {
+            spatialSidebar
+        } detail: {
+            destination(for: selectedRoute)
+                .ornament(attachmentAnchor: .scene(.bottom)) {
+                    VisionOSConfiguration.navigationOrnament(
+                        onHome: { selectedRoute = .home },
+                        onSettings: { selectedRoute = .settings }
+                    )
+                }
+                .ornament(attachmentAnchor: .scene(.top)) {
+                    VisionOSConfiguration.actionsOrnament(
+                        onRefresh: {
+                            Task {
+                                // Refrescar vista actual
+                            }
+                        },
+                        onShare: {
+                            // TODO: Implementar share
+                        }
+                    )
+                }
+        }
+    }
+
+    private var spatialSidebar: some View {
+        List {
+            Section("Navegación") {
                 Button {
                     selectedRoute = .home
                 } label: {
                     Label("Inicio", systemImage: "house.fill")
                 }
+                .tag(Route.home)
 
                 Button {
                     selectedRoute = .settings
                 } label: {
                     Label("Configuración", systemImage: "gear")
                 }
-                #else
-                NavigationLink(value: Route.home) {
-                    Label("Inicio", systemImage: "house.fill")
-                }
-
-                NavigationLink(value: Route.settings) {
-                    Label("Configuración", systemImage: "gear")
-                }
-                #endif
+                .tag(Route.settings)
             }
 
             Section("Cuenta") {
@@ -189,34 +399,8 @@ private struct AuthenticatedApp: View {
             }
         }
         .navigationTitle("EduGo")
-        #if os(macOS)
-        .listStyle(.sidebar)
-        #endif
     }
-
-    // MARK: - Destinations
-
-    @ViewBuilder
-    private func destination(for route: Route) -> some View {
-        switch route {
-        case .login:
-            // Login nunca debería mostrarse aquí (ya estamos autenticados)
-            EmptyView()
-
-        case .home:
-            HomeView(
-                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
-                logoutUseCase: container.resolve(LogoutUseCase.self),
-                authState: authState
-            )
-
-        case .settings:
-            SettingsView(
-                updateThemeUseCase: container.resolve(UpdateThemeUseCase.self),
-                preferencesRepository: container.resolve(PreferencesRepository.self)
-            )
-        }
-    }
+    #endif
 
     // MARK: - Logout
 
@@ -272,4 +456,13 @@ private struct AuthenticatedApp: View {
 
     return AdaptiveNavigationView()
         .environmentObject(container)
+}
+
+#Preview("Platform Detection") {
+    VStack(spacing: DSSpacing.large) {
+        Text("Platform: \(String(describing: PlatformCapabilities.currentDevice))")
+        Text("Navigation Style: \(String(describing: PlatformCapabilities.recommendedNavigationStyle))")
+        Text("Screen Size: \(PlatformCapabilities.screenCapabilities.screenSize.debugDescription)")
+    }
+    .padding()
 }
