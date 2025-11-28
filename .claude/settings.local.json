@@ -1,5 +1,14 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(./run.sh:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(gh pr checks:*)",
+      "WebFetch(domain:github.com)"
+    ],
     "additionalDirectories": [
       "/Users/jhoanmedina/source/Documentation/GuideDesign/Design/Apple",
       "/Users/jhoanmedina/source/EduGo/repos-separados/edugo-api-mobile",

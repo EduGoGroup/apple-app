@@ -3,55 +3,46 @@
 //  apple-app
 //
 //  Created on 16-11-25.
+//  Updated on 28-11-25: Removido SwiftUI para cumplir Clean Architecture
 //
 
-import SwiftUI
+import Foundation
 
 /// Representa los temas de apariencia disponibles en la aplicación
+///
+/// Esta entidad de Domain es pura y no tiene dependencias de UI.
+/// Para propiedades de presentación (colorScheme, displayName, iconName),
+/// ver la extensión en `Presentation/Extensions/Theme+UI.swift`.
+///
+/// - Note: Cumple Clean Architecture - Domain Layer puro
 enum Theme: String, Codable, CaseIterable, Sendable {
     /// Tema claro
     case light
-    
+
     /// Tema oscuro
     case dark
-    
+
     /// Tema automático (según preferencias del sistema)
     case system
-    
-    /// Retorna el ColorScheme correspondiente al tema
-    /// - Returns: ColorScheme de SwiftUI, o nil para seguir el sistema
-    var colorScheme: ColorScheme? {
-        switch self {
-        case .light:
-            return .light
-        case .dark:
-            return .dark
-        case .system:
-            return nil
-        }
+
+    // MARK: - Business Logic Properties
+
+    /// Tema por defecto para nuevos usuarios
+    static let `default`: Theme = .system
+
+    /// Indica si es un tema explícito (no sigue al sistema)
+    ///
+    /// Útil para determinar si el usuario ha seleccionado activamente
+    /// un tema o si está usando el predeterminado del sistema.
+    var isExplicit: Bool {
+        self != .system
     }
-    
-    /// Nombre localizado para mostrar en UI
-    var displayName: String {
-        switch self {
-        case .light:
-            return "Claro"
-        case .dark:
-            return "Oscuro"
-        case .system:
-            return "Sistema"
-        }
-    }
-    
-    /// Ícono SF Symbol para el tema
-    var iconName: String {
-        switch self {
-        case .light:
-            return "sun.max.fill"
-        case .dark:
-            return "moon.fill"
-        case .system:
-            return "circle.lefthalf.filled"
-        }
+
+    /// Indica si el tema representa modo oscuro
+    ///
+    /// - Note: Para `.system`, esto es indeterminado y devuelve false.
+    ///   Use `colorScheme` en la extensión UI para obtener el valor real.
+    var prefersDark: Bool {
+        self == .dark
     }
 }
