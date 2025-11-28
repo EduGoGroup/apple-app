@@ -106,23 +106,27 @@ struct LanguageEnumTests {
     }
 
     @Test("Nombre de español")
-    func testSpanishDisplayName() {
-        #expect(Language.spanish.displayName == "Español")
+    func testSpanishDisplayName() async {
+        let name = await MainActor.run { Language.spanish.displayName }
+        #expect(name == "Español")
     }
 
     @Test("Nombre de inglés")
-    func testEnglishDisplayName() {
-        #expect(Language.english.displayName == "English")
+    func testEnglishDisplayName() async {
+        let name = await MainActor.run { Language.english.displayName }
+        #expect(name == "English")
     }
 
     @Test("Emoji de español")
-    func testSpanishFlag() {
-        #expect(Language.spanish.flagEmoji == "🇪🇸")
+    func testSpanishFlag() async {
+        let flag = await MainActor.run { Language.spanish.flagEmoji }
+        #expect(flag == "🇪🇸")
     }
 
     @Test("Emoji de inglés")
-    func testEnglishFlag() {
-        #expect(Language.english.flagEmoji == "🇺🇸")
+    func testEnglishFlag() async {
+        let flag = await MainActor.run { Language.english.flagEmoji }
+        #expect(flag == "🇺🇸")
     }
 
     @Test("Todos los idiomas tienen códigos únicos")
