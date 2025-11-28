@@ -27,12 +27,12 @@ enum Language: String, Codable, CaseIterable, Sendable {
     // MARK: - Business Logic Properties
 
     /// Código de idioma ISO 639-1
-    var code: String {
+    nonisolated var code: String {
         rawValue
     }
 
     /// Idioma predeterminado de la aplicación
-    static var `default`: Language {
+    nonisolated static var `default`: Language {
         .spanish
     }
 
@@ -43,7 +43,7 @@ enum Language: String, Codable, CaseIterable, Sendable {
     /// más cercano.
     ///
     /// - Returns: Language soportado más cercano al idioma del sistema
-    static func systemLanguage() -> Language {
+    nonisolated static func systemLanguage() -> Language {
         let preferredLanguages = Locale.preferredLanguages
 
         for preferredLanguage in preferredLanguages {
@@ -59,7 +59,7 @@ enum Language: String, Codable, CaseIterable, Sendable {
     }
 
     /// Indica si es el idioma predeterminado
-    var isDefault: Bool {
+    nonisolated var isDefault: Bool {
         self == .default
     }
 }
