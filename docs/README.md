@@ -1,51 +1,87 @@
-# Documentación del Proyecto
+# 📚 Documentación EduGo Apple App
 
-Esta carpeta contiene toda la documentación del proyecto organizada por categorías.
-
----
-
-## 📁 Estructura de Documentación
-
-### `/` (Raíz)
-Documentación principal de arquitectura y planificación:
-
-- **01-arquitectura.md**: Arquitectura detallada del proyecto (Clean Architecture)
-- **02-design-system.md**: Sistema de diseño y componentes
-- **03-plan-sprints.md**: Plan completo de desarrollo por sprints
-- **04-guia-desarrollo.md**: Guía extendida para desarrolladores
-- **05-decisiones-arquitectonicas.md**: Registro de decisiones importantes
-
-### `/features`
-Documentación de características específicas:
-
-- **guia-efectos-visuales.md**: Guía completa de efectos visuales (Liquid Glass + Materials)
-- **resumen-efectos-visuales.md**: Resumen ejecutivo de efectos visuales
-
-### `/troubleshooting`
-Resolución de problemas y correcciones:
-
-- **01-configuracion-plataformas.md**: Configuración multi-plataforma (iOS/iPad/macOS/visionOS)
-- **02-correccion-final-ios26.md**: Correcciones específicas para iOS 26
-- **03-correcciones-compilacion.md**: Soluciones a errores de compilación comunes
+**Actualizado**: 2025-11-28  
+**Estado**: Documentación minimalista y precisa
 
 ---
 
-## 🎯 Guía Rápida
+## 🎯 Documentos Esenciales
 
-### Para empezar a desarrollar
-1. Lee `CLAUDE.md` en la raíz del proyecto (guía rápida)
-2. Revisa `01-arquitectura.md` (conceptos fundamentales)
-3. Consulta `04-guia-desarrollo.md` (workflow de desarrollo)
+### Desarrollo Diario
+- **[`CLAUDE.md`](../CLAUDE.md)** - Guía rápida (arranque, reglas, comandos)
+- **[`03-REGLAS-DESARROLLO-IA.md`](03-REGLAS-DESARROLLO-IA.md)** - Reglas completas Swift 6 concurrency
+- **[`FLUJO-REPOSITORY-PATTERN.md`](FLUJO-REPOSITORY-PATTERN.md)** - Diagramas de flujo arquitectónicos
 
-### Para resolver problemas
-1. Revisa `/troubleshooting` para problemas comunes
-2. Consulta `05-decisiones-arquitectonicas.md` para entender el "por qué"
+### Tracking y Planning
+- **[`specs/TRACKING.md`](specs/TRACKING.md)** - Estado actual (59% - fuente única de verdad)
+- **[`specs/PENDIENTES.md`](specs/PENDIENTES.md)** - Próximas tareas priorizadas
 
-### Para implementar features
-1. Sigue el patrón en `03-plan-sprints.md`
-2. Usa `02-design-system.md` para componentes UI
-3. Consulta `/features` para features específicas
+### Referencia Técnica
+- **[`revision/sprint-0-2025-11-28/`](revision/sprint-0-2025-11-28/)** - Última revisión completa
+  * Guías Swift 6.2 (concurrencia, persistencia, networking, UI)
+  * Roadmap de SPECs
+  * Análisis arquitectónico exhaustivo (25k+ líneas)
 
 ---
 
-**Última actualización**: 2025-01-23
+## 📁 Estructura
+
+```
+docs/
+├── 03-REGLAS-DESARROLLO-IA.md        # Reglas concurrencia Swift 6
+├── FLUJO-REPOSITORY-PATTERN.md       # Diagramas arquitectónicos
+│
+├── specs/                             # Especificaciones
+│   ├── TRACKING.md                   # Estado actual (FUENTE ÚNICA)
+│   ├── PENDIENTES.md                 # Próximas tareas
+│   ├── feature-flags/                # SPEC-009 (activa)
+│   ├── authentication-migration/     # SPEC-003 (activa)
+│   └── archived/                     # Specs completadas
+│
+├── backend-specs/                     # Specs para backend
+│   └── feature-flags/                # API Feature Flags
+│
+├── revision/                          # Revisiones de arquitectura
+│   ├── LEER-PRIMERO-SPRINT-0.md      # Resumen Sprint 0
+│   ├── INFORME-ALINEACION-POST-SPRINT-0.md
+│   └── sprint-0-2025-11-28/          # Análisis completo (41 docs)
+│
+└── archived/                          # Histórico
+    ├── pre-sprint-0/                 # Docs base antiguos
+    ├── sprint-sessions/              # Sesiones desarrollo
+    ├── pr-analysis/                  # Análisis PRs antiguos
+    └── old-analysis/                 # Análisis técnicos superados
+```
+
+---
+
+## 🚀 Para Empezar
+
+### Nuevo en el Proyecto
+1. [`CLAUDE.md`](../CLAUDE.md) (5 min)
+2. [`revision/LEER-PRIMERO-SPRINT-0.md`](revision/LEER-PRIMERO-SPRINT-0.md) (10 min)
+3. [`specs/TRACKING.md`](specs/TRACKING.md) (5 min)
+
+### Implementar Nueva Feature
+1. [`specs/PENDIENTES.md`](specs/PENDIENTES.md) - Ver qué hacer
+2. [`03-REGLAS-DESARROLLO-IA.md`](03-REGLAS-DESARROLLO-IA.md) - Reglas a seguir
+3. [`FLUJO-REPOSITORY-PATTERN.md`](FLUJO-REPOSITORY-PATTERN.md) - Patrón arquitectónico
+
+### Resolver Dudas Técnicas
+1. [`revision/sprint-0-2025-11-28/guias-uso/`](revision/sprint-0-2025-11-28/guias-uso/) - Guías completas
+2. [`specs/archived/completed-specs/`](specs/archived/completed-specs/) - Ejemplos reales
+
+---
+
+## 📖 Documentos Archivados
+
+La documentación base (01-arquitectura.md, 02-tecnologias.md, etc.) fue archivada porque:
+- **Desactualizada**: Menciona Swift 5.9, iOS 17 (proyecto usa Swift 6.0, iOS 18+)
+- **Superada**: Sprint 0 generó documentación más completa y actualizada
+- **Redundante**: CLAUDE.md + 03-REGLAS + FLUJO cubren lo esencial
+
+**Ubicación**: [`archived/pre-sprint-0/`](archived/pre-sprint-0/)
+
+---
+
+**Filosofía**: Documentación **minimalista pero precisa**. Solo lo necesario, siempre actualizado.
