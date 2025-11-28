@@ -17,17 +17,19 @@ extension UserRole {
 
     // MARK: - Display Properties
 
-    /// Nombre localizado del rol para mostrar en UI
+    /// Nombre del rol para mostrar en UI
+    ///
+    /// - Note: TODO SPEC-010: Migrar a String Catalog cuando se implemente localización
     var displayName: String {
         switch self {
         case .student:
-            return String(localized: "user.role.student")
+            return "Estudiante"
         case .teacher:
-            return String(localized: "user.role.teacher")
+            return "Profesor"
         case .admin:
-            return String(localized: "user.role.admin")
+            return "Administrador"
         case .parent:
-            return String(localized: "user.role.parent")
+            return "Padre/Tutor"
         }
     }
 

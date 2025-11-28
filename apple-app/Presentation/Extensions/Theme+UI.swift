@@ -42,29 +42,17 @@ extension Theme {
 
     // MARK: - Display Properties
 
-    /// Nombre localizado para mostrar en UI
+    /// Nombre para mostrar en UI
     ///
-    /// - Note: Usa String(localized:) para soporte multiidioma (SPEC-010)
+    /// - Note: TODO SPEC-010: Migrar a String Catalog cuando se implemente localización
     var displayName: String {
         switch self {
         case .light:
-            return String(localized: "settings.theme.light")
+            return "Claro"
         case .dark:
-            return String(localized: "settings.theme.dark")
+            return "Oscuro"
         case .system:
-            return String(localized: "settings.theme.system")
-        }
-    }
-
-    /// LocalizedStringKey version para Text() directo
-    var displayNameKey: LocalizedStringKey {
-        switch self {
-        case .light:
-            return "settings.theme.light"
-        case .dark:
-            return "settings.theme.dark"
-        case .system:
-            return "settings.theme.system"
+            return "Sistema"
         }
     }
 
