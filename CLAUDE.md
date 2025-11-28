@@ -154,6 +154,7 @@ Antes de crear una clase/struct, preguntarse:
 ```swift
 // Componentes
 DSButton(title: "Login", style: .primary) { }
+DSButton.adaptive(title: "Login") { } // Tamaño automático por plataforma
 DSTextField(placeholder: "Email", text: $email)
 DSCard { Text("Contenido") }
 
@@ -162,8 +163,67 @@ DSColors.accent, .textPrimary, .error
 DSSpacing.small, .medium, .large
 DSTypography.title, .body
 
-// Efectos (detecta iOS 18 vs 26+)
+// Efectos (iOS 26+ primero, degradación a iOS 18+)
 Text("Contenido").dsGlassEffect(.prominent, shape: .capsule)
+```
+
+---
+
+## 🖥️ Platform Optimization (SPEC-006)
+
+**Filosofía**: **iOS 26+ / macOS 26+ / visionOS 26+ PRIMERO**, degradación elegante.
+
+### Detección de Plataforma
+
+```swift
+// Sistema centralizado de detección
+if PlatformCapabilities.isIPad {
+    IPadHomeView(...)
+} else if PlatformCapabilities.isMac {
+    MacOSSettingsView(...)
+} else {
+    HomeView(...) // iPhone
+}
+
+// Navigation style recomendado
+switch PlatformCapabilities.recommendedNavigationStyle {
+case .tabs: TabView { }
+case .sidebar: NavigationSplitView { }
+case .spatial: // visionOS ornaments
+}
+```
+
+### Layouts por Plataforma
+
+**iPhone:**
+- `TabView` con navigation tabs
+- Botones tamaño `.medium`
+- Layout single column
+
+**iPad:**
+- `NavigationSplitView` (sidebar 320px ideal)
+- Layouts 2 columnas (landscape) / 1 columna (portrait)
+- Botones tamaño `.large`
+- Panel dual en settings
+
+**macOS:**
+- `NavigationSplitView` (sidebar 250px ideal)
+- Toolbar nativa + Menu bar
+- Keyboard shortcuts (⌘1, ⌘R, ⌘⌥S)
+- TabView settings estilo nativo
+
+**visionOS:**
+- Layout espacial 3 columnas
+- Ornaments flotantes (top + bottom)
+- Hover effects (`.lift`, `.highlight`)
+- Spatial spacing para gestos
+
+### Efectos Visuales Modernos
+
+```swift
+// iOS 26+: Automáticamente usa DSVisualEffectModern
+// iOS 18-25: Automáticamente usa DSVisualEffectLegacy
+.dsGlassEffect(.prominent, shape: .capsule, isInteractive: true)
 ```
 
 ---

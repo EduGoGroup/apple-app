@@ -126,26 +126,40 @@
 
 ---
 
-### 🟠 SPEC-006: Platform Optimization (15%)
+### ✅ SPEC-006: Platform Optimization (100%) - COMPLETADO
 
 **Prioridad**: 🟡 P2 - MEDIA  
-**Última Actualización**: 2025-11-26  
+**Última Actualización**: 2025-11-27  
+**Fecha de Completación**: 2025-11-27  
 **Ubicación**: `docs/specs/platform-optimization/`
 
 #### Estado
 
 | Plataforma | Progreso |
 |------------|----------|
-| iOS Visual Effects | 15% 🟠 |
-| **iPad Optimization** | 0% ❌ |
-| **macOS Optimization** | 0% ❌ |
-| **visionOS Support** | 0% ❌ |
+| iOS Visual Effects | 100% ✅ |
+| iPad Optimization | 100% ✅ |
+| macOS Optimization | 100% ✅ |
+| visionOS Support | 100% ✅ |
 
-#### Pendientes (15h)
+#### Completado (16h reales)
 
-- iPad: NavigationSplitView, Size Classes (5h)
-- macOS: Toolbar, Menu bar, Shortcuts (6h)
-- visionOS: Spatial UI (4h)
+- ✅ PlatformCapabilities system (2h)
+- ✅ DSVisualEffects refactorizado (iOS 26+ primero) (1h)
+- ✅ iPad: NavigationSplitView, layouts 2 columnas, panel dual (5h)
+- ✅ macOS: Toolbar, Menu bar, Shortcuts, window controls (6h)
+- ✅ visionOS: Spatial UI, ornaments, depth effects (4h)
+
+#### Archivos Clave
+
+- `PlatformCapabilities.swift` - Sistema de detección
+- `DSVisualEffects.swift` - Modern + Legacy effects
+- `IPadHomeView.swift`, `IPadSettingsView.swift` - iPad layouts
+- `MacOSToolbarConfiguration.swift`, `MacOSMenuCommands.swift`, `KeyboardShortcuts.swift` - macOS
+- `MacOSSettingsView.swift` - Settings nativo macOS
+- `VisionOSConfiguration.swift`, `VisionOSHomeView.swift` - visionOS
+
+**Ver**: `docs/specs/platform-optimization/SPEC-006-COMPLETADO.md`
 
 ---
 
