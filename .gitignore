@@ -34,3 +34,6 @@ playground.xcworkspace
 # Test outputs
 test_output.log
 test_output.txt
+
+# Build outputs
+build_output.txt
