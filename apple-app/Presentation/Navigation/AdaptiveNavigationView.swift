@@ -266,12 +266,10 @@ private struct AuthenticatedApp: View {
     private func refreshCurrentView() async {
         switch selectedRoute {
         case .home:
-            // Refrescar home - recargar datos del usuario
-            if let homeViewModel = container.resolve(GetCurrentUserUseCase.self) as? any AnyObject {
-                // Trigger reload
-            }
+            // TODO: Refrescar home - recargar datos del usuario
+            break
         case .settings:
-            // Refrescar settings
+            // TODO: Refrescar settings
             break
         case .login:
             break

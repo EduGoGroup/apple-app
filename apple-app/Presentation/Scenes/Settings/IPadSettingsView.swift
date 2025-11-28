@@ -471,14 +471,13 @@ extension Theme {
 
 // MARK: - Previews
 
-#Preview("iPad Settings") {
+#Preview("iPad Settings", traits: .fixedLayout(width: 1366, height: 1024)) {
     NavigationStack {
         IPadSettingsView(
             updateThemeUseCase: PreviewMocks.updateThemeUseCase,
             preferencesRepository: PreviewMocks.preferencesRepository
         )
     }
-    .previewDevice("iPad Pro (12.9-inch) (6th generation)")
 }
 
 // MARK: - Preview Mocks

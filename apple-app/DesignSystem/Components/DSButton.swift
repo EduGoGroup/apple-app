@@ -274,11 +274,10 @@ extension DSButton {
     .padding()
 }
 
-#Preview("iPad Size") {
+#Preview("iPad Size", traits: .fixedLayout(width: 1366, height: 1024)) {
     VStack(spacing: DSSpacing.xl) {
         DSButton(title: "iPad Large Button", style: .primary, size: .large) {}
         DSButton(title: "iPad Secondary", style: .secondary, size: .large) {}
     }
     .padding(DSSpacing.xl)
-    .previewDevice("iPad Pro (12.9-inch) (6th generation)")
 }
