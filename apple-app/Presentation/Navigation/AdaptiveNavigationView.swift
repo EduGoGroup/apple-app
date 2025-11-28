@@ -55,9 +55,27 @@ struct AdaptiveNavigationView: View {
         // Delay para mostrar splash
         try? await Task.sleep(nanoseconds: 500_000_000)
 
-        // Por ahora, siempre ir a login
-        // TODO: Verificar sesión guardada en Keychain
-        authState.logout()
+        // Verificar si hay sesión guardada en Keychain
+        let authRepository = container.resolve(AuthRepository.self)
+        let hasSession = await authRepository.hasActiveSession()
+
+        if hasSession {
+            // Recuperar usuario actual del token guardado
+            let userResult = await authRepository.getCurrentUser()
+
+            switch userResult {
+            case .success(let user):
+                // Restaurar sesión
+                authState.authenticate(user: user)
+            case .failure:
+                // Si falla obtener el usuario, hacer logout
+                authState.logout()
+            }
+        } else {
+            // No hay sesión guardada
+            authState.logout()
+        }
+
         isCheckingSession = false
     }
 }
