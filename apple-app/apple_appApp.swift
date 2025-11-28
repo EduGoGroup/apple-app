@@ -30,7 +30,8 @@ struct EduGoApp: App {
                 for: CachedUser.self,
                 CachedHTTPResponse.self,
                 SyncQueueItem.self,
-                AppSettings.self
+                AppSettings.self,
+                CachedFeatureFlag.self  // SPEC-009
             )
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
@@ -82,6 +83,7 @@ struct EduGoApp: App {
     /// - Parameters:
     ///   - container: Container donde registrar las dependencias
     ///   - modelContainer: ModelContainer de SwiftData (para LocalDataSource)
+    @MainActor
     private static func setupDependencies(in container: DependencyContainer, modelContainer: ModelContainer) {
         // Servicios base (Keychain, NetworkMonitor, LocalDataSource)
         registerBaseServices(in: container, modelContainer: modelContainer)
@@ -99,7 +101,7 @@ struct EduGoApp: App {
         registerValidators(in: container)
 
         // Repositorios
-        registerRepositories(in: container)
+        registerRepositories(in: container, modelContainer: modelContainer)
 
         // Casos de uso
         registerUseCases(in: container)
@@ -251,7 +253,7 @@ struct EduGoApp: App {
     // MARK: - Repositories Registration
 
     /// Registra los repositorios de la aplicación
-    private static func registerRepositories(in container: DependencyContainer) {
+    private static func registerRepositories(in container: DependencyContainer, modelContainer: ModelContainer) {
         // AuthRepository - Singleton
         // Cachea estado de sesión y token
         container.register(AuthRepository.self, scope: .singleton) {
@@ -268,6 +270,12 @@ struct EduGoApp: App {
         // Cachea preferencias del usuario
         container.register(PreferencesRepository.self, scope: .singleton) {
             PreferencesRepositoryImpl()
+        }
+
+        // FeatureFlagRepository - Singleton (SPEC-009)
+        // Cachea feature flags con TTL de 1 hora
+        container.register(FeatureFlagRepository.self, scope: .singleton) {
+            FeatureFlagRepositoryImpl(modelContext: modelContainer.mainContext)
         }
     }
 
@@ -313,6 +321,32 @@ struct EduGoApp: App {
         container.register(UpdateThemeUseCase.self, scope: .factory) {
             DefaultUpdateThemeUseCase(
                 preferencesRepository: container.resolve(PreferencesRepository.self)
+            )
+        }
+
+        // SPEC-009: Feature Flags Use Cases
+
+        // GetFeatureFlagUseCase - Factory
+        // Cada consulta de flag es independiente
+        container.register(GetFeatureFlagUseCase.self, scope: .factory) {
+            GetFeatureFlagUseCase(
+                repository: container.resolve(FeatureFlagRepository.self)
+            )
+        }
+
+        // GetAllFeatureFlagsUseCase - Factory
+        // Cada consulta de todos los flags es independiente
+        container.register(GetAllFeatureFlagsUseCase.self, scope: .factory) {
+            GetAllFeatureFlagsUseCase(
+                repository: container.resolve(FeatureFlagRepository.self)
+            )
+        }
+
+        // SyncFeatureFlagsUseCase - Factory
+        // Cada sincronización es independiente
+        container.register(SyncFeatureFlagsUseCase.self, scope: .factory) {
+            SyncFeatureFlagsUseCase(
+                repository: container.resolve(FeatureFlagRepository.self)
             )
         }
     }
