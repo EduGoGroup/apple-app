@@ -98,6 +98,6 @@ extension UserRole {
 
 extension UserRole: CustomStringConvertible {
     var description: String {
-        "\(emoji) \(displayNameString)"
+        "\(emoji) \(displayName)"
     }
 }
