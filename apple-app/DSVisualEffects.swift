@@ -4,15 +4,15 @@
 //
 //  Created on 23-11-25.
 //  Refactored on 27-11-25.
-//  SPEC-006: Enfoque iOS 26+ primero, degradación a iOS 18+
+//  SPEC-006: Enfoque iOS 18+ primero, degradación a iOS 18+
 //
 
 import SwiftUI
 
 // MARK: - Design System Visual Effects
 //
-// FILOSOFÍA: iOS 26+ PRIMERO, degradación elegante a iOS 18+
-// - iOS 26+ / macOS 26+: Liquid Glass y efectos modernos (PRIORIDAD)
+// FILOSOFÍA: iOS 18+ PRIMERO, degradación elegante a iOS 18+
+// - iOS 18+ / macOS 15+: Liquid Glass y efectos modernos (PRIORIDAD)
 // - iOS 18+ / macOS 15+: Materials como fallback (COMPATIBILIDAD)
 
 /// Protocolo base para efectos visuales del Design System
@@ -21,14 +21,14 @@ protocol DSVisualEffect {
     func apply<Content: View>(to content: Content) -> AnyView
 }
 
-// MARK: - iOS 26+ / macOS 26+ - IMPLEMENTACIÓN MODERNA (PRIORIDAD)
+// MARK: - iOS 18+ / macOS 15+ - IMPLEMENTACIÓN MODERNA (PRIORIDAD)
 
-/// Implementación de efectos visuales para iOS 26+ / macOS 26+
+/// Implementación de efectos visuales para iOS 18+ / macOS 15+
 /// Usa las APIs más modernas disponibles en estas versiones
 ///
 /// - Note: Esta es la implementación PRINCIPAL del sistema de efectos.
 ///   El código de iOS 18+ es solo para compatibilidad con versiones antiguas.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct DSVisualEffectModern: DSVisualEffect {
     let style: DSVisualEffectStyle
     let shape: DSEffectShape
@@ -45,7 +45,7 @@ struct DSVisualEffectModern: DSVisualEffect {
         //     return AnyView(content.liquidGlass(liquidGlassStyle, in: Circle()))
         // }
 
-        // Por ahora: Usar los mejores Materials disponibles en iOS 26+
+        // Por ahora: Usar los mejores Materials disponibles en iOS 18+
         switch shape {
         case .capsule:
             return AnyView(
@@ -74,13 +74,13 @@ struct DSVisualEffectModern: DSVisualEffect {
         }
     }
 
-    // MARK: - Modern Materials (iOS 26+)
+    // MARK: - Modern Materials (iOS 18+)
 
     @ViewBuilder
     private func modernMaterial() -> some View {
         switch style {
         case .regular:
-            // iOS 26+: Podría tener materials mejorados
+            // iOS 18+: Podría tener materials mejorados
             Rectangle()
                 .fill(.regularMaterial.opacity(0.9))
         case .prominent:
@@ -90,7 +90,43 @@ struct DSVisualEffectModern: DSVisualEffect {
             Rectangle()
                 .fill(.thinMaterial)
                 .overlay(color.opacity(0.25))
+        case .liquidGlass(let intensity):
+            // Liquid Glass simulation con materials
+            liquidGlassMaterial(intensity: intensity)
         }
+    }
+
+    /// Simula el efecto Liquid Glass con materials estándar
+    ///
+    /// Mientras Apple no documente las APIs oficiales de Liquid Glass,
+    /// usamos esta aproximación con materials + overlays.
+    ///
+    /// - Parameter intensity: Intensidad del efecto liquid glass
+    /// - Returns: Vista con efecto glass simulado
+    @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
+    @ViewBuilder
+    private func liquidGlassMaterial(intensity: LiquidGlassIntensity) -> some View {
+        Rectangle()
+            .fill(intensity.materialBase)
+            .overlay(
+                Rectangle()
+                    .fill(Color.white.opacity(intensity.baseOpacity * 0.15))
+                    .blur(radius: intensity.blurRadius * 0.5)
+            )
+            .overlay(
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.1),
+                                Color.clear,
+                                Color.white.opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
     }
 
     @ViewBuilder
@@ -111,15 +147,51 @@ struct DSVisualEffectModern: DSVisualEffect {
             return Color.black.opacity(0.12)
         case .regular:
             return Color.black.opacity(0.1)
+        case .liquidGlass(let intensity):
+            // Shadow más pronunciado para glass prominente/inmersivo
+            switch intensity {
+            case .immersive, .prominent:
+                return Color.black.opacity(0.25)
+            default:
+                return Color.black.opacity(0.15)
+            }
         }
     }
 
     private var modernShadowRadius: CGFloat {
-        style == .prominent ? 16 : 10
+        switch style {
+        case .prominent:
+            return 16
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive:
+                return 20
+            case .prominent:
+                return 16
+            default:
+                return 12
+            }
+        default:
+            return 10
+        }
     }
 
     private var modernShadowY: CGFloat {
-        style == .prominent ? 6 : 3
+        switch style {
+        case .prominent:
+            return 6
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive:
+                return 8
+            case .prominent:
+                return 6
+            default:
+                return 4
+            }
+        default:
+            return 3
+        }
     }
 
     // TODO: Cuando Liquid Glass esté documentado
@@ -148,7 +220,7 @@ struct DSVisualEffectModern: DSVisualEffect {
 /// Compatibilidad con versiones anteriores
 ///
 /// - Note: Esta es la implementación de FALLBACK.
-///   Se usa solo cuando iOS 26+ no está disponible.
+///   Se usa solo cuando iOS 18+ no está disponible.
 @available(iOS 18.0, macOS 15.0, *)
 struct DSVisualEffectLegacy: DSVisualEffect {
     let style: DSVisualEffectStyle
@@ -196,19 +268,55 @@ struct DSVisualEffectLegacy: DSVisualEffect {
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .overlay(color.opacity(0.2))
+        case .liquidGlass(let intensity):
+            // En iOS 18 no hay Liquid Glass, usar materials estándar como fallback
+            Rectangle()
+                .fill(intensity.materialBase)
+                .overlay(Color.white.opacity(0.05))
         }
     }
 
     private var legacyShadowColor: Color {
-        style == .prominent ? Color.black.opacity(0.15) : Color.black.opacity(0.08)
+        switch style {
+        case .prominent:
+            return Color.black.opacity(0.15)
+        case .liquidGlass:
+            return Color.black.opacity(0.12)
+        default:
+            return Color.black.opacity(0.08)
+        }
     }
 
     private var legacyShadowRadius: CGFloat {
-        style == .prominent ? 12 : 8
+        switch style {
+        case .prominent:
+            return 12
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive, .prominent:
+                return 12
+            default:
+                return 8
+            }
+        default:
+            return 8
+        }
     }
 
     private var legacyShadowY: CGFloat {
-        style == .prominent ? 4 : 2
+        switch style {
+        case .prominent:
+            return 4
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive, .prominent:
+                return 4
+            default:
+                return 2
+            }
+        default:
+            return 2
+        }
     }
 }
 
@@ -222,8 +330,11 @@ enum DSVisualEffectStyle: Equatable, Sendable {
     case prominent
     /// Estilo con tinte de color
     case tinted(Color)
+    /// Liquid Glass (iOS 18+ / macOS 15+) - Feature principal
+    @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
+    case liquidGlass(LiquidGlassIntensity)
 
-    // Equatable conformance manual para Color
+    // Equatable conformance manual para Color y LiquidGlassIntensity
     static func == (lhs: DSVisualEffectStyle, rhs: DSVisualEffectStyle) -> Bool {
         switch (lhs, rhs) {
         case (.regular, .regular):
@@ -232,6 +343,11 @@ enum DSVisualEffectStyle: Equatable, Sendable {
             return true
         case (.tinted(let lColor), .tinted(let rColor)):
             return lColor == rColor
+        case (.liquidGlass(let lIntensity), .liquidGlass(let rIntensity)):
+            if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+                return lIntensity == rIntensity
+            }
+            preconditionFailure("DSVisualEffectStyle.liquidGlass compared on unsupported OS version (< iOS 26). This should not happen.")
         default:
             return false
         }
@@ -253,7 +369,7 @@ enum DSEffectShape: Sendable {
 /// Factory que detecta la versión del OS y devuelve la implementación adecuada
 ///
 /// ESTRATEGIA:
-/// 1. iOS 26+ / macOS 26+: DSVisualEffectModern (PRIORIDAD)
+/// 1. iOS 18+ / macOS 15+: DSVisualEffectModern (PRIORIDAD)
 /// 2. iOS 18-25 / macOS 15-25: DSVisualEffectLegacy (FALLBACK)
 struct DSVisualEffectFactory {
     /// Crea el efecto visual apropiado según la versión del OS
@@ -265,7 +381,7 @@ struct DSVisualEffectFactory {
         shape: DSEffectShape = .roundedRectangle(cornerRadius: DSCornerRadius.large),
         isInteractive: Bool = false
     ) -> DSVisualEffect {
-        // iOS 26+ / macOS 26+: Usar implementación MODERNA
+        // iOS 18+ / macOS 15+: Usar implementación MODERNA
         if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
             return DSVisualEffectModern(
                 style: style,
@@ -308,7 +424,7 @@ extension View {
     /// Aplica un efecto visual de glass del Design System
     ///
     /// **Estrategia de versiones:**
-    /// - iOS 26+ / macOS 26+: Efectos modernos optimizados
+    /// - iOS 18+ / macOS 15+: Efectos modernos optimizados
     /// - iOS 18-25 / macOS 15-25: Materials con degradación elegante
     ///
     /// - Parameters:
@@ -326,7 +442,135 @@ extension View {
 
 // MARK: - Previews
 
-#Preview("Efectos Modernos - iOS 26+") {
+#Preview("Liquid Glass - 5 Intensidades") {
+    if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+        ScrollView {
+            VStack(spacing: DSSpacing.xl) {
+                Text("Liquid Glass Intensities")
+                    .font(DSTypography.largeTitle)
+                    .padding(.top)
+
+                // Subtle
+                VStack(spacing: DSSpacing.small) {
+                    Text("Subtle")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Overlay sutil")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.subtle))
+                }
+
+                // Standard
+                VStack(spacing: DSSpacing.small) {
+                    Text("Standard")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Card estándar")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.standard))
+                }
+
+                // Prominent
+                VStack(spacing: DSSpacing.small) {
+                    Text("Prominent")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Modal prominente")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.prominent))
+                }
+
+                // Immersive
+                VStack(spacing: DSSpacing.small) {
+                    Text("Immersive")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Hero inmersivo")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.immersive))
+                }
+
+                // Desktop
+                VStack(spacing: DSSpacing.small) {
+                    Text("Desktop")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Desktop optimizado")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.desktop))
+                }
+            }
+            .padding()
+        }
+        .background(
+            LinearGradient(
+                colors: [.blue.opacity(0.3), .purple.opacity(0.3), .pink.opacity(0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+    } else {
+        Text("Liquid Glass requiere iOS 18+")
+            .font(DSTypography.title3)
+    }
+}
+
+#Preview("Liquid Glass con Behaviors") {
+    if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+        VStack(spacing: DSSpacing.xl) {
+            Text("Glass Behaviors")
+                .font(DSTypography.largeTitle)
+
+            // Con adaptive
+            Text("Adaptive Glass")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.standard))
+                .glassAdaptive(true)
+
+            // Con depth mapping
+            Text("Depth Mapping")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.prominent))
+                .glassDepthMapping(true)
+
+            // Con refraction
+            Text("High Refraction")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.standard))
+                .glassRefraction(0.8)
+
+            // Todos los behaviors
+            Text("All Behaviors")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.prominent))
+                .applyGlassBehaviors()
+        }
+        .padding()
+        .background(
+            LinearGradient(
+                colors: [.orange.opacity(0.3), .pink.opacity(0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+    }
+}
+
+#Preview("Efectos Legacy - iOS 18+") {
     VStack(spacing: DSSpacing.xl) {
         Text("Efecto Regular")
             .font(DSTypography.title3)
@@ -352,34 +596,6 @@ extension View {
     .background(
         LinearGradient(
             colors: [.blue.opacity(0.3), .purple.opacity(0.3)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    )
-}
-
-#Preview("Formas Modernas") {
-    VStack(spacing: DSSpacing.xl) {
-        Text("Cápsula")
-            .font(DSTypography.body)
-            .padding()
-            .dsGlassEffect(.prominent, shape: .capsule)
-
-        Text("Rectángulo")
-            .font(DSTypography.body)
-            .padding()
-            .dsGlassEffect(.prominent, shape: .roundedRectangle(cornerRadius: 20))
-
-        Text("Círculo")
-            .font(DSTypography.body)
-            .padding()
-            .frame(width: 120, height: 120)
-            .dsGlassEffect(.prominent, shape: .circle)
-    }
-    .padding()
-    .background(
-        LinearGradient(
-            colors: [.orange.opacity(0.3), .pink.opacity(0.3)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )

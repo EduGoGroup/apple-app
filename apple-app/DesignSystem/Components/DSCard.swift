@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Tarjeta de contenido reutilizable del Design System
-/// Usa efectos visuales adaptativos que aprovechan Liquid Glass en iOS 26+/macOS 26+
+/// Usa efectos visuales adaptativos que aprovechan Liquid Glass en iOS 18+/macOS 15+
 /// y materials modernos en iOS 18+/macOS 15+
 struct DSCard<Content: View>: View {
     let content: Content
