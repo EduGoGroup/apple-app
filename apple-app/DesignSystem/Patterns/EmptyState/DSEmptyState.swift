@@ -335,7 +335,9 @@ extension DSEmptyState {
             action: {}
         )
         .navigationTitle("Mensajes")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
+        #endif
     }
 }
 
@@ -364,7 +366,9 @@ extension DSEmptyState {
             .frame(maxHeight: .infinity)
         }
         .navigationTitle("Búsqueda")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 }
 
@@ -375,7 +379,9 @@ extension DSEmptyState {
         }
         .frame(maxHeight: .infinity)
         .navigationTitle("Productos")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
+        #endif
     }
 }
 

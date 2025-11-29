@@ -56,8 +56,10 @@ struct DSSearchBar: View {
                 .focused($isFocused)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
+                #if os(iOS)
                 .textInputAutocapitalization(.never)
                 .submitLabel(.search)
+                #endif
                 .onSubmit {
                     onSubmit?()
                 }
@@ -133,7 +135,9 @@ struct DSGlassSearchBar: View {
                 .focused($isFocused)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
+                #if os(iOS)
                 .textInputAutocapitalization(.never)
+                #endif
 
             if !text.isEmpty {
                 Button(action: { text = "" }) {
@@ -240,7 +244,9 @@ struct DSGlassSearchBar: View {
         }
         .searchable(text: .constant(""), prompt: "Buscar productos...")
         .navigationTitle("Búsqueda")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 }
 

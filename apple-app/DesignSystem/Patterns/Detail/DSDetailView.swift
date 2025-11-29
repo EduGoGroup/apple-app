@@ -416,6 +416,7 @@ private struct FeatureItem: View {
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
+@MainActor
 private func productDetailView(index: Int) -> some View {
     DSDetailView(
         title: "Producto \(index + 1)",
