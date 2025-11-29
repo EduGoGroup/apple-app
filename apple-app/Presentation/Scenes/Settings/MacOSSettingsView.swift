@@ -127,7 +127,7 @@ struct MacOSSettingsView: View {
                 )) {
                     ForEach([Theme.light, Theme.dark, Theme.system], id: \.self) { theme in
                         HStack {
-                            Image(systemName: theme.icon)
+                            Image(systemName: theme.iconName)
                             Text(theme.displayName)
                         }
                         .tag(theme)
@@ -275,18 +275,6 @@ enum SettingsTab: String, CaseIterable {
     case notifications
     case privacy
     case advanced
-}
-
-// MARK: - Theme Extension
-
-extension Theme {
-    var icon: String {
-        switch self {
-        case .light: return "sun.max.fill"
-        case .dark: return "moon.fill"
-        case .system: return "sparkles"
-        }
-    }
 }
 
 // MARK: - Previews
