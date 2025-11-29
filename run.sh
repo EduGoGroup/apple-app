@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-SCHEME="apple-app"
+SCHEME="EduGo-Dev"
 DEVICE="${1:-iphone}"
 
 echo -e "${GREEN}🚀 Ejecutando apple-app en ${DEVICE}...${NC}"

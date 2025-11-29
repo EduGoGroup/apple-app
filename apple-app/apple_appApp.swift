@@ -69,11 +69,11 @@ struct EduGoApp: App {
                 .modelContainer(modelContainer)  // SPEC-005: SwiftData container
                 .task {
                     // SPEC-012: Marcar primer frame renderizado
-                    await LaunchTimeTracker.markFirstFrameRendered()
-                    await LaunchTimeTracker.recordLaunchMetrics()
+                    LaunchTimeTracker.markFirstFrameRendered() // Síncrono @MainActor
+                    await LaunchTimeTracker.recordLaunchMetrics() // Async @MainActor
 
                     // SPEC-011: Track app launch
-                    await AnalyticsManager.shared.track(.appLaunched)
+                    await AnalyticsManager.shared.track(.appLaunched) // Async actor
                 }
         }
         .commands {
