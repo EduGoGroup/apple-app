@@ -147,15 +147,51 @@ struct DSVisualEffectModern: DSVisualEffect {
             return Color.black.opacity(0.12)
         case .regular:
             return Color.black.opacity(0.1)
+        case .liquidGlass(let intensity):
+            // Shadow más pronunciado para glass prominente/inmersivo
+            switch intensity {
+            case .immersive, .prominent:
+                return Color.black.opacity(0.25)
+            default:
+                return Color.black.opacity(0.15)
+            }
         }
     }
 
     private var modernShadowRadius: CGFloat {
-        style == .prominent ? 16 : 10
+        switch style {
+        case .prominent:
+            return 16
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive:
+                return 20
+            case .prominent:
+                return 16
+            default:
+                return 12
+            }
+        default:
+            return 10
+        }
     }
 
     private var modernShadowY: CGFloat {
-        style == .prominent ? 6 : 3
+        switch style {
+        case .prominent:
+            return 6
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive:
+                return 8
+            case .prominent:
+                return 6
+            default:
+                return 4
+            }
+        default:
+            return 3
+        }
     }
 
     // TODO: Cuando Liquid Glass esté documentado
@@ -232,19 +268,55 @@ struct DSVisualEffectLegacy: DSVisualEffect {
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .overlay(color.opacity(0.2))
+        case .liquidGlass(let intensity):
+            // En iOS 18 no hay Liquid Glass, usar materials estándar como fallback
+            Rectangle()
+                .fill(intensity.materialBase)
+                .overlay(Color.white.opacity(0.05))
         }
     }
 
     private var legacyShadowColor: Color {
-        style == .prominent ? Color.black.opacity(0.15) : Color.black.opacity(0.08)
+        switch style {
+        case .prominent:
+            return Color.black.opacity(0.15)
+        case .liquidGlass:
+            return Color.black.opacity(0.12)
+        default:
+            return Color.black.opacity(0.08)
+        }
     }
 
     private var legacyShadowRadius: CGFloat {
-        style == .prominent ? 12 : 8
+        switch style {
+        case .prominent:
+            return 12
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive, .prominent:
+                return 12
+            default:
+                return 8
+            }
+        default:
+            return 8
+        }
     }
 
     private var legacyShadowY: CGFloat {
-        style == .prominent ? 4 : 2
+        switch style {
+        case .prominent:
+            return 4
+        case .liquidGlass(let intensity):
+            switch intensity {
+            case .immersive, .prominent:
+                return 4
+            default:
+                return 2
+            }
+        default:
+            return 2
+        }
     }
 }
 
