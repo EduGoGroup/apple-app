@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Pantalla de configuración de la aplicación
+/// Pantalla de configuración de la aplicación usando DSForm pattern
 struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
 
@@ -24,38 +24,34 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            DSColors.backgroundPrimary.ignoresSafeArea()
+        DSForm {
+            // Sección de Apariencia
+            DSFormSection(
+                title: String(localized: "settings.section.appearance")
+            ) {
+                themePicker
+            }
 
-            Form {
-                // Sección de Apariencia
-                Section {
-                    themePicker
-                } header: {
-                    Text(String(localized: "settings.section.appearance"))
-                        .font(DSTypography.subheadline)
-                }
+            // SPEC-010: Sección de Idioma
+            DSFormSection(
+                title: String(localized: "settings.section.language")
+            ) {
+                languagePicker
+            }
 
-                // SPEC-010: Sección de Idioma
-                Section {
-                    languagePicker
-                } header: {
-                    Text(String(localized: "settings.section.language"))
-                        .font(DSTypography.subheadline)
-                }
-
-                // Sección de Información
-                Section {
-                    infoRows
-                } header: {
-                    Text(String(localized: "settings.section.info"))
-                        .font(DSTypography.subheadline)
+            // Sección de Información usando DSDetailRow
+            DSFormSection(
+                title: String(localized: "settings.section.info")
+            ) {
+                if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
+                    infoRowsModern
+                } else {
+                    infoRowsLegacy
                 }
             }
-            .scrollContentBackground(.hidden)
         }
         .navigationTitle(String(localized: "settings.title"))
-        #if canImport(UIKit)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
         .task {
@@ -122,13 +118,56 @@ struct SettingsView: View {
         }
     }
 
-    private var infoRows: some View {
+    // Info rows usando DSDetailRow (iOS 18+)
+    @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
+    private var infoRowsModern: some View {
         VStack(spacing: 0) {
-            infoRow(label: String(localized: "settings.info.version"), value: "1.0.0")
-            Divider().padding(.leading, DSSpacing.xl)
-            infoRow(label: String(localized: "settings.info.build"), value: "1")
-            Divider().padding(.leading, DSSpacing.xl)
-            infoRow(label: String(localized: "settings.info.environment"), value: AppEnvironment.displayName)
+            DSDetailRow(
+                label: String(localized: "settings.info.version"),
+                value: "1.0.0"
+            )
+
+            Divider()
+                .padding(.leading, DSSpacing.medium)
+
+            DSDetailRow(
+                label: String(localized: "settings.info.build"),
+                value: "1"
+            )
+
+            Divider()
+                .padding(.leading, DSSpacing.medium)
+
+            DSDetailRow(
+                label: String(localized: "settings.info.environment"),
+                value: AppEnvironment.displayName
+            )
+        }
+    }
+
+    // Info rows legacy (pre iOS 18)
+    private var infoRowsLegacy: some View {
+        VStack(spacing: 0) {
+            infoRow(
+                label: String(localized: "settings.info.version"),
+                value: "1.0.0"
+            )
+
+            Divider()
+                .padding(.leading, DSSpacing.xl)
+
+            infoRow(
+                label: String(localized: "settings.info.build"),
+                value: "1"
+            )
+
+            Divider()
+                .padding(.leading, DSSpacing.xl)
+
+            infoRow(
+                label: String(localized: "settings.info.environment"),
+                value: AppEnvironment.displayName
+            )
         }
     }
 
@@ -146,9 +185,6 @@ struct SettingsView: View {
         }
         .padding(.vertical, DSSpacing.small)
     }
-
-    // MARK: - Helpers
-    // Theme display properties ahora vienen de Theme+UI.swift extension
 }
 
 // MARK: - Previews
