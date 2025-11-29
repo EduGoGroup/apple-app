@@ -90,7 +90,42 @@ struct DSVisualEffectModern: DSVisualEffect {
             Rectangle()
                 .fill(.thinMaterial)
                 .overlay(color.opacity(0.25))
+        case .liquidGlass(let intensity):
+            // Liquid Glass simulation con materials
+            liquidGlassMaterial(intensity: intensity)
         }
+    }
+
+    /// Simula el efecto Liquid Glass con materials estándar
+    ///
+    /// Mientras Apple no documente las APIs oficiales de Liquid Glass,
+    /// usamos esta aproximación con materials + overlays.
+    ///
+    /// - Parameter intensity: Intensidad del efecto liquid glass
+    /// - Returns: Vista con efecto glass simulado
+    @ViewBuilder
+    private func liquidGlassMaterial(intensity: LiquidGlassIntensity) -> some View {
+        Rectangle()
+            .fill(intensity.materialBase)
+            .overlay(
+                Rectangle()
+                    .fill(Color.white.opacity(intensity.baseOpacity * 0.15))
+                    .blur(radius: intensity.blurRadius * 0.5)
+            )
+            .overlay(
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.1),
+                                Color.clear,
+                                Color.white.opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
     }
 
     @ViewBuilder
@@ -222,8 +257,11 @@ enum DSVisualEffectStyle: Equatable, Sendable {
     case prominent
     /// Estilo con tinte de color
     case tinted(Color)
+    /// Liquid Glass (iOS 26+ / macOS 26+) - Feature principal
+    @available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+    case liquidGlass(LiquidGlassIntensity)
 
-    // Equatable conformance manual para Color
+    // Equatable conformance manual para Color y LiquidGlassIntensity
     static func == (lhs: DSVisualEffectStyle, rhs: DSVisualEffectStyle) -> Bool {
         switch (lhs, rhs) {
         case (.regular, .regular):
@@ -232,6 +270,11 @@ enum DSVisualEffectStyle: Equatable, Sendable {
             return true
         case (.tinted(let lColor), .tinted(let rColor)):
             return lColor == rColor
+        case (.liquidGlass(let lIntensity), .liquidGlass(let rIntensity)):
+            if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+                return lIntensity == rIntensity
+            }
+            return false
         default:
             return false
         }
@@ -326,7 +369,135 @@ extension View {
 
 // MARK: - Previews
 
-#Preview("Efectos Modernos - iOS 26+") {
+#Preview("Liquid Glass - 5 Intensidades") {
+    if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+        ScrollView {
+            VStack(spacing: DSSpacing.xl) {
+                Text("Liquid Glass Intensities")
+                    .font(DSTypography.largeTitle)
+                    .padding(.top)
+
+                // Subtle
+                VStack(spacing: DSSpacing.small) {
+                    Text("Subtle")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Overlay sutil")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.subtle))
+                }
+
+                // Standard
+                VStack(spacing: DSSpacing.small) {
+                    Text("Standard")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Card estándar")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.standard))
+                }
+
+                // Prominent
+                VStack(spacing: DSSpacing.small) {
+                    Text("Prominent")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Modal prominente")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.prominent))
+                }
+
+                // Immersive
+                VStack(spacing: DSSpacing.small) {
+                    Text("Immersive")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Hero inmersivo")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.immersive))
+                }
+
+                // Desktop
+                VStack(spacing: DSSpacing.small) {
+                    Text("Desktop")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    Text("Desktop optimizado")
+                        .font(DSTypography.bodyBold)
+                        .padding()
+                        .dsGlassEffect(.liquidGlass(.desktop))
+                }
+            }
+            .padding()
+        }
+        .background(
+            LinearGradient(
+                colors: [.blue.opacity(0.3), .purple.opacity(0.3), .pink.opacity(0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+    } else {
+        Text("Liquid Glass requiere iOS 26+")
+            .font(DSTypography.title3)
+    }
+}
+
+#Preview("Liquid Glass con Behaviors") {
+    if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+        VStack(spacing: DSSpacing.xl) {
+            Text("Glass Behaviors")
+                .font(DSTypography.largeTitle)
+
+            // Con adaptive
+            Text("Adaptive Glass")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.standard))
+                .glassAdaptive(true)
+
+            // Con depth mapping
+            Text("Depth Mapping")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.prominent))
+                .glassDepthMapping(true)
+
+            // Con refraction
+            Text("High Refraction")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.standard))
+                .glassRefraction(0.8)
+
+            // Todos los behaviors
+            Text("All Behaviors")
+                .font(DSTypography.bodyBold)
+                .padding()
+                .dsGlassEffect(.liquidGlass(.prominent))
+                .applyGlassBehaviors()
+        }
+        .padding()
+        .background(
+            LinearGradient(
+                colors: [.orange.opacity(0.3), .pink.opacity(0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+    }
+}
+
+#Preview("Efectos Legacy - iOS 18+") {
     VStack(spacing: DSSpacing.xl) {
         Text("Efecto Regular")
             .font(DSTypography.title3)
@@ -352,34 +523,6 @@ extension View {
     .background(
         LinearGradient(
             colors: [.blue.opacity(0.3), .purple.opacity(0.3)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    )
-}
-
-#Preview("Formas Modernas") {
-    VStack(spacing: DSSpacing.xl) {
-        Text("Cápsula")
-            .font(DSTypography.body)
-            .padding()
-            .dsGlassEffect(.prominent, shape: .capsule)
-
-        Text("Rectángulo")
-            .font(DSTypography.body)
-            .padding()
-            .dsGlassEffect(.prominent, shape: .roundedRectangle(cornerRadius: 20))
-
-        Text("Círculo")
-            .font(DSTypography.body)
-            .padding()
-            .frame(width: 120, height: 120)
-            .dsGlassEffect(.prominent, shape: .circle)
-    }
-    .padding()
-    .background(
-        LinearGradient(
-            colors: [.orange.opacity(0.3), .pink.opacity(0.3)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
