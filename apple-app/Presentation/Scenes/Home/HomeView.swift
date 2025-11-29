@@ -170,6 +170,7 @@ struct HomeView: View {
         }
     }
 
+    @ViewBuilder
     private func errorView(message: String) -> some View {
         if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
             DSEmptyState(

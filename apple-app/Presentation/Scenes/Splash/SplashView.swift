@@ -74,7 +74,7 @@ struct SplashView: View {
         if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
             RoundedRectangle(cornerRadius: DSCornerRadius.xl)
                 .fill(Color.clear)
-                .dsGlassEffect(.subtle, shape: .roundedRectangle(cornerRadius: DSCornerRadius.xl))
+                .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.xl))
         } else {
             RoundedRectangle(cornerRadius: DSCornerRadius.xl)
                 .fill(DSColors.backgroundSecondary.opacity(0.5))
