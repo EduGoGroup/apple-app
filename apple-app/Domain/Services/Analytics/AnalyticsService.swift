@@ -34,10 +34,14 @@ protocol AnalyticsService: Sendable {
     /// ## Concurrency
     /// - async: Permite crossing isolation boundaries
     ///
+    /// ## Parámetros Sendable
+    /// - `[String: String]` es Sendable ✅
+    /// - Para valores no-String, convertir a String antes de enviar
+    ///
     /// - Parameters:
     ///   - event: Evento a trackear
     ///   - parameters: Parámetros adicionales del evento (opcional)
-    func track(_ event: AnalyticsEvent, parameters: [String: Any]?) async
+    func track(_ event: AnalyticsEvent, parameters: [String: String]?) async
 
     /// Establece una propiedad de usuario
     ///

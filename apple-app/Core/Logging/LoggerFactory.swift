@@ -67,6 +67,16 @@ enum LoggerFactory {
     /// Usar en: AppDelegate, App lifecycle, Memory management
     static let system: Logger = make(category: .system)
 
+    /// Logger para analytics y telemetry
+    ///
+    /// Usar en: AnalyticsManager, AnalyticsProviders
+    static let analytics: Logger = make(category: .analytics)
+
+    /// Logger para performance monitoring
+    ///
+    /// Usar en: PerformanceMonitor, LaunchTimeTracker, MemoryMonitor
+    static let performance: Logger = make(category: .performance)
+
     // MARK: - Factory Method
 
     /// Crea un logger para la categoría especificada
