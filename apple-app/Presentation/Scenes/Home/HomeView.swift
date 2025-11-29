@@ -171,21 +171,45 @@ struct HomeView: View {
     }
 
     private func errorView(message: String) -> some View {
-        DSEmptyState(
-            icon: "exclamationmark.triangle",
-            title: String(localized: "common.error"),
-            message: message,
-            action: DSEmptyState.Action(
-                title: String(localized: "common.retry"),
-                handler: {
+        if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
+            DSEmptyState(
+                icon: "exclamationmark.triangle",
+                title: String(localized: "common.error"),
+                message: message,
+                actionTitle: String(localized: "common.retry"),
+                action: {
+                    Task {
+                        await viewModel.loadUser()
+                    }
+                },
+                style: .standard
+            )
+            .padding(.top, 100)
+        } else {
+            // Fallback para iOS 17
+            VStack(spacing: DSSpacing.large) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 50))
+                    .foregroundColor(DSColors.error)
+
+                Text(String(localized: "common.error"))
+                    .font(DSTypography.title)
+                    .foregroundColor(DSColors.textPrimary)
+
+                Text(message)
+                    .font(DSTypography.body)
+                    .foregroundColor(DSColors.textSecondary)
+                    .multilineTextAlignment(.center)
+
+                DSButton(title: String(localized: "common.retry"), style: .primary) {
                     Task {
                         await viewModel.loadUser()
                     }
                 }
-            ),
-            style: .default
-        )
-        .padding(.top, 100)
+                .frame(maxWidth: 200)
+            }
+            .padding(.top, 100)
+        }
     }
 }
 
