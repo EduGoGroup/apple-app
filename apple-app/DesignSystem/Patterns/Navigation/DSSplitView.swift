@@ -332,6 +332,7 @@ struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
 
 // MARK: - Preview Helpers
 
+@MainActor
 private func iconForCategory(_ key: String) -> String {
     switch key {
     case "documents": return "doc.fill"
@@ -341,6 +342,7 @@ private func iconForCategory(_ key: String) -> String {
     }
 }
 
+@MainActor
 private func iconForFolder(_ key: String) -> String {
     switch key {
     case "inbox": return "tray.fill"
@@ -351,6 +353,7 @@ private func iconForFolder(_ key: String) -> String {
     }
 }
 
+@MainActor
 @ViewBuilder
 private func detailContentPreview(for item: String) -> some View {
     NavigationStack {
@@ -380,6 +383,7 @@ private func detailContentPreview(for item: String) -> some View {
     }
 }
 
+@MainActor
 @ViewBuilder
 private func mailDetailPreview(for folder: String, name: String) -> some View {
     NavigationStack {
@@ -410,6 +414,7 @@ private func mailDetailPreview(for folder: String, name: String) -> some View {
     }
 }
 
+@MainActor
 @ViewBuilder
 private func projectDetailPreview(for project: String) -> some View {
     NavigationStack {

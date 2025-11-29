@@ -315,6 +315,7 @@ struct DSSidebar<Content: View>: View {
 
 // MARK: - Preview Helpers
 
+@MainActor
 @ViewBuilder
 private func detailViewPreview(for itemId: String?) -> some View {
     if let itemId = itemId {
@@ -350,6 +351,7 @@ private func detailViewPreview(for itemId: String?) -> some View {
     }
 }
 
+@MainActor
 private func iconForItemPreview(_ id: String) -> String {
     switch id {
     case "home": return "house.fill"
@@ -369,6 +371,7 @@ private func iconForItemPreview(_ id: String) -> String {
     }
 }
 
+@MainActor
 private func titleForItemPreview(_ id: String) -> String {
     switch id {
     case "home": return "Inicio"

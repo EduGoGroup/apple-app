@@ -372,6 +372,7 @@ struct DSCustomTabBar<Content: View>: View {
 
 // MARK: - Preview Helpers
 
+@MainActor
 private func iconForTab(_ id: String) -> String {
     switch id {
     case "home": return "house.fill"
@@ -382,6 +383,7 @@ private func iconForTab(_ id: String) -> String {
     }
 }
 
+@MainActor
 private func titleForTab(_ id: String) -> String {
     switch id {
     case "home": return "Inicio"
