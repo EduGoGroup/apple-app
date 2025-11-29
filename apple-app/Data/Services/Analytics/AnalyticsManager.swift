@@ -191,7 +191,7 @@ actor AnalyticsManager: AnalyticsService {
         if let params = parameters {
             await logger.debug("Tracking event: \(event.rawValue)", metadata: [
                 "category": "\(event.category.rawValue)",
-                "parameters": "\(params)"
+                "parameter_keys": "\(Array(params.keys))"
             ])
         } else {
             await logger.debug("Tracking event: \(event.rawValue)", metadata: [
@@ -217,8 +217,8 @@ actor AnalyticsManager: AnalyticsService {
     func setUserProperty(_ property: AnalyticsUserProperty, value: String?) async {
         guard _isEnabled else { return }
 
-        if let value = value {
-            await logger.debug("Setting user property: \(property.rawValue) = \(value)")
+        if value != nil {
+            await logger.debug("Setting user property: \(property.rawValue) = [REDACTED]")
         } else {
             await logger.debug("Removing user property: \(property.rawValue)")
         }

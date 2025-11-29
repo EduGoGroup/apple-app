@@ -69,7 +69,9 @@ struct PerformanceMetric: Sendable, Identifiable {
     /// Crea una nueva métrica de rendimiento
     ///
     /// ## Concurrency
-    /// - nonisolated: Puede llamarse desde cualquier contexto (actors)
+    /// - nonisolated: NECESARIO para prevenir MainActor inference
+    /// - Razón: Default params (Date(), UUID()) causan inference en strict mode
+    /// - Permite llamadas desde actors sin 'await'
     ///
     /// - Parameters:
     ///   - id: ID único (generado automáticamente si no se proporciona)

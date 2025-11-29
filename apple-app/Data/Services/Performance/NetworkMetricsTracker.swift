@@ -95,7 +95,10 @@ actor NetworkMetricsTracker {
         )
 
         activeRequests[id] = metric
-        await logger.debug("Request started: \(method) \(url)")
+
+        // Redact URL to prevent PII/token leakage in query params
+        let safeUrl = URL(string: url).map { "\($0.host ?? "")\($0.path)" } ?? "[invalid-url]"
+        await logger.debug("Request started: \(method) \(safeUrl)")
     }
 
     /// Finaliza el tracking de un request
@@ -141,14 +144,16 @@ actor NetworkMetricsTracker {
             unit: .bytes
         )
 
-        // Logging según resultado
+        // Logging según resultado (redact URLs to prevent PII/token leakage)
+        let safeUrl = URL(string: request.url).map { "\($0.host ?? "")\($0.path)" } ?? "[invalid-url]"
+
         if let error = error {
-            await logger.error("Request failed: \(request.method) \(request.url)", metadata: [
+            await logger.error("Request failed: \(request.method) \(safeUrl)", metadata: [
                 "duration": "\(String(format: "%.3f", duration))s",
                 "error": error.localizedDescription
             ])
         } else if let statusCode = statusCode {
-            await logger.debug("Request completed: \(request.method) \(request.url)", metadata: [
+            await logger.debug("Request completed: \(request.method) \(safeUrl)", metadata: [
                 "duration": "\(String(format: "%.3f", duration))s",
                 "status": "\(statusCode)",
                 "responseSize": "\(responseSize) bytes"
@@ -157,7 +162,7 @@ actor NetworkMetricsTracker {
             // Detectar requests lentos
             if duration > 5.0 {
                 await logger.warning("⚠️ Slow network request", metadata: [
-                    "url": request.url,
+                    "endpoint": safeUrl,
                     "duration": "\(String(format: "%.3f", duration))s",
                     "threshold": "5.0s"
                 ])

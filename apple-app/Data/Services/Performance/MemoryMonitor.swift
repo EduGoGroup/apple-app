@@ -107,13 +107,14 @@ actor MemoryMonitor {
     /// Obtiene el uso de memoria actual
     ///
     /// ## Concurrency
-    /// - actor method: Thread-safe
+    /// - nonisolated: No accede a estado mutable del actor
+    /// - Permite llamadas síncronas sin await
     ///
     /// ## System APIs
     /// Usa mach task_info API (thread-safe según Darwin docs)
     ///
     /// - Returns: Uso de memoria actual
-    func currentMemoryUsage() -> MemoryUsage {
+    nonisolated func currentMemoryUsage() -> MemoryUsage {
         var info = mach_task_basic_info()
         var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
 

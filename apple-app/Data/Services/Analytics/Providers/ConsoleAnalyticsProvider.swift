@@ -71,16 +71,16 @@ struct ConsoleAnalyticsProvider: AnalyticsProvider {
     }
 
     func setUserProperty(_ name: String, value: String?) async {
-        if let value = value {
-            await logger.debug("[Console] User Property: \(name) = \(value)")
+        if value != nil {
+            await logger.debug("[Console] User Property: \(name) = [REDACTED]")
         } else {
             await logger.debug("[Console] User Property: \(name) = nil (removed)")
         }
     }
 
     func setUserId(_ userId: String?) async {
-        if let userId = userId {
-            await logger.debug("[Console] User ID: \(userId)")
+        if userId != nil {
+            await logger.debug("[Console] User ID set")
         } else {
             await logger.debug("[Console] User ID cleared")
         }
