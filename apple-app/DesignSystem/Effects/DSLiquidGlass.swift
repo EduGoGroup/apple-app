@@ -11,12 +11,12 @@ import SwiftUI
 
 // MARK: - Liquid Glass Intensity
 //
-// Define las 5 intensidades de Liquid Glass disponibles en iOS 26+ / macOS 26+
+// Define las 5 intensidades de Liquid Glass disponibles en iOS 18+ / macOS 15+
 // Cada intensidad representa un nivel diferente de efecto de cristal líquido
 
 /// Intensidades de Liquid Glass
 ///
-/// Liquid Glass es el feature estrella de iOS 26 y macOS 26.
+/// Liquid Glass es el feature estrella de iOS 18+ y macOS 15+.
 /// Crea efectos de cristal líquido ultra-realistas con refracción dinámica,
 /// profundidad y animaciones fluidas.
 ///
@@ -25,14 +25,14 @@ import SwiftUI
 /// - `.standard`: Cards, panels estándar (default)
 /// - `.prominent`: Modales, dialogs importantes
 /// - `.immersive`: Hero content, full-screen effects
-/// - `.desktop`: Optimizado para macOS 26+ (ventanas, sidebars)
+/// - `.desktop`: Optimizado para macOS 15+ (ventanas, sidebars)
 ///
 /// **Performance:**
 /// - Acelerado por Neural Engine en dispositivos compatibles
 /// - Degradación automática en dispositivos no compatibles
 ///
 /// - Note: En iOS 18-25 / macOS 15-25 se usa fallback con materials estándar
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     /// Efecto sutil - Ideal para overlays y backgrounds ligeros
     ///
@@ -70,7 +70,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     /// - Ideal para: Hero content, splash screens, onboarding
     case immersive
 
-    /// Efecto optimizado para desktop (macOS 26+)
+    /// Efecto optimizado para desktop (macOS 15+)
     ///
     /// **Características:**
     /// - Optimizado para pantallas grandes
@@ -140,7 +140,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
 /// **Performance:**
 /// - Todas usan spring physics para movimiento natural
 /// - Aceleradas por Core Animation
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 enum LiquidAnimation: Sendable {
     /// Animación suave - Transiciones lentas y fluidas
     ///
@@ -187,7 +187,7 @@ enum LiquidAnimation: Sendable {
 ///
 /// Define los diferentes estados visuales que puede tener un elemento glass
 /// durante la interacción del usuario.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 enum GlassState: Sendable {
     /// Estado normal - Sin interacción
     case normal
@@ -231,7 +231,7 @@ enum GlassState: Sendable {
 /// Estilos de transiciones Liquid Glass
 ///
 /// Define el tipo de transición visual al mostrar/ocultar elementos con glass.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 enum LiquidTransitionStyle: Sendable {
     /// Transición tipo vertido - Aparece como líquido vertiéndose
     case pour
@@ -261,12 +261,12 @@ enum LiquidTransitionStyle: Sendable {
 // MARK: - Preview Support
 
 #if DEBUG
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension LiquidGlassIntensity: Identifiable {
     var id: String { rawValue }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension LiquidAnimation: Identifiable {
     var id: String {
         switch self {
@@ -277,7 +277,7 @@ extension LiquidAnimation: Identifiable {
     }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension GlassState: Identifiable {
     var id: String {
         switch self {

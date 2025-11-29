@@ -4,15 +4,15 @@
 //
 //  Created on 23-11-25.
 //  Refactored on 27-11-25.
-//  SPEC-006: Enfoque iOS 26+ primero, degradación a iOS 18+
+//  SPEC-006: Enfoque iOS 18+ primero, degradación a iOS 18+
 //
 
 import SwiftUI
 
 // MARK: - Design System Visual Effects
 //
-// FILOSOFÍA: iOS 26+ PRIMERO, degradación elegante a iOS 18+
-// - iOS 26+ / macOS 26+: Liquid Glass y efectos modernos (PRIORIDAD)
+// FILOSOFÍA: iOS 18+ PRIMERO, degradación elegante a iOS 18+
+// - iOS 18+ / macOS 15+: Liquid Glass y efectos modernos (PRIORIDAD)
 // - iOS 18+ / macOS 15+: Materials como fallback (COMPATIBILIDAD)
 
 /// Protocolo base para efectos visuales del Design System
@@ -21,14 +21,14 @@ protocol DSVisualEffect {
     func apply<Content: View>(to content: Content) -> AnyView
 }
 
-// MARK: - iOS 26+ / macOS 26+ - IMPLEMENTACIÓN MODERNA (PRIORIDAD)
+// MARK: - iOS 18+ / macOS 15+ - IMPLEMENTACIÓN MODERNA (PRIORIDAD)
 
-/// Implementación de efectos visuales para iOS 26+ / macOS 26+
+/// Implementación de efectos visuales para iOS 18+ / macOS 15+
 /// Usa las APIs más modernas disponibles en estas versiones
 ///
 /// - Note: Esta es la implementación PRINCIPAL del sistema de efectos.
 ///   El código de iOS 18+ es solo para compatibilidad con versiones antiguas.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct DSVisualEffectModern: DSVisualEffect {
     let style: DSVisualEffectStyle
     let shape: DSEffectShape
@@ -45,7 +45,7 @@ struct DSVisualEffectModern: DSVisualEffect {
         //     return AnyView(content.liquidGlass(liquidGlassStyle, in: Circle()))
         // }
 
-        // Por ahora: Usar los mejores Materials disponibles en iOS 26+
+        // Por ahora: Usar los mejores Materials disponibles en iOS 18+
         switch shape {
         case .capsule:
             return AnyView(
@@ -74,13 +74,13 @@ struct DSVisualEffectModern: DSVisualEffect {
         }
     }
 
-    // MARK: - Modern Materials (iOS 26+)
+    // MARK: - Modern Materials (iOS 18+)
 
     @ViewBuilder
     private func modernMaterial() -> some View {
         switch style {
         case .regular:
-            // iOS 26+: Podría tener materials mejorados
+            // iOS 18+: Podría tener materials mejorados
             Rectangle()
                 .fill(.regularMaterial.opacity(0.9))
         case .prominent:
@@ -103,7 +103,7 @@ struct DSVisualEffectModern: DSVisualEffect {
     ///
     /// - Parameter intensity: Intensidad del efecto liquid glass
     /// - Returns: Vista con efecto glass simulado
-    @available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+    @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
     @ViewBuilder
     private func liquidGlassMaterial(intensity: LiquidGlassIntensity) -> some View {
         Rectangle()
@@ -184,7 +184,7 @@ struct DSVisualEffectModern: DSVisualEffect {
 /// Compatibilidad con versiones anteriores
 ///
 /// - Note: Esta es la implementación de FALLBACK.
-///   Se usa solo cuando iOS 26+ no está disponible.
+///   Se usa solo cuando iOS 18+ no está disponible.
 @available(iOS 18.0, macOS 15.0, *)
 struct DSVisualEffectLegacy: DSVisualEffect {
     let style: DSVisualEffectStyle
@@ -258,8 +258,8 @@ enum DSVisualEffectStyle: Equatable, Sendable {
     case prominent
     /// Estilo con tinte de color
     case tinted(Color)
-    /// Liquid Glass (iOS 26+ / macOS 26+) - Feature principal
-    @available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+    /// Liquid Glass (iOS 18+ / macOS 15+) - Feature principal
+    @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
     case liquidGlass(LiquidGlassIntensity)
 
     // Equatable conformance manual para Color y LiquidGlassIntensity
@@ -297,7 +297,7 @@ enum DSEffectShape: Sendable {
 /// Factory que detecta la versión del OS y devuelve la implementación adecuada
 ///
 /// ESTRATEGIA:
-/// 1. iOS 26+ / macOS 26+: DSVisualEffectModern (PRIORIDAD)
+/// 1. iOS 18+ / macOS 15+: DSVisualEffectModern (PRIORIDAD)
 /// 2. iOS 18-25 / macOS 15-25: DSVisualEffectLegacy (FALLBACK)
 struct DSVisualEffectFactory {
     /// Crea el efecto visual apropiado según la versión del OS
@@ -309,7 +309,7 @@ struct DSVisualEffectFactory {
         shape: DSEffectShape = .roundedRectangle(cornerRadius: DSCornerRadius.large),
         isInteractive: Bool = false
     ) -> DSVisualEffect {
-        // iOS 26+ / macOS 26+: Usar implementación MODERNA
+        // iOS 18+ / macOS 15+: Usar implementación MODERNA
         if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
             return DSVisualEffectModern(
                 style: style,
@@ -352,7 +352,7 @@ extension View {
     /// Aplica un efecto visual de glass del Design System
     ///
     /// **Estrategia de versiones:**
-    /// - iOS 26+ / macOS 26+: Efectos modernos optimizados
+    /// - iOS 18+ / macOS 15+: Efectos modernos optimizados
     /// - iOS 18-25 / macOS 15-25: Materials con degradación elegante
     ///
     /// - Parameters:
@@ -448,7 +448,7 @@ extension View {
             )
         )
     } else {
-        Text("Liquid Glass requiere iOS 26+")
+        Text("Liquid Glass requiere iOS 18+")
             .font(DSTypography.title3)
     }
 }

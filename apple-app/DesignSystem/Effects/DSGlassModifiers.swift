@@ -25,9 +25,9 @@ import SwiftUI
 ///     .glassAdaptive(true)
 /// ```
 ///
-/// - Note: En iOS 26+ esto usará las APIs nativas cuando estén disponibles.
+/// - Note: En iOS 18+ esto usará las APIs nativas cuando estén disponibles.
 ///         Por ahora es una aproximación con blend modes.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct GlassAdaptiveModifier: ViewModifier {
     let enabled: Bool
 
@@ -42,7 +42,7 @@ struct GlassAdaptiveModifier: ViewModifier {
     }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension View {
     /// Hace que el glass se adapte al contenido subyacente
     ///
@@ -72,8 +72,8 @@ extension View {
 /// ```
 ///
 /// - Note: Por ahora es una aproximación visual.
-///         En iOS 26+ usará las APIs nativas cuando estén disponibles.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+///         En iOS 18+ usará las APIs nativas cuando estén disponibles.
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct GlassDepthMappingModifier: ViewModifier {
     let enabled: Bool
 
@@ -88,7 +88,7 @@ struct GlassDepthMappingModifier: ViewModifier {
     }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension View {
     /// Habilita mapeo de profundidad para el glass
     ///
@@ -118,8 +118,8 @@ extension View {
 /// ```
 ///
 /// - Note: Por ahora es una aproximación con blur y opacity.
-///         En iOS 26+ usará las APIs nativas cuando estén disponibles.
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+///         En iOS 18+ usará las APIs nativas cuando estén disponibles.
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct GlassRefractionModifier: ViewModifier {
     let amount: Double
 
@@ -130,7 +130,7 @@ struct GlassRefractionModifier: ViewModifier {
     }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension View {
     /// Controla la cantidad de refracción del glass
     ///
@@ -157,7 +157,7 @@ extension View {
 ///     .dsGlassEffect(.liquidGlass(.prominent))
 ///     .liquidAnimation(.ripple)
 /// ```
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct LiquidAnimationModifier: ViewModifier {
     let style: LiquidAnimation
 
@@ -167,7 +167,7 @@ struct LiquidAnimationModifier: ViewModifier {
     }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension View {
     /// Aplica animaciones líquidas al glass
     ///
@@ -195,7 +195,7 @@ extension View {
 ///     .dsGlassEffect(.liquidGlass(.standard))
 ///     .glassState(state)
 /// ```
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 struct GlassStateModifier: ViewModifier {
     let state: GlassState
 
@@ -206,7 +206,7 @@ struct GlassStateModifier: ViewModifier {
     }
 }
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension View {
     /// Aplica estilos según el estado glass
     ///
@@ -221,7 +221,7 @@ extension View {
 //
 // Transiciones animadas para glass
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension AnyTransition {
     /// Transición liquid glass
     ///
@@ -244,7 +244,7 @@ extension AnyTransition {
 
 // MARK: - Desktop Glass Modifiers (macOS26)
 //
-// Modifiers específicos para macOS 26+
+// Modifiers específicos para macOS 15+
 
 #if os(macOS)
 /// Modifier que optimiza el glass para desktop
@@ -405,7 +405,7 @@ extension View {
 
 // MARK: - Convenience Modifiers
 
-@available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
+@available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension View {
     /// Aplica un conjunto completo de modifiers glass
     ///

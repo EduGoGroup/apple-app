@@ -103,13 +103,13 @@ struct DSSidebarSection: Identifiable, Sendable {
 /// Sidebar del Design System
 ///
 /// Implementa el pattern de Sidebar estándar de Apple para iPad y Mac
-/// con soporte para Liquid Glass en iOS 26+ / macOS 26+.
+/// con soporte para Liquid Glass en iOS 18+ / macOS 15+.
 ///
 /// **Características:**
 /// - NavigationSplitView con sidebar
 /// - Secciones agrupadas
 /// - Badges opcionales
-/// - Liquid Glass en iOS 26+ (opcional)
+/// - Liquid Glass en iOS 18+ (opcional)
 /// - Adaptativo (se colapsa en iPhone)
 ///
 /// **Uso:**
@@ -137,7 +137,7 @@ struct DSSidebar<Content: View>: View {
     /// - Parameters:
     ///   - selection: Binding al ID del item seleccionado
     ///   - sections: Array de secciones del sidebar
-    ///   - glassIntensity: Intensidad del efecto glass (iOS 26+)
+    ///   - glassIntensity: Intensidad del efecto glass (iOS 18+)
     ///   - content: Closure que devuelve el contenido para cada item ID
     init(
         selection: Binding<String?>,

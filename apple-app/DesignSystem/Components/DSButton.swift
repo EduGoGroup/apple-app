@@ -4,14 +4,14 @@
 //
 //  Created on 16-11-25.
 //  Refactored on 27-11-25.
-//  SPEC-006: Optimizado para iOS 26+ con degradación a iOS 18+
+//  SPEC-006: Optimizado para iOS 18+ con degradación a iOS 18+
 //
 
 import SwiftUI
 
 /// Botón reutilizable del Design System
 ///
-/// Características iOS 26+:
+/// Características iOS 18+:
 /// - Efectos visuales modernos con Glass effects
 /// - Tamaños adaptados por plataforma (iPhone, iPad, Mac)
 /// - Interacciones mejoradas con hover states
@@ -174,7 +174,7 @@ struct DSButton: View {
 
 // MARK: - Modern Button Style
 
-/// ButtonStyle moderno con efectos hover para iOS 26+ / macOS
+/// ButtonStyle moderno con efectos hover para iOS 18+ / macOS
 private struct ModernButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

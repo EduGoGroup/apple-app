@@ -70,13 +70,13 @@ struct DSTabBarItem: Identifiable, Sendable {
 /// Tab Bar del Design System
 ///
 /// Implementa el pattern de Tab Bar estándar de Apple con soporte
-/// para Liquid Glass en iOS 26+.
+/// para Liquid Glass en iOS 18+.
 ///
 /// **Características:**
 /// - Hasta 5 tabs recomendado (HIG)
 /// - Badges opcionales
 /// - Iconos con estado selected/normal
-/// - Liquid Glass en iOS 26+ (opcional)
+/// - Liquid Glass en iOS 18+ (opcional)
 ///
 /// **Uso:**
 /// ```swift
@@ -107,7 +107,7 @@ struct DSTabBar<Content: View>: View {
     /// - Parameters:
     ///   - selection: Binding al ID del tab seleccionado
     ///   - items: Array de items del tab bar
-    ///   - useGlass: Si debe usar Liquid Glass en iOS 26+ (default: true)
+    ///   - useGlass: Si debe usar Liquid Glass en iOS 18+ (default: true)
     ///   - content: Contenido de cada tab (debe usar .tag() con IDs)
     init(
         selection: Binding<String>,
@@ -164,7 +164,7 @@ struct DSCustomTabBar<Content: View>: View {
     /// - Parameters:
     ///   - selection: Binding al ID del tab seleccionado
     ///   - items: Array de items del tab bar
-    ///   - glassIntensity: Intensidad del efecto glass (iOS 26+)
+    ///   - glassIntensity: Intensidad del efecto glass (iOS 18+)
     ///   - content: Closure que devuelve el contenido para cada tab ID
     init(
         selection: Binding<String>,
@@ -366,7 +366,7 @@ struct DSCustomTabBar<Content: View>: View {
             }
         }
     } else {
-        Text("Custom Tab Bar requiere iOS 26+")
+        Text("Custom Tab Bar requiere iOS 18+")
     }
 }
 

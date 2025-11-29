@@ -19,7 +19,7 @@ import SwiftUI
 /// **Características:**
 /// - 3 columnas: Sidebar + Content + Detail
 /// - Visibilidad configurable por columna
-/// - Liquid Glass en iOS 26+ (opcional)
+/// - Liquid Glass en iOS 18+ (opcional)
 /// - Adaptativo (se colapsa en iPhone)
 /// - Soporte para toolbar personalizado
 ///
@@ -52,8 +52,8 @@ struct DSSplitView<Sidebar: View, Content: View, Detail: View>: View {
     /// Crea un Split View de 3 columnas
     ///
     /// - Parameters:
-    ///   - sidebarGlassIntensity: Intensidad glass para sidebar (iOS 26+)
-    ///   - contentGlassIntensity: Intensidad glass para content (iOS 26+)
+    ///   - sidebarGlassIntensity: Intensidad glass para sidebar (iOS 18+)
+    ///   - contentGlassIntensity: Intensidad glass para content (iOS 18+)
     ///   - sidebar: Contenido de la barra lateral
     ///   - content: Contenido de la columna central
     ///   - detail: Contenido de la columna de detalle
@@ -135,7 +135,7 @@ struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
     /// Crea un Split View de 2 columnas
     ///
     /// - Parameters:
-    ///   - sidebarGlassIntensity: Intensidad glass para sidebar (iOS 26+)
+    ///   - sidebarGlassIntensity: Intensidad glass para sidebar (iOS 18+)
     ///   - sidebar: Contenido de la barra lateral
     ///   - detail: Contenido de detalle
     init(
@@ -228,7 +228,7 @@ struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
             }
         }
     } else {
-        Text("Split View de 3 columnas requiere iOS 26+")
+        Text("Split View de 3 columnas requiere iOS 18+")
     }
 }
 
