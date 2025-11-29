@@ -97,9 +97,12 @@ actor AnalyticsManager: AnalyticsService {
     /// - Actor init: Puede llamarse desde cualquier contexto
     /// - Logger inmutable: Sendable, thread-safe
     ///
-    /// - Parameter logger: Logger a usar (default: LoggerFactory.analytics)
-    init(logger: Logger = LoggerFactory.analytics) {
-        self.logger = logger
+    /// - Parameter logger: Logger a usar (default: analytics logger)
+    init(logger: Logger? = nil) {
+        self.logger = logger ?? OSLogger(
+            subsystem: Bundle.main.bundleIdentifier ?? "com.edugo.apple-app",
+            category: .analytics
+        )
     }
 
     // MARK: - Configuration

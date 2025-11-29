@@ -72,9 +72,12 @@ struct FirebaseAnalyticsProvider: AnalyticsProvider {
 
     /// Crea un provider de Firebase
     ///
-    /// - Parameter logger: Logger a usar (default: LoggerFactory.analytics)
-    init(logger: Logger = LoggerFactory.analytics) {
-        self.logger = logger
+    /// - Parameter logger: Logger a usar (default: analytics logger)
+    init(logger: Logger? = nil) {
+        self.logger = logger ?? OSLogger(
+            subsystem: Bundle.main.bundleIdentifier ?? "com.edugo.apple-app",
+            category: .analytics
+        )
     }
 
     // MARK: - AnalyticsProvider Implementation

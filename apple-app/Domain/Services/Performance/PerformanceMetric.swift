@@ -68,6 +68,9 @@ struct PerformanceMetric: Sendable, Identifiable {
 
     /// Crea una nueva métrica de rendimiento
     ///
+    /// ## Concurrency
+    /// - nonisolated: Puede llamarse desde cualquier contexto (actors)
+    ///
     /// - Parameters:
     ///   - id: ID único (generado automáticamente si no se proporciona)
     ///   - name: Nombre descriptivo
@@ -76,7 +79,7 @@ struct PerformanceMetric: Sendable, Identifiable {
     ///   - unit: Unidad de medida
     ///   - timestamp: Timestamp (Date.now por defecto)
     ///   - metadata: Información adicional (opcional)
-    init(
+    nonisolated init(
         id: UUID = UUID(),
         name: String,
         category: MetricCategory,
