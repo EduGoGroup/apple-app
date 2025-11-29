@@ -31,7 +31,7 @@ import SwiftUI
 /// }
 /// .dsAlert($alert)
 /// ```
-struct DSAlert: Identifiable, Sendable {
+struct DSAlert: Identifiable {
     let id = UUID()
     let title: String
     let message: String?
@@ -61,7 +61,7 @@ struct DSAlert: Identifiable, Sendable {
     static func simple(
         title: String,
         message: String? = nil,
-        onDismiss: @escaping @Sendable () -> Void = {}
+        onDismiss: @escaping () -> Void = {}
     ) -> DSAlert {
         DSAlert(
             title: title,
@@ -74,8 +74,8 @@ struct DSAlert: Identifiable, Sendable {
     static func confirmation(
         title: String,
         message: String? = nil,
-        onConfirm: @escaping @Sendable () -> Void,
-        onCancel: @escaping @Sendable () -> Void = {}
+        onConfirm: @escaping () -> Void,
+        onCancel: @escaping () -> Void = {}
     ) -> DSAlert {
         DSAlert(
             title: title,
@@ -90,8 +90,8 @@ struct DSAlert: Identifiable, Sendable {
         title: String,
         message: String? = nil,
         actionTitle: String = "Eliminar",
-        onConfirm: @escaping @Sendable () -> Void,
-        onCancel: @escaping @Sendable () -> Void = {}
+        onConfirm: @escaping () -> Void,
+        onCancel: @escaping () -> Void = {}
     ) -> DSAlert {
         DSAlert(
             title: title,
@@ -103,10 +103,10 @@ struct DSAlert: Identifiable, Sendable {
 }
 
 /// Botón de Alert
-struct DSAlertButton: Sendable {
+struct DSAlertButton {
     let title: String
     let role: ButtonRole?
-    let action: @Sendable () -> Void
+    let action: () -> Void
 
     /// Crea un botón de Alert
     ///
@@ -117,7 +117,7 @@ struct DSAlertButton: Sendable {
     init(
         title: String,
         role: ButtonRole? = nil,
-        action: @escaping @Sendable () -> Void
+        action: @escaping () -> Void
     ) {
         self.title = title
         self.role = role
