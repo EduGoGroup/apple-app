@@ -163,7 +163,7 @@ struct LiquidAnimationModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .animation(style.animation, value: UUID())
+            .animation(style.animation)
     }
 }
 

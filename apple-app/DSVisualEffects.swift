@@ -103,6 +103,7 @@ struct DSVisualEffectModern: DSVisualEffect {
     ///
     /// - Parameter intensity: Intensidad del efecto liquid glass
     /// - Returns: Vista con efecto glass simulado
+    @available(iOS 26.0, macOS 26.0, visionOS 26.0, *)
     @ViewBuilder
     private func liquidGlassMaterial(intensity: LiquidGlassIntensity) -> some View {
         Rectangle()
@@ -274,7 +275,7 @@ enum DSVisualEffectStyle: Equatable, Sendable {
             if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
                 return lIntensity == rIntensity
             }
-            return false
+            preconditionFailure("DSVisualEffectStyle.liquidGlass compared on unsupported OS version (< iOS 26). This should not happen.")
         default:
             return false
         }
