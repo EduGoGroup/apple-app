@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Pantalla de login
+/// Pantalla de login usando DSLoginView pattern
 struct LoginView: View {
     @State private var viewModel: LoginViewModel
     @State private var email = ""
@@ -26,40 +26,58 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            DSColors.backgroundPrimary.ignoresSafeArea()
+            // Gradient background
+            LinearGradient(
+                colors: [
+                    DSColors.accent.opacity(0.15),
+                    DSColors.accent.opacity(0.05)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: DSSpacing.xxl) {
-                    Spacer()
-                        .frame(height: DSSpacing.xxxl)
-
-                    // Header
-                    headerSection
-
-                    // Formulario
-                    formSection
-
-                    // Botón de login
-                    loginButton
-
-                    // Botón de login biométrico (SPEC-003)
-                    if viewModel.isBiometricAvailable {
-                        biometricLoginButton
+            // Login form usando DSLoginView pattern
+            DSLoginView(
+                email: $email,
+                password: $password,
+                onLogin: {
+                    Task {
+                        await viewModel.login(email: email, password: password)
                     }
-
-                    // Mensaje de error
-                    if case .error(let message) = viewModel.state {
-                        errorMessage(message)
+                },
+                onBiometric: viewModel.isBiometricAvailable ? {
+                    Task {
+                        await viewModel.loginWithBiometrics()
                     }
+                } : nil,
+                logoSystemName: "apple.logo",
+                title: String(localized: "login.welcome.title"),
+                subtitle: String(localized: "login.welcome.subtitle")
+            )
+            .disabled(viewModel.isLoading)
 
-                    // Hint de credenciales (solo en desarrollo)
-                    #if DEBUG
-                    developmentHint
-                    #endif
+            // Overlay de carga
+            if viewModel.isLoading {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
 
-                    Spacer()
-                }
-                .padding(DSSpacing.xl)
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .scaleEffect(1.5)
+            }
+        }
+        .alert(
+            String(localized: "common.error"),
+            isPresented: Binding(
+                get: { if case .error = viewModel.state { return true } else { return false } },
+                set: { _ in }
+            )
+        ) {
+            Button(String(localized: "common.ok"), role: .cancel) {}
+        } message: {
+            if case .error(let message) = viewModel.state {
+                Text(message)
             }
         }
         .onChange(of: viewModel.state) { _, newValue in
@@ -67,105 +85,17 @@ struct LoginView: View {
                 authState.authenticate(user: user)
             }
         }
-    }
-
-    // MARK: - View Components
-
-    private var headerSection: some View {
-        VStack(spacing: DSSpacing.medium) {
-            Image(systemName: "apple.logo")
-                .font(.system(size: 60))
-                .foregroundColor(DSColors.accent)
-
-            Text(String(localized: "login.welcome.title"))
-                .font(DSTypography.largeTitle)
-                .foregroundColor(DSColors.textPrimary)
-
-            Text(String(localized: "login.welcome.subtitle"))
-                .font(DSTypography.body)
-                .foregroundColor(DSColors.textSecondary)
+        #if DEBUG
+        .overlay(alignment: .bottom) {
+            developmentHint
+                .padding(.bottom, DSSpacing.xl)
         }
+        #endif
     }
 
-    private var formSection: some View {
-        VStack(spacing: DSSpacing.large) {
-            DSTextField(
-                placeholder: String(localized: "login.email.placeholder"),
-                text: $email,
-                leadingIcon: "envelope"
-            )
-            .textContentType(.emailAddress)
-            #if canImport(UIKit)
-            .keyboardType(.emailAddress)
-            .autocapitalization(.none)
-            .textInputAutocapitalization(.never)
-            #endif
+    // MARK: - Development Hint
 
-            DSTextField(
-                placeholder: String(localized: "login.password.placeholder"),
-                text: $password,
-                isSecure: true,
-                leadingIcon: "lock"
-            )
-            .textContentType(.password)
-        }
-    }
-
-    private var loginButton: some View {
-        DSButton(
-            title: String(localized: "login.button.login"),
-            style: .primary,
-            isLoading: viewModel.isLoading,
-            isDisabled: viewModel.isLoginDisabled
-        ) {
-            Task {
-                await viewModel.login(email: email, password: password)
-            }
-        }
-    }
-
-    private var biometricLoginButton: some View {
-        VStack(spacing: DSSpacing.small) {
-            Text(String(localized: "login.or"))
-                .font(DSTypography.caption)
-                .foregroundColor(DSColors.textSecondary)
-
-            Button {
-                Task {
-                    await viewModel.loginWithBiometrics()
-                }
-            } label: {
-                HStack(spacing: DSSpacing.small) {
-                    Image(systemName: "faceid")
-                    Text(String(localized: "login.button.biometric"))
-                }
-                .font(DSTypography.body.weight(.semibold))
-                .foregroundColor(DSColors.accent)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(DSColors.backgroundSecondary)
-                .cornerRadius(DSCornerRadius.medium)
-            }
-            .buttonStyle(.plain)
-            .disabled(viewModel.isLoginDisabled)
-            .opacity(viewModel.isLoginDisabled ? 0.5 : 1.0)
-        }
-        .padding(.top, DSSpacing.small)
-    }
-
-    private func errorMessage(_ message: String) -> some View {
-        HStack(spacing: DSSpacing.small) {
-            Image(systemName: "exclamationmark.triangle.fill")
-            Text(message)
-        }
-        .font(DSTypography.caption)
-        .foregroundColor(DSColors.error)
-        .padding(DSSpacing.medium)
-        .frame(maxWidth: .infinity)
-        .background(DSColors.error.opacity(0.1))
-        .cornerRadius(DSCornerRadius.medium)
-    }
-
+    #if DEBUG
     private var developmentHint: some View {
         VStack(spacing: DSSpacing.small) {
             Text(String(localized: "login.dev.hint.title"))
@@ -189,8 +119,12 @@ struct LoginView: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.top, DSSpacing.large)
+        .padding(DSSpacing.medium)
+        .background(DSColors.backgroundSecondary.opacity(0.9))
+        .cornerRadius(DSCornerRadius.medium)
+        .dsShadow(level: .sm)
     }
+    #endif
 }
 
 // MARK: - Previews
