@@ -44,8 +44,17 @@ struct EduGoApp: App {
         // Configurar dependencias (pasando modelContainer para LocalDataSource)
         Self.setupDependencies(in: container, modelContainer: modelContainer)
 
+        // SPEC-011 & SPEC-012: Launch time tracking
+        LaunchTimeTracker.markProcessStart()
+
         // SPEC-004: Iniciar monitoreo de red para auto-sync
         Task {
+            // SPEC-011: Configurar analytics
+            await container.setupAnalytics()
+
+            // SPEC-012: Configurar performance monitoring
+            await container.setupPerformanceMonitoring()
+
             let syncCoordinator = container.resolve(NetworkSyncCoordinator.self)
             await syncCoordinator.startMonitoring()
         }
@@ -58,6 +67,14 @@ struct EduGoApp: App {
             AdaptiveNavigationView()
                 .environmentObject(container)
                 .modelContainer(modelContainer)  // SPEC-005: SwiftData container
+                .task {
+                    // SPEC-012: Marcar primer frame renderizado
+                    await LaunchTimeTracker.markFirstFrameRendered()
+                    await LaunchTimeTracker.recordLaunchMetrics()
+
+                    // SPEC-011: Track app launch
+                    await AnalyticsManager.shared.track(.appLaunched)
+                }
         }
         .commands {
             appCommands
