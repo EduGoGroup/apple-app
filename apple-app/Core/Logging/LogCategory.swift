@@ -66,4 +66,20 @@ enum LogCategory: String, Sendable {
     /// - "Memory warning received"
     /// - "App entering background"
     case system
+
+    /// Logs de analytics y telemetry
+    ///
+    /// Ejemplos:
+    /// - "Event tracked: user_logged_in"
+    /// - "Analytics provider initialized"
+    /// - "User property set: theme"
+    case analytics
+
+    /// Logs de performance monitoring
+    ///
+    /// Ejemplos:
+    /// - "Trace started: api_call"
+    /// - "Memory usage: 150MB"
+    /// - "Launch time: 1.2s"
+    case performance
 }

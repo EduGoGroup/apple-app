@@ -51,10 +51,14 @@ final class OSLogger: Logger, @unchecked Sendable {
     // MARK: - Initialization
 
     /// Crea un logger para un subsystem y categoría específicos
+    ///
+    /// ## Concurrency
+    /// - nonisolated: Puede llamarse desde cualquier contexto (actors)
+    ///
     /// - Parameters:
     ///   - subsystem: Identificador único del subsystem (ej: "com.edugo.app")
     ///   - category: Categoría de logs (network, auth, data, etc.)
-    init(subsystem: String, category: LogCategory) {
+    nonisolated init(subsystem: String, category: LogCategory) {
         self.logger = os.Logger(subsystem: subsystem, category: category.rawValue)
         self.category = category
     }
