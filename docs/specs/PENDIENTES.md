@@ -1,10 +1,11 @@
 # 📋 ESPECIFICACIONES PENDIENTES - EduGo Apple App
 
-**Fecha**: 2025-11-27  
+**Fecha**: 2025-11-29 (Actualizado)  
 **Versión del Proyecto**: 0.1.0 (Pre-release)  
 **Progreso General**: 62% (8 de 13 specs completadas)
 
-> 📊 **FUENTE ÚNICA DE VERDAD**: Ver `TRACKING.md` para historial completo
+> 📊 **FUENTE ÚNICA DE VERDAD**: Ver `TRACKING.md` para historial completo  
+> 📋 **NUEVO**: Cada spec pendiente tiene `RESUMEN-CONTEXTO.md` para facilitar continuación
 
 ---
 
@@ -17,6 +18,13 @@ Specs Pendientes:      2/13  (15%)  ❌
 ```
 
 **Specs completadas archivadas en**: `/docs/specs/archived/completed-specs/`
+
+**Archivos RESUMEN-CONTEXTO.md creados para**:
+- ✅ SPEC-003 (authentication-migration/)
+- ✅ SPEC-008 (security-hardening/)
+- ✅ SPEC-009 (feature-flags/)
+- ✅ SPEC-011 (analytics/)
+- ✅ SPEC-012 (performance-monitoring/)
 
 ---
 
@@ -180,57 +188,13 @@ jobs:
 
 ## ⚡ ALTA PRIORIDAD
 
-### ✅ SPEC-006: Platform Optimization (100%) - COMPLETADO
+### ✅ SPEC-006: Platform Optimization (100%) - ARCHIVADA
 
-**Estado**: ✅ COMPLETADO  
-**Tiempo Estimado**: 15 horas  
-**Tiempo Real**: 16 horas  
-**Prioridad**: P2 - MEDIA  
-**Fecha de Completación**: 2025-11-27
+**Estado**: ✅ COMPLETADO Y ARCHIVADO  
+**Fecha de Completación**: 2025-11-27  
+**Ubicación**: `docs/specs/archived/completed-specs/platform-optimization/`
 
-#### ✅ Implementado (100%)
-
-**Fase 1: iPad Optimization (5h)**
-- ✅ PlatformCapabilities system completo
-- ✅ DSVisualEffects refactorizado (iOS 26+ primero)
-- ✅ IPadHomeView con layout 2 columnas
-- ✅ IPadSettingsView con panel dual
-- ✅ DSButton con tamaños y adaptive()
-
-**Fase 2: macOS Optimization (6h)**
-- ✅ MacOSToolbarConfiguration (toolbar nativa)
-- ✅ MacOSMenuCommands (menu bar completo)
-- ✅ KeyboardShortcuts multiplataforma
-- ✅ MacOSSettingsView (TabView estilo nativo)
-- ✅ Window controls (sidebar, fullscreen, minimize)
-
-**Fase 3: visionOS Support (4h)**
-- ✅ VisionOSConfiguration (window groups, ornaments)
-- ✅ VisionOSHomeView (layout espacial 3 columnas)
-- ✅ Spatial navigation con ornaments
-- ✅ Depth effects y hover
-
-**Fase 4: Documentation (1h)**
-- ✅ SPEC-006-COMPLETADO.md
-- ✅ TRACKING.md actualizado
-- ✅ CLAUDE.md con patrones de plataforma
-
-#### 📦 Archivos Clave
-
-**Core/Platform/** (5 archivos):
-- `PlatformCapabilities.swift`
-- `MacOSToolbarConfiguration.swift`
-- `MacOSMenuCommands.swift`
-- `KeyboardShortcuts.swift`
-- `VisionOSConfiguration.swift`
-
-**Layouts específicos** (4 archivos):
-- `IPadHomeView.swift`
-- `IPadSettingsView.swift`
-- `MacOSSettingsView.swift`
-- `VisionOSHomeView.swift`
-
-**Ver**: `docs/specs/platform-optimization/SPEC-006-COMPLETADO.md`
+**Ver documentación completa**: `docs/specs/archived/completed-specs/platform-optimization/SPEC-006-COMPLETADO.md`
 
 ---
 

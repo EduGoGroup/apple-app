@@ -1,12 +1,13 @@
 # 📊 TRACKING DE ESPECIFICACIONES - FUENTE ÚNICA DE VERDAD
 
-**Última Actualización**: 2025-11-27  
+**Última Actualización**: 2025-11-29  
 **Versión del Proyecto**: 0.1.0 (Pre-release)  
 **Branch Actual**: dev  
 **Metodología**: Verificación directa con código fuente
 
-> ⚠️ **FUENTE ÚNICA DE VERDAD**: Este es el ÚNICO archivo oficial de tracking.
-> Para detalles de implementación, ver carpetas individuales de cada spec.
+> ⚠️ **FUENTE ÚNICA DE VERDAD**: Este es el ÚNICO archivo oficial de tracking.  
+> Para detalles de implementación, ver carpetas individuales de cada spec.  
+> 📋 **NUEVO**: Specs pendientes incluyen `RESUMEN-CONTEXTO.md` para continuación simplificada.
 
 ---
 
@@ -126,12 +127,12 @@
 
 ---
 
-### ✅ SPEC-006: Platform Optimization (100%) - COMPLETADO
+### ✅ SPEC-006: Platform Optimization (100%) - ARCHIVADA
 
 **Prioridad**: 🟡 P2 - MEDIA  
-**Última Actualización**: 2025-11-27  
 **Fecha de Completación**: 2025-11-27  
-**Ubicación**: `docs/specs/platform-optimization/`
+**Archivada**: 2025-11-29  
+**Ubicación**: `docs/specs/archived/completed-specs/platform-optimization/`
 
 #### Estado
 
@@ -221,7 +222,7 @@
 | 003 | Authentication | 🟢 Muy Avanzado | 90% | `authentication-migration/` |
 | 004 | Network Layer | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 005 | SwiftData | ✅ Archivada | 100% | `archived/completed-specs/` |
-| 006 | Platform Optimization | 🟠 Básico | 15% | `platform-optimization/` |
+| 006 | Platform Optimization | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 007 | Testing | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 008 | Security | 🟡 Parcial | 75% | `security-hardening/` |
 | 009 | Feature Flags | ⚠️ Mínimo | 10% | `feature-flags/` |
@@ -294,6 +295,7 @@ Este tracking se genera mediante:
 
 | Fecha | Cambio | Specs Afectadas |
 |-------|--------|-----------------|
+| 2025-11-29 | ✅ SPEC-006 archivada, RESUMEN-CONTEXTO.md creados para specs pendientes | 003, 006, 008, 009, 011, 012 |
 | 2025-11-27 | ✅ Reorganización documental, archivo de completadas | Todas |
 | 2025-11-26 | ✅ Creación de TRACKING.md como fuente única | Todas |
 | 2025-11-25 | ✅ SPEC-004, 005, 007, 010, 013 completadas | 004, 005, 007, 010, 013 |

@@ -40,7 +40,7 @@ apple-app/
 ```
 
 📖 **Detalles**: [`docs/01-arquitectura.md`](docs/01-arquitectura.md)  
-🔀 **Flujos**: [`docs/FLUJO-REPOSITORY-PATTERN.md`](docs/FLUJO-REPOSITORY-PATTERN.md)
+🔀 **Flujos**: [`docs/guides/repository-pattern.md`](docs/guides/repository-pattern.md)
 
 ---
 
@@ -99,8 +99,8 @@ final class MockService { }
 actor MockService { }  // Si protocolo async
 ```
 
-📖 **Guía Completa**: [`docs/03-REGLAS-DESARROLLO-IA.md`](docs/03-REGLAS-DESARROLLO-IA.md)  
-📊 **Sprint 0**: [`docs/revision/sprint-0-2025-11-28/`](docs/revision/sprint-0-2025-11-28/) - Análisis exhaustivo (25k+ líneas)
+📖 **Guía Completa**: [`docs/SWIFT6-CONCURRENCY-RULES.md`](docs/SWIFT6-CONCURRENCY-RULES.md)  
+📊 **Sprint 0**: [`docs/revision/RESUMEN-SPRINT-0.md`](docs/revision/RESUMEN-SPRINT-0.md) - Resumen ejecutivo
 
 ---
 
@@ -147,19 +147,30 @@ DSTextField(placeholder: "Email", text: $email)
 ### Esenciales
 - `CLAUDE.md` - Esta guía
 - [`docs/01-arquitectura.md`](docs/01-arquitectura.md) - Arquitectura detallada
-- [`docs/revision/03-REGLAS-DESARROLLO-IA.md`](docs/revision/03-REGLAS-DESARROLLO-IA.md) - Reglas concurrencia
-- [`docs/FLUJO-REPOSITORY-PATTERN.md`](docs/FLUJO-REPOSITORY-PATTERN.md) - Diagramas de flujo
+- [`docs/SWIFT6-CONCURRENCY-RULES.md`](docs/SWIFT6-CONCURRENCY-RULES.md) - Reglas concurrencia Swift 6
+- [`docs/guides/repository-pattern.md`](docs/guides/repository-pattern.md) - Diagramas de flujo
+
+### Guías Técnicas
+- [`docs/guides/`](docs/guides/) - 16 guías técnicas completas
+- [`docs/guides/concurrency-guide.md`](docs/guides/concurrency-guide.md) - Actors, @MainActor, Sendable
+- [`docs/guides/swiftdata-guide.md`](docs/guides/swiftdata-guide.md) - SwiftData + ModelActor
+- [`docs/guides/networking-guide.md`](docs/guides/networking-guide.md) - async/await + actors
+
+### Design System
+- [`docs/apple-design-system/`](docs/apple-design-system/) - Guía del Design System Apple
+- [`docs/guides/visual-effects-guide.md`](docs/guides/visual-effects-guide.md) - Efectos visuales
 
 ### Tracking
-- [`docs/specs/TRACKING.md`](docs/specs/TRACKING.md) - Estado specs
+- [`docs/specs/TRACKING.md`](docs/specs/TRACKING.md) - Estado specs (fuente única de verdad)
 - [`docs/specs/PENDIENTES.md`](docs/specs/PENDIENTES.md) - Próximas tareas
+- Cada spec pendiente tiene `RESUMEN-CONTEXTO.md` para continuar fácilmente
 
-### Referencia
-- [`docs/revision/sprint-0-2025-11-28/README.md`](docs/revision/sprint-0-2025-11-28/README.md) - Última revisión completa
-- [`docs/archived/`](docs/archived/) - Histórico
+### Referencia Histórica
+- [`docs/revision/RESUMEN-SPRINT-0.md`](docs/revision/RESUMEN-SPRINT-0.md) - Resumen Sprint 0
+- [`docs/archived/`](docs/archived/) - Documentación histórica
 
 ---
 
 **Versión**: 0.1.0  
 **Sprint Actual**: 3-4  
-**Actualizado**: 2025-11-28
+**Actualizado**: 2025-11-29
