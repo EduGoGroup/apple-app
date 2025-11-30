@@ -53,6 +53,29 @@ apple-app/
 ./run.sh test    # Tests
 ```
 
+### ⚠️ Validación Multi-Plataforma (OBLIGATORIO antes de PR/merge)
+
+**IMPORTANTE**: Este proyecto usa código condicional (`#if os(macOS)`, `#if os(iOS)`, etc.). 
+Compilar solo para una plataforma NO detecta errores en código de otras plataformas.
+
+**Antes de crear PR o merge, SIEMPRE compilar para TODAS las plataformas:**
+
+```bash
+# Compilación completa multi-plataforma
+./run.sh              # iOS
+./run.sh macos        # macOS  
+./run.sh test         # Tests
+```
+
+O manualmente:
+```bash
+xcodebuild -scheme EduGo-Dev -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
+xcodebuild -scheme EduGo-Dev -destination 'platform=macOS' build
+```
+
+> **Razón**: Un `switch` incompleto dentro de `#if os(macOS)` NO genera error al compilar para iOS, 
+> pero SÍ falla en macOS. Validar ambas plataformas evita errores ocultos.
+
 ---
 
 ## ⚡ REGLAS CRÍTICAS
@@ -173,4 +196,4 @@ DSTextField(placeholder: "Email", text: $email)
 
 **Versión**: 0.1.0  
 **Sprint Actual**: 3-4  
-**Actualizado**: 2025-11-29
+**Actualizado**: 2025-11-30

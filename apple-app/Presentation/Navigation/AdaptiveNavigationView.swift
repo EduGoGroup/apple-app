@@ -318,6 +318,18 @@ private struct AuthenticatedApp: View {
         case .home:
             // TODO: Refrescar home - recargar datos del usuario
             break
+        case .courses:
+            // TODO: Refrescar courses
+            break
+        case .calendar:
+            // TODO: Refrescar calendar
+            break
+        case .progress:
+            // TODO: Refrescar progress
+            break
+        case .community:
+            // TODO: Refrescar community
+            break
         case .settings:
             // TODO: Refrescar settings
             break
