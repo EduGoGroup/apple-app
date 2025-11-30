@@ -150,13 +150,25 @@ private struct AuthenticatedApp: View {
         TabView(selection: $selectedRoute) {
             destination(for: .home)
                 .tabItem {
-                    Label("Inicio", systemImage: "house.fill")
+                    Label(String(localized: "home.title"), systemImage: "house.fill")
                 }
                 .tag(Route.home)
 
+            destination(for: .courses)
+                .tabItem {
+                    Label(String(localized: "courses.title"), systemImage: "book.fill")
+                }
+                .tag(Route.courses)
+
+            destination(for: .progress)
+                .tabItem {
+                    Label(String(localized: "progress.title"), systemImage: "chart.bar.fill")
+                }
+                .tag(Route.progress)
+
             destination(for: .settings)
                 .tabItem {
-                    Label("Configuración", systemImage: "gear")
+                    Label(String(localized: "settings.title"), systemImage: "gear")
                 }
                 .tag(Route.settings)
         }
@@ -220,12 +232,32 @@ private struct AuthenticatedApp: View {
         List {
             Section("Navegación") {
                 NavigationLink(value: Route.home) {
-                    Label("Inicio", systemImage: "house.fill")
+                    Label(String(localized: "home.title"), systemImage: "house.fill")
                 }
                 .tag(Route.home)
 
+                NavigationLink(value: Route.courses) {
+                    Label(String(localized: "courses.title"), systemImage: "book.fill")
+                }
+                .tag(Route.courses)
+
+                NavigationLink(value: Route.calendar) {
+                    Label(String(localized: "calendar.title"), systemImage: "calendar")
+                }
+                .tag(Route.calendar)
+
+                NavigationLink(value: Route.progress) {
+                    Label(String(localized: "progress.title"), systemImage: "chart.bar.fill")
+                }
+                .tag(Route.progress)
+
+                NavigationLink(value: Route.community) {
+                    Label(String(localized: "community.title"), systemImage: "person.2.fill")
+                }
+                .tag(Route.community)
+
                 NavigationLink(value: Route.settings) {
-                    Label("Configuración", systemImage: "gear")
+                    Label(String(localized: "settings.title"), systemImage: "gear")
                 }
                 .tag(Route.settings)
             }
@@ -300,9 +332,17 @@ private struct AuthenticatedApp: View {
     private var navigationTitle: String {
         switch selectedRoute {
         case .home:
-            return "Inicio"
+            return String(localized: "home.title")
+        case .courses:
+            return String(localized: "courses.title")
+        case .calendar:
+            return String(localized: "calendar.title")
+        case .progress:
+            return String(localized: "progress.title")
+        case .community:
+            return String(localized: "community.title")
         case .settings:
-            return "Configuración"
+            return String(localized: "settings.title")
         case .login:
             return ""
         }
@@ -354,6 +394,50 @@ private struct AuthenticatedApp: View {
                     preferencesRepository: container.resolve(PreferencesRepository.self)
                 )
             }
+
+        case .courses:
+            #if os(visionOS)
+            VisionOSCoursesView()
+            #else
+            if PlatformCapabilities.isIPad {
+                IPadCoursesView()
+            } else {
+                CoursesView()
+            }
+            #endif
+
+        case .calendar:
+            #if os(visionOS)
+            VisionOSCalendarView()
+            #else
+            if PlatformCapabilities.isIPad {
+                IPadCalendarView()
+            } else {
+                CalendarView()
+            }
+            #endif
+
+        case .progress:
+            #if os(visionOS)
+            VisionOSProgressView()
+            #else
+            if PlatformCapabilities.isIPad {
+                IPadProgressView()
+            } else {
+                UserProgressView()
+            }
+            #endif
+
+        case .community:
+            #if os(visionOS)
+            VisionOSCommunityView()
+            #else
+            if PlatformCapabilities.isIPad {
+                IPadCommunityView()
+            } else {
+                CommunityView()
+            }
+            #endif
         }
     }
 
@@ -392,14 +476,42 @@ private struct AuthenticatedApp: View {
                 Button {
                     selectedRoute = .home
                 } label: {
-                    Label("Inicio", systemImage: "house.fill")
+                    Label(String(localized: "home.title"), systemImage: "house.fill")
                 }
                 .tag(Route.home)
 
                 Button {
+                    selectedRoute = .courses
+                } label: {
+                    Label(String(localized: "courses.title"), systemImage: "book.fill")
+                }
+                .tag(Route.courses)
+
+                Button {
+                    selectedRoute = .calendar
+                } label: {
+                    Label(String(localized: "calendar.title"), systemImage: "calendar")
+                }
+                .tag(Route.calendar)
+
+                Button {
+                    selectedRoute = .progress
+                } label: {
+                    Label(String(localized: "progress.title"), systemImage: "chart.bar.fill")
+                }
+                .tag(Route.progress)
+
+                Button {
+                    selectedRoute = .community
+                } label: {
+                    Label(String(localized: "community.title"), systemImage: "person.2.fill")
+                }
+                .tag(Route.community)
+
+                Button {
                     selectedRoute = .settings
                 } label: {
-                    Label("Configuración", systemImage: "gear")
+                    Label(String(localized: "settings.title"), systemImage: "gear")
                 }
                 .tag(Route.settings)
             }

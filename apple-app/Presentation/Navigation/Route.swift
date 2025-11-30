@@ -15,6 +15,18 @@ enum Route: Hashable, Sendable {
     /// Pantalla principal (home)
     case home
 
+    /// Pantalla de cursos
+    case courses
+
+    /// Pantalla de calendario
+    case calendar
+
+    /// Pantalla de progreso
+    case progress
+
+    /// Pantalla de comunidad
+    case community
+
     /// Pantalla de configuración
     case settings
 }
