@@ -294,6 +294,21 @@ struct EduGoApp: App {
         container.register(FeatureFlagRepository.self, scope: .singleton) {
             FeatureFlagRepositoryImpl(modelContext: modelContainer.mainContext)
         }
+
+        // MARK: - Mock Repositories (Fase 3)
+        // TODO: Reemplazar con implementaciones reales cuando APIs estén disponibles
+
+        container.register(ActivityRepository.self, scope: .singleton) {
+            MockActivityRepository()
+        }
+
+        container.register(StatsRepository.self, scope: .singleton) {
+            MockStatsRepository()
+        }
+
+        container.register(CoursesRepository.self, scope: .singleton) {
+            MockCoursesRepository()
+        }
     }
 
     // MARK: - Use Cases Registration
@@ -364,6 +379,32 @@ struct EduGoApp: App {
         container.register(SyncFeatureFlagsUseCase.self, scope: .factory) {
             SyncFeatureFlagsUseCase(
                 repository: container.resolve(FeatureFlagRepository.self)
+            )
+        }
+
+        // MARK: - Fase 3: Home Data Use Cases
+
+        // GetRecentActivityUseCase - Factory
+        // Cada consulta de actividad es independiente
+        container.register(GetRecentActivityUseCase.self, scope: .factory) {
+            DefaultGetRecentActivityUseCase(
+                activityRepository: container.resolve(ActivityRepository.self)
+            )
+        }
+
+        // GetUserStatsUseCase - Factory
+        // Cada consulta de estadísticas es independiente
+        container.register(GetUserStatsUseCase.self, scope: .factory) {
+            DefaultGetUserStatsUseCase(
+                statsRepository: container.resolve(StatsRepository.self)
+            )
+        }
+
+        // GetRecentCoursesUseCase - Factory
+        // Cada consulta de cursos es independiente
+        container.register(GetRecentCoursesUseCase.self, scope: .factory) {
+            DefaultGetRecentCoursesUseCase(
+                coursesRepository: container.resolve(CoursesRepository.self)
             )
         }
     }
