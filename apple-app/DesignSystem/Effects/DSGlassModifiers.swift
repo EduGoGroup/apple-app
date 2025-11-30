@@ -155,15 +155,16 @@ extension View {
 /// ```swift
 /// Card()
 ///     .dsGlassEffect(.liquidGlass(.prominent))
-///     .liquidAnimation(.ripple)
+///     .liquidAnimation(.ripple, value: isExpanded)
 /// ```
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct LiquidAnimationModifier: ViewModifier {
+struct LiquidAnimationModifier<V: Equatable>: ViewModifier {
     let style: LiquidAnimation
+    let value: V
 
     func body(content: Content) -> some View {
         content
-            .animation(style.animation)
+            .animation(style.animation, value: value)
     }
 }
 
@@ -171,10 +172,12 @@ struct LiquidAnimationModifier: ViewModifier {
 extension View {
     /// Aplica animaciones líquidas al glass
     ///
-    /// - Parameter style: Estilo de animación líquida
+    /// - Parameters:
+    ///   - style: Estilo de animación líquida
+    ///   - value: Valor a observar para triggear la animación
     /// - Returns: Vista con animación líquida
-    func liquidAnimation(_ style: LiquidAnimation) -> some View {
-        modifier(LiquidAnimationModifier(style: style))
+    func liquidAnimation<V: Equatable>(_ style: LiquidAnimation, value: V) -> some View {
+        modifier(LiquidAnimationModifier(style: style, value: value))
     }
 }
 
@@ -415,7 +418,7 @@ extension View {
     /// ```swift
     /// Card()
     ///     .dsGlassEffect(.liquidGlass(.prominent))
-    ///     .applyGlassBehaviors()
+    ///     .applyGlassBehaviors(animationValue: isExpanded)
     /// ```
     ///
     /// - Parameters:
@@ -423,17 +426,19 @@ extension View {
     ///   - depthMapping: Si debe aplicar mapeo de profundidad
     ///   - refraction: Cantidad de refracción (0.0-1.0)
     ///   - animation: Estilo de animación líquida
+    ///   - animationValue: Valor a observar para triggear la animación
     /// - Returns: Vista con behaviors glass aplicados
-    func applyGlassBehaviors(
+    func applyGlassBehaviors<V: Equatable>(
         adaptive: Bool = true,
         depthMapping: Bool = true,
         refraction: Double = 0.5,
-        animation: LiquidAnimation = .smooth
+        animation: LiquidAnimation = .smooth,
+        animationValue: V
     ) -> some View {
         self
             .glassAdaptive(adaptive)
             .glassDepthMapping(depthMapping)
             .glassRefraction(refraction)
-            .liquidAnimation(animation)
+            .liquidAnimation(animation, value: animationValue)
     }
 }

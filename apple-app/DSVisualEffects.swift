@@ -559,7 +559,7 @@ extension View {
                 .font(DSTypography.bodyBold)
                 .padding()
                 .dsGlassEffect(.liquidGlass(.prominent))
-                .applyGlassBehaviors()
+                .applyGlassBehaviors(animationValue: true)
         }
         .padding()
         .background(
