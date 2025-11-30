@@ -344,10 +344,12 @@ enum DSVisualEffectStyle: Equatable, Sendable {
         case (.tinted(let lColor), .tinted(let rColor)):
             return lColor == rColor
         case (.liquidGlass(let lIntensity), .liquidGlass(let rIntensity)):
-            if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+            if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
                 return lIntensity == rIntensity
             }
-            preconditionFailure("DSVisualEffectStyle.liquidGlass compared on unsupported OS version (< iOS 26). This should not happen.")
+            // Fallback: si por alguna razón se compara en versión no soportada,
+            // retornar false (no deberían ser iguales si la plataforma no soporta el feature)
+            return false
         default:
             return false
         }

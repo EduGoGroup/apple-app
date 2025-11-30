@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Pantalla principal (Home) después del login
+/// Pantalla principal (Home) después del login usando DSCard pattern
 struct HomeView: View {
     @State private var viewModel: HomeViewModel
     @State private var showLogoutAlert = false
@@ -46,7 +46,7 @@ struct HomeView: View {
             }
         }
         .navigationTitle(String(localized: "home.title"))
-        #if canImport(UIKit)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
         .task {
@@ -88,8 +88,32 @@ struct HomeView: View {
             // Avatar y bienvenida
             userHeaderSection(user: user)
 
-            // Información del usuario
-            userInfoCard(user: user)
+            // Información del usuario usando DSCard
+            DSCard(visualEffect: .prominent) {
+                VStack(alignment: .leading, spacing: DSSpacing.medium) {
+                    Label("Perfil", systemImage: "person.circle.fill")
+                        .font(DSTypography.headlineSmall)
+                        .foregroundColor(DSColors.textPrimary)
+
+                    Divider()
+
+                    infoRow(
+                        icon: "envelope",
+                        label: String(localized: "home.info.email.label"),
+                        value: user.email
+                    )
+
+                    Divider()
+
+                    infoRow(
+                        icon: user.isEmailVerified ? "checkmark.circle.fill" : "xmark.circle",
+                        label: String(localized: "home.info.status.label"),
+                        value: user.isEmailVerified
+                            ? String(localized: "home.info.status.verified")
+                            : String(localized: "home.info.status.unverified")
+                    )
+                }
+            }
 
             // Acciones
             actionsSection
@@ -100,7 +124,7 @@ struct HomeView: View {
 
     private func userHeaderSection(user: User) -> some View {
         VStack(spacing: DSSpacing.medium) {
-            // Avatar con iniciales - Ahora con efecto glass
+            // Avatar con iniciales usando glass effect
             Circle()
                 .fill(DSColors.accent.opacity(0.2))
                 .frame(width: 80, height: 80)
@@ -116,20 +140,6 @@ struct HomeView: View {
                 .foregroundColor(DSColors.textPrimary)
         }
         .padding(.top, DSSpacing.xl)
-    }
-
-    private func userInfoCard(user: User) -> some View {
-        DSCard(visualEffect: .prominent) {
-            VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                infoRow(icon: "envelope", label: String(localized: "home.info.email.label"), value: user.email)
-                Divider()
-                infoRow(
-                    icon: user.isEmailVerified ? "checkmark.circle.fill" : "xmark.circle",
-                    label: String(localized: "home.info.status.label"),
-                    value: user.isEmailVerified ? String(localized: "home.info.status.verified") : String(localized: "home.info.status.unverified")
-                )
-            }
-        }
     }
 
     private func infoRow(icon: String, label: String, value: String) -> some View {
@@ -160,25 +170,47 @@ struct HomeView: View {
         }
     }
 
+    @ViewBuilder
     private func errorView(message: String) -> some View {
-        VStack(spacing: DSSpacing.large) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 50))
-                .foregroundColor(DSColors.error)
+        if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
+            DSEmptyState(
+                icon: "exclamationmark.triangle",
+                title: String(localized: "common.error"),
+                message: message,
+                actionTitle: String(localized: "common.retry"),
+                action: {
+                    Task {
+                        await viewModel.loadUser()
+                    }
+                },
+                style: .standard
+            )
+            .padding(.top, 100)
+        } else {
+            // Fallback para iOS 17
+            VStack(spacing: DSSpacing.large) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 50))
+                    .foregroundColor(DSColors.error)
 
-            Text(message)
-                .font(DSTypography.body)
-                .foregroundColor(DSColors.textSecondary)
-                .multilineTextAlignment(.center)
+                Text(String(localized: "common.error"))
+                    .font(DSTypography.title)
+                    .foregroundColor(DSColors.textPrimary)
 
-            DSButton(title: String(localized: "common.retry"), style: .primary) {
-                Task {
-                    await viewModel.loadUser()
+                Text(message)
+                    .font(DSTypography.body)
+                    .foregroundColor(DSColors.textSecondary)
+                    .multilineTextAlignment(.center)
+
+                DSButton(title: String(localized: "common.retry"), style: .primary) {
+                    Task {
+                        await viewModel.loadUser()
+                    }
                 }
+                .frame(maxWidth: 200)
             }
-            .frame(maxWidth: 200)
+            .padding(.top, 100)
         }
-        .padding(.top, 100)
     }
 }
 
