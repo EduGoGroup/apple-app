@@ -363,19 +363,39 @@ private struct AuthenticatedApp: View {
             VisionOSHomeView(
                 getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
                 logoutUseCase: container.resolve(LogoutUseCase.self),
+                getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
+                authState: authState
+            )
+            #elseif os(macOS)
+            // macOS usa el mismo layout que iPad (pantalla grande)
+            IPadHomeView(
+                getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
+                logoutUseCase: container.resolve(LogoutUseCase.self),
+                getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
                 authState: authState
             )
             #else
+            // iOS: iPad usa layout de dos columnas, iPhone usa layout simple
             if PlatformCapabilities.isIPad {
                 IPadHomeView(
                     getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
                     logoutUseCase: container.resolve(LogoutUseCase.self),
+                    getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                    getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                    getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
                     authState: authState
                 )
             } else {
                 HomeView(
                     getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
                     logoutUseCase: container.resolve(LogoutUseCase.self),
+                    getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                    getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                    getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
                     authState: authState
                 )
             }
