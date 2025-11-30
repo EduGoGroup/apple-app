@@ -24,7 +24,11 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        DSForm {
+        ZStack {
+            DSColors.backgroundPrimary
+                .ignoresSafeArea()
+
+            DSForm {
             // Sección de Apariencia
             DSFormSection(
                 title: String(localized: "settings.section.appearance")
@@ -48,6 +52,7 @@ struct SettingsView: View {
                 } else {
                     infoRowsLegacy
                 }
+            }
             }
         }
         .navigationTitle(String(localized: "settings.title"))
