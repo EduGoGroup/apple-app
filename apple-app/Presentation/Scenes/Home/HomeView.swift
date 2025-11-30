@@ -106,6 +106,30 @@ struct HomeView: View {
                     Divider()
 
                     infoRow(
+                        icon: "number",
+                        label: String(localized: "home.info.id.label"),
+                        value: user.id
+                    )
+
+                    Divider()
+
+                    infoRow(
+                        icon: "person.fill",
+                        label: String(localized: "home.info.name.label"),
+                        value: user.displayName
+                    )
+
+                    Divider()
+
+                    infoRow(
+                        icon: "person.badge.shield.checkmark",
+                        label: String(localized: "home.info.role.label"),
+                        value: user.role.displayName
+                    )
+
+                    Divider()
+
+                    infoRow(
                         icon: user.isEmailVerified ? "checkmark.circle.fill" : "xmark.circle",
                         label: String(localized: "home.info.status.label"),
                         value: user.isEmailVerified

@@ -25,6 +25,8 @@ struct VisionOSHomeView: View {
     let authState: AuthenticationState
 
     @State private var viewModel: HomeViewModel
+    @State private var showLogoutAlert = false
+    @Environment(AuthenticationState.self) private var authStateEnv
 
     init(
         getCurrentUserUseCase: GetCurrentUserUseCase,
@@ -56,12 +58,24 @@ struct VisionOSHomeView: View {
                 activityCard
                 statsCard
                 recentCoursesCard
+                accountActionsCard
             }
             .padding(DSSpacing.xxl)
         }
         .navigationTitle("Inicio")
         .task {
             await viewModel.loadUser()
+        }
+        .alert("Cerrar Sesión", isPresented: $showLogoutAlert) {
+            Button("Cancelar", role: .cancel) { }
+            Button("Cerrar Sesión", role: .destructive) {
+                Task {
+                    await viewModel.logout()
+                    authStateEnv.logout()
+                }
+            }
+        } message: {
+            Text("¿Estás seguro que deseas cerrar tu sesión?")
         }
     }
 
@@ -118,7 +132,10 @@ struct VisionOSHomeView: View {
             case .loaded(let user):
                 VStack(alignment: .leading, spacing: DSSpacing.small) {
                     InfoRow(label: "Email", value: user.email)
+                    InfoRow(label: "ID", value: user.id)
+                    InfoRow(label: "Nombre", value: user.displayName)
                     InfoRow(label: "Rol", value: user.role.displayName)
+                    InfoRow(label: "Email Verificado", value: user.isEmailVerified ? "Sí" : "No")
                 }
 
             case .error(let errorMessage):
@@ -243,6 +260,42 @@ struct VisionOSHomeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
         .hoverEffect(.highlight)
+    }
+
+    // MARK: - Account Actions Card
+
+    private var accountActionsCard: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.medium) {
+            Label("Cuenta", systemImage: "person.crop.circle.badge.checkmark")
+                .font(DSTypography.title3)
+                .foregroundColor(DSColors.textPrimary)
+
+            Divider()
+
+            Button {
+                showLogoutAlert = true
+            } label: {
+                HStack(spacing: DSSpacing.medium) {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 24))
+                        .foregroundColor(DSColors.error)
+                        .frame(width: 40)
+
+                    Text("Cerrar Sesión")
+                        .font(DSTypography.body)
+                        .foregroundColor(DSColors.error)
+
+                    Spacer()
+                }
+                .padding(DSSpacing.medium)
+            }
+            .buttonStyle(.plain)
+            .dsGlassEffect(.tinted(DSColors.error.opacity(0.1)), shape: .roundedRectangle(cornerRadius: DSCornerRadius.medium))
+            .hoverEffect(.lift)
+        }
+        .padding(DSSpacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
     }
 }
 
