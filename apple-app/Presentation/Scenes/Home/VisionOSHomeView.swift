@@ -3,6 +3,7 @@
 //  apple-app
 //
 //  Created on 27-11-25.
+//  Updated on 30-11-25 - Fase 3: Integración con Mock Repositories
 //  SPEC-006: visionOS-optimized home view con visionOS 26+ primero
 //
 
@@ -22,23 +23,36 @@ import SwiftUI
 struct VisionOSHomeView: View {
     let getCurrentUserUseCase: GetCurrentUserUseCase
     let logoutUseCase: LogoutUseCase
+    let getRecentActivityUseCase: GetRecentActivityUseCase
+    let getUserStatsUseCase: GetUserStatsUseCase
+    let getRecentCoursesUseCase: GetRecentCoursesUseCase
     let authState: AuthenticationState
 
     @State private var viewModel: HomeViewModel
+    @State private var showLogoutAlert = false
 
     init(
         getCurrentUserUseCase: GetCurrentUserUseCase,
         logoutUseCase: LogoutUseCase,
+        getRecentActivityUseCase: GetRecentActivityUseCase,
+        getUserStatsUseCase: GetUserStatsUseCase,
+        getRecentCoursesUseCase: GetRecentCoursesUseCase,
         authState: AuthenticationState
     ) {
         self.getCurrentUserUseCase = getCurrentUserUseCase
         self.logoutUseCase = logoutUseCase
+        self.getRecentActivityUseCase = getRecentActivityUseCase
+        self.getUserStatsUseCase = getUserStatsUseCase
+        self.getRecentCoursesUseCase = getRecentCoursesUseCase
         self.authState = authState
 
         self._viewModel = State(
             initialValue: HomeViewModel(
                 getCurrentUserUseCase: getCurrentUserUseCase,
-                logoutUseCase: logoutUseCase
+                logoutUseCase: logoutUseCase,
+                getRecentActivityUseCase: getRecentActivityUseCase,
+                getUserStatsUseCase: getUserStatsUseCase,
+                getRecentCoursesUseCase: getRecentCoursesUseCase
             )
         )
     }
@@ -52,16 +66,29 @@ struct VisionOSHomeView: View {
             ) {
                 welcomeCard
                 userInfoCard
-                quickActionsCard
-                activityCard
                 statsCard
+                activityCard
                 recentCoursesCard
+                accountActionsCard
             }
             .padding(DSSpacing.xxl)
         }
-        .navigationTitle("Inicio")
+        .navigationTitle(String(localized: "home.title"))
         .task {
-            await viewModel.loadUser()
+            await viewModel.loadAllData()
+        }
+        .alert(String(localized: "home.logout.alert.title"), isPresented: $showLogoutAlert) {
+            Button(String(localized: "common.cancel"), role: .cancel) {}
+            Button(String(localized: "home.button.logout"), role: .destructive) {
+                Task {
+                    let success = await viewModel.logout()
+                    if success {
+                        authState.logout()
+                    }
+                }
+            }
+        } message: {
+            Text(String(localized: "home.logout.alert.message"))
         }
     }
 
@@ -101,7 +128,7 @@ struct VisionOSHomeView: View {
 
     private var userInfoCard: some View {
         VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            Label("Perfil", systemImage: "person.circle.fill")
+            Label(String(localized: "home.profile.title"), systemImage: "person.circle.fill")
                 .font(DSTypography.title3)
                 .foregroundColor(DSColors.textPrimary)
 
@@ -117,8 +144,16 @@ struct VisionOSHomeView: View {
 
             case .loaded(let user):
                 VStack(alignment: .leading, spacing: DSSpacing.small) {
-                    InfoRow(label: "Email", value: user.email)
-                    InfoRow(label: "Rol", value: user.role.displayName)
+                    InfoRow(label: String(localized: "home.info.id.label"), value: user.id)
+                    InfoRow(label: String(localized: "home.info.name.label"), value: user.displayName)
+                    InfoRow(label: String(localized: "home.info.role.label"), value: user.role.displayName)
+                    InfoRow(label: String(localized: "home.info.email.label"), value: user.email)
+                    InfoRow(
+                        label: String(localized: "home.info.status.label"),
+                        value: user.isEmailVerified
+                            ? String(localized: "home.info.status.verified")
+                            : String(localized: "home.info.status.unverified")
+                    )
                 }
 
             case .error(let errorMessage):
@@ -126,65 +161,16 @@ struct VisionOSHomeView: View {
                     Label("Error", systemImage: "exclamationmark.triangle.fill")
                         .foregroundColor(DSColors.error)
 
-                    DSButton(title: "Reintentar", style: .secondary) {
+                    Text(errorMessage)
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+
+                    DSButton(title: String(localized: "common.retry"), style: .secondary) {
                         Task {
-                            await viewModel.loadUser()
+                            await viewModel.loadAllData()
                         }
                     }
                 }
-            }
-        }
-        .padding(DSSpacing.xl)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
-        .hoverEffect(.highlight)
-    }
-
-    // MARK: - Quick Actions Card
-
-    private var quickActionsCard: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            Label("Acciones", systemImage: "bolt.fill")
-                .font(DSTypography.title3)
-                .foregroundColor(DSColors.textPrimary)
-
-            Divider()
-
-            VStack(spacing: DSSpacing.medium) {
-                SpatialActionButton(icon: "book.fill", title: "Cursos", color: .blue)
-                SpatialActionButton(icon: "calendar", title: "Calendario", color: .green)
-                SpatialActionButton(icon: "chart.bar.fill", title: "Progreso", color: .orange)
-            }
-        }
-        .padding(DSSpacing.xl)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
-    }
-
-    // MARK: - Activity Card
-
-    private var activityCard: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            Label("Actividad", systemImage: "clock.fill")
-                .font(DSTypography.title3)
-                .foregroundColor(DSColors.textPrimary)
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: DSSpacing.small) {
-                ActivityItem(
-                    icon: "checkmark.circle.fill",
-                    title: "Módulo completado",
-                    time: "Hoy",
-                    color: .green
-                )
-
-                ActivityItem(
-                    icon: "star.fill",
-                    title: "Nueva insignia",
-                    time: "Ayer",
-                    color: .yellow
-                )
             }
         }
         .padding(DSSpacing.xl)
@@ -197,16 +183,46 @@ struct VisionOSHomeView: View {
 
     private var statsCard: some View {
         VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            Label("Estadísticas", systemImage: "chart.line.uptrend.xyaxis")
+            Label(String(localized: "home.stats.title"), systemImage: "chart.line.uptrend.xyaxis")
                 .font(DSTypography.title3)
                 .foregroundColor(DSColors.textPrimary)
 
             Divider()
 
-            VStack(spacing: DSSpacing.medium) {
-                StatRow(label: "Cursos completados", value: "12", icon: "checkmark.circle")
-                StatRow(label: "Horas de estudio", value: "48", icon: "clock")
-                StatRow(label: "Racha actual", value: "7 días", icon: "flame")
+            if viewModel.isLoadingStats {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, DSSpacing.medium)
+            } else if let error = viewModel.statsError {
+                Text(error)
+                    .font(DSTypography.caption)
+                    .foregroundColor(DSColors.error)
+            } else {
+                VStack(spacing: DSSpacing.medium) {
+                    StatRow(
+                        label: String(localized: "home.stats.courses"),
+                        value: "\(viewModel.userStats.coursesCompleted)",
+                        icon: "checkmark.circle"
+                    )
+                    StatRow(
+                        label: String(localized: "home.stats.hours"),
+                        value: "\(viewModel.userStats.studyHoursTotal)h",
+                        icon: "clock"
+                    )
+                    StatRow(
+                        label: String(localized: "home.stats.streak"),
+                        value: "\(viewModel.userStats.currentStreakDays) días",
+                        icon: "flame"
+                    )
+                    StatRow(
+                        label: String(localized: "home.stats.points"),
+                        value: "\(viewModel.userStats.totalPoints)",
+                        icon: "star"
+                    )
+                }
             }
         }
         .padding(DSSpacing.xl)
@@ -215,34 +231,119 @@ struct VisionOSHomeView: View {
         .hoverEffect(.lift)
     }
 
-    // MARK: - Recent Courses Card
+    // MARK: - Activity Card
 
-    private var recentCoursesCard: some View {
+    private var activityCard: some View {
         VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            Label("Cursos Recientes", systemImage: "book.closed.fill")
+            Label(String(localized: "home.activity.title"), systemImage: "clock.arrow.circlepath")
                 .font(DSTypography.title3)
                 .foregroundColor(DSColors.textPrimary)
 
             Divider()
 
-            VStack(spacing: DSSpacing.small) {
-                CourseRow(
-                    title: "Swift 6 Avanzado",
-                    progress: 0.75,
-                    color: .orange
-                )
-
-                CourseRow(
-                    title: "SwiftUI Moderno",
-                    progress: 0.45,
-                    color: .blue
-                )
+            if viewModel.isLoadingActivity {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, DSSpacing.medium)
+            } else if let error = viewModel.activityError {
+                Text(error)
+                    .font(DSTypography.caption)
+                    .foregroundColor(DSColors.error)
+            } else if viewModel.recentActivity.isEmpty {
+                Text(String(localized: "home.activity.empty"))
+                    .font(DSTypography.body)
+                    .foregroundColor(DSColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, DSSpacing.medium)
+            } else {
+                VStack(alignment: .leading, spacing: DSSpacing.small) {
+                    ForEach(viewModel.recentActivity) { activity in
+                        ActivityItem(activity: activity)
+                    }
+                }
             }
         }
         .padding(DSSpacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
         .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
         .hoverEffect(.highlight)
+    }
+
+    // MARK: - Recent Courses Card
+
+    private var recentCoursesCard: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.medium) {
+            Label(String(localized: "home.courses.title"), systemImage: "books.vertical.fill")
+                .font(DSTypography.title3)
+                .foregroundColor(DSColors.textPrimary)
+
+            Divider()
+
+            if viewModel.isLoadingCourses {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, DSSpacing.medium)
+            } else if let error = viewModel.coursesError {
+                Text(error)
+                    .font(DSTypography.caption)
+                    .foregroundColor(DSColors.error)
+            } else if viewModel.recentCourses.isEmpty {
+                Text(String(localized: "home.courses.empty"))
+                    .font(DSTypography.body)
+                    .foregroundColor(DSColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, DSSpacing.medium)
+            } else {
+                VStack(spacing: DSSpacing.small) {
+                    ForEach(viewModel.recentCourses) { course in
+                        CourseRow(course: course)
+                    }
+                }
+            }
+        }
+        .padding(DSSpacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
+        .hoverEffect(.highlight)
+    }
+
+    // MARK: - Account Actions Card
+
+    private var accountActionsCard: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.medium) {
+            Label("Cuenta", systemImage: "gearshape.fill")
+                .font(DSTypography.title3)
+                .foregroundColor(DSColors.textPrimary)
+
+            Divider()
+
+            Button {
+                showLogoutAlert = true
+            } label: {
+                HStack {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .foregroundColor(DSColors.error)
+                    Text(String(localized: "home.button.logout"))
+                        .foregroundColor(DSColors.error)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DSColors.textSecondary)
+                }
+                .padding(DSSpacing.medium)
+            }
+            .buttonStyle(.plain)
+            .dsGlassEffect(.tinted(DSColors.error.opacity(0.1)), shape: .roundedRectangle(cornerRadius: DSCornerRadius.medium))
+            .hoverEffect(.lift)
+        }
+        .padding(DSSpacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
     }
 }
 
@@ -263,61 +364,27 @@ private struct InfoRow: View {
             Text(value)
                 .font(DSTypography.body)
                 .foregroundColor(DSColors.textPrimary)
+                .lineLimit(1)
         }
-    }
-}
-
-private struct SpatialActionButton: View {
-    let icon: String
-    let title: String
-    let color: Color
-
-    var body: some View {
-        Button {
-            // TODO: Implementar navegación
-        } label: {
-            HStack(spacing: DSSpacing.medium) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(color)
-                    .frame(width: 40)
-
-                Text(title)
-                    .font(DSTypography.body)
-                    .foregroundColor(DSColors.textPrimary)
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14))
-                    .foregroundColor(DSColors.textSecondary)
-            }
-            .padding(DSSpacing.medium)
-        }
-        .buttonStyle(.plain)
-        .dsGlassEffect(.tinted(color.opacity(0.1)), shape: .roundedRectangle(cornerRadius: DSCornerRadius.medium))
-        .hoverEffect(.lift)
     }
 }
 
 private struct ActivityItem: View {
-    let icon: String
-    let title: String
-    let time: String
-    let color: Color
+    let activity: Activity
 
     var body: some View {
         HStack(spacing: DSSpacing.medium) {
-            Image(systemName: icon)
+            Image(systemName: activity.iconName)
                 .font(.system(size: 20))
-                .foregroundColor(color)
+                .foregroundColor(activity.type.color)
 
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
-                Text(title)
+                Text(activity.title)
                     .font(DSTypography.body)
                     .foregroundColor(DSColors.textPrimary)
+                    .lineLimit(1)
 
-                Text(time)
+                Text(activity.timestamp.formatted(.relative(presentation: .named)))
                     .font(DSTypography.caption)
                     .foregroundColor(DSColors.textSecondary)
             }
@@ -351,26 +418,34 @@ private struct StatRow: View {
 }
 
 private struct CourseRow: View {
-    let title: String
-    let progress: Double
-    let color: Color
+    let course: Course
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xs) {
             HStack {
-                Text(title)
+                Circle()
+                    .fill(course.category.color.opacity(0.2))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: course.category.iconName)
+                            .font(.system(size: 14))
+                            .foregroundColor(course.category.color)
+                    )
+
+                Text(course.title)
                     .font(DSTypography.body)
                     .foregroundColor(DSColors.textPrimary)
+                    .lineLimit(1)
 
                 Spacer()
 
-                Text("\(Int(progress * 100))%")
+                Text("\(Int(course.progress * 100))%")
                     .font(DSTypography.caption)
                     .foregroundColor(DSColors.textSecondary)
             }
 
-            ProgressView(value: progress)
-                .tint(color)
+            ProgressView(value: course.progress)
+                .tint(course.category.color)
         }
     }
 }
@@ -381,6 +456,9 @@ private struct CourseRow: View {
     VisionOSHomeView(
         getCurrentUserUseCase: PreviewMocks.getCurrentUserUseCase,
         logoutUseCase: PreviewMocks.logoutUseCase,
+        getRecentActivityUseCase: PreviewMocks.getRecentActivityUseCase,
+        getUserStatsUseCase: PreviewMocks.getUserStatsUseCase,
+        getRecentCoursesUseCase: PreviewMocks.getRecentCoursesUseCase,
         authState: AuthenticationState()
     )
 }
@@ -396,6 +474,21 @@ private enum PreviewMocks {
     @MainActor
     static var logoutUseCase: LogoutUseCase {
         MockLogoutUseCase()
+    }
+
+    @MainActor
+    static var getRecentActivityUseCase: GetRecentActivityUseCase {
+        DefaultGetRecentActivityUseCase(activityRepository: MockActivityRepository())
+    }
+
+    @MainActor
+    static var getUserStatsUseCase: GetUserStatsUseCase {
+        DefaultGetUserStatsUseCase(statsRepository: MockStatsRepository())
+    }
+
+    @MainActor
+    static var getRecentCoursesUseCase: GetRecentCoursesUseCase {
+        DefaultGetRecentCoursesUseCase(coursesRepository: MockCoursesRepository())
     }
 }
 

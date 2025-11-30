@@ -323,6 +323,9 @@ private struct AuthenticatedApp: View {
             VisionOSHomeView(
                 getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
                 logoutUseCase: container.resolve(LogoutUseCase.self),
+                getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
                 authState: authState
             )
             #else
@@ -330,12 +333,18 @@ private struct AuthenticatedApp: View {
                 IPadHomeView(
                     getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
                     logoutUseCase: container.resolve(LogoutUseCase.self),
+                    getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                    getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                    getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
                     authState: authState
                 )
             } else {
                 HomeView(
                     getCurrentUserUseCase: container.resolve(GetCurrentUserUseCase.self),
                     logoutUseCase: container.resolve(LogoutUseCase.self),
+                    getRecentActivityUseCase: container.resolve(GetRecentActivityUseCase.self),
+                    getUserStatsUseCase: container.resolve(GetUserStatsUseCase.self),
+                    getRecentCoursesUseCase: container.resolve(GetRecentCoursesUseCase.self),
                     authState: authState
                 )
             }
