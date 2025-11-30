@@ -25,10 +25,12 @@ struct IPadHomeView: View {
     let authState: AuthenticationState
 
     @State private var viewModel: HomeViewModel
+    @State private var showLogoutAlert = false
 
     // Environment para Size Classes
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(AuthenticationState.self) private var authStateEnv
 
     init(
         getCurrentUserUseCase: GetCurrentUserUseCase,
@@ -66,6 +68,17 @@ struct IPadHomeView: View {
         .task {
             await viewModel.loadUser()
         }
+        .alert("Cerrar Sesión", isPresented: $showLogoutAlert) {
+            Button("Cancelar", role: .cancel) { }
+            Button("Cerrar Sesión", role: .destructive) {
+                Task {
+                    await viewModel.logout()
+                    authStateEnv.logout()
+                }
+            }
+        } message: {
+            Text("¿Estás seguro que deseas cerrar tu sesión?")
+        }
     }
 
     // MARK: - Landscape Layout (Dos Columnas)
@@ -76,6 +89,7 @@ struct IPadHomeView: View {
             VStack(spacing: DSSpacing.large) {
                 userInfoCard
                 quickActionsCard
+                accountActionsCard
             }
             .frame(maxWidth: .infinity)
 
@@ -97,6 +111,7 @@ struct IPadHomeView: View {
             userInfoCard
             quickActionsCard
             activityCard
+            accountActionsCard
         }
         .padding(DSSpacing.xl)
     }
@@ -261,6 +276,35 @@ struct IPadHomeView: View {
                     color: .blue
                 )
             }
+        }
+        .padding(DSSpacing.large)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dsGlassEffect(.regular, shape: .roundedRectangle(cornerRadius: DSCornerRadius.large))
+    }
+
+    private var accountActionsCard: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.medium) {
+            Label("Cuenta", systemImage: "person.crop.circle.badge.checkmark")
+                .font(DSTypography.title3)
+                .foregroundColor(DSColors.textPrimary)
+
+            Divider()
+
+            Button {
+                showLogoutAlert = true
+            } label: {
+                HStack(spacing: DSSpacing.medium) {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 18))
+                    Text("Cerrar Sesión")
+                        .font(DSTypography.body)
+                }
+                .foregroundColor(DSColors.error)
+                .frame(maxWidth: .infinity)
+                .padding(DSSpacing.medium)
+            }
+            .buttonStyle(.plain)
+            .dsGlassEffect(.tinted(DSColors.error.opacity(0.1)), shape: .roundedRectangle(cornerRadius: DSCornerRadius.medium))
         }
         .padding(DSSpacing.large)
         .frame(maxWidth: .infinity, alignment: .leading)
