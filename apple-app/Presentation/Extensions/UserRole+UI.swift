@@ -99,7 +99,7 @@ extension UserRole {
 // MARK: - CustomStringConvertible
 
 extension UserRole: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         "\(emoji) \(displayName)"
     }
 }

@@ -33,7 +33,7 @@ import Foundation
 /// - Note: Este protocolo está aislado a MainActor para garantizar
 ///   thread-safety en operaciones con Keychain y estado de UI.
 @MainActor
-protocol AuthRepository: Sendable {
+public protocol AuthRepository: Sendable {
     // MARK: - Authentication
 
     /// Autentica al usuario con email y contraseña
@@ -134,7 +134,7 @@ protocol AuthRepository: Sendable {
 
 // MARK: - Default Implementations
 
-extension AuthRepository {
+public extension AuthRepository {
     /// Verifica si el usuario está autenticado con un token válido
     func isAuthenticated() async -> Bool {
         await getValidAccessToken() != nil
@@ -152,14 +152,14 @@ extension AuthRepository {
 ///
 /// Permite desacoplar la obtención de tokens de la implementación del repositorio.
 @MainActor
-protocol AuthTokenProvider: Sendable {
+public protocol AuthTokenProvider: Sendable {
     /// Obtiene un access token válido para usar en requests
     func getValidAccessToken() async -> String?
 }
 
 // MARK: - AuthRepository conforms to AuthTokenProvider
 
-extension AuthRepository {
+public extension AuthRepository {
     // AuthRepository ya implementa getValidAccessToken(),
     // por lo que automáticamente puede ser usado como AuthTokenProvider
 }

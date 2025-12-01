@@ -10,7 +10,7 @@ import Foundation
 
 /// Caso de uso para obtener cursos recientes
 @MainActor
-protocol GetRecentCoursesUseCase: Sendable {
+public protocol GetRecentCoursesUseCase: Sendable {
     /// Ejecuta el caso de uso
     /// - Parameter limit: Número máximo de cursos (default: 3)
     /// - Returns: Lista de cursos o error
@@ -19,14 +19,14 @@ protocol GetRecentCoursesUseCase: Sendable {
 
 /// Implementación por defecto
 @MainActor
-final class DefaultGetRecentCoursesUseCase: GetRecentCoursesUseCase {
+public final class DefaultGetRecentCoursesUseCase: GetRecentCoursesUseCase {
     private let coursesRepository: CoursesRepository
 
-    nonisolated init(coursesRepository: CoursesRepository) {
+    public nonisolated init(coursesRepository: CoursesRepository) {
         self.coursesRepository = coursesRepository
     }
 
-    func execute(limit: Int = 3) async -> Result<[Course], AppError> {
+    public func execute(limit: Int = 3) async -> Result<[Course], AppError> {
         await coursesRepository.getRecentCourses(limit: limit)
     }
 }

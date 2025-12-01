@@ -28,12 +28,12 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSFormField<Content: View>: View {
-    let label: String
-    let isRequired: Bool
-    let helpText: String?
-    @ViewBuilder let content: () -> Content
-    let validation: DSFormValidation?
+public struct DSFormField<Content: View>: View {
+    public let label: String
+    public let isRequired: Bool
+    public let helpText: String?
+    @ViewBuilder public let content: () -> Content
+    public let validation: DSFormValidation?
 
     /// Crea un Form Field
     ///
@@ -43,7 +43,7 @@ struct DSFormField<Content: View>: View {
     ///   - helpText: Texto de ayuda (opcional)
     ///   - validation: Validación del campo (opcional)
     ///   - content: Contenido del field (TextField, Picker, etc)
-    init(
+    public init(
         label: String,
         isRequired: Bool = false,
         helpText: String? = nil,
@@ -57,7 +57,7 @@ struct DSFormField<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xs) {
             // Label
             Text(label + (isRequired ? " *" : ""))
@@ -108,11 +108,11 @@ struct DSFormField<Content: View>: View {
 // MARK: - Form Validation
 
 /// Validación de campo
-struct DSFormValidation: Sendable {
-    let isValid: Bool
-    let message: String
-    let showSuccess: Bool
-    let successMessage: String?
+public struct DSFormValidation: Sendable {
+    public let isValid: Bool
+    public let message: String
+    public let showSuccess: Bool
+    public let successMessage: String?
 
     /// Crea una validación
     ///
@@ -121,7 +121,7 @@ struct DSFormValidation: Sendable {
     ///   - message: Mensaje de error
     ///   - showSuccess: Mostrar indicador de éxito
     ///   - successMessage: Mensaje de éxito customizado
-    init(
+    public init(
         isValid: Bool,
         message: String = "",
         showSuccess: Bool = false,
@@ -134,7 +134,7 @@ struct DSFormValidation: Sendable {
     }
 
     /// Validación exitosa
-    static func success(message: String? = nil) -> DSFormValidation {
+    public static func success(message: String? = nil) -> DSFormValidation {
         DSFormValidation(
             isValid: true,
             message: "",
@@ -144,7 +144,7 @@ struct DSFormValidation: Sendable {
     }
 
     /// Validación con error
-    static func error(_ message: String) -> DSFormValidation {
+    public static func error(_ message: String) -> DSFormValidation {
         DSFormValidation(
             isValid: false,
             message: message,
@@ -153,7 +153,7 @@ struct DSFormValidation: Sendable {
     }
 
     /// Valida email
-    static func email(_ text: String) -> DSFormValidation {
+    public static func email(_ text: String) -> DSFormValidation {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
 
@@ -167,7 +167,7 @@ struct DSFormValidation: Sendable {
     }
 
     /// Valida longitud mínima
-    static func minLength(_ text: String, min: Int, fieldName: String = "Campo") -> DSFormValidation {
+    public static func minLength(_ text: String, min: Int, fieldName: String = "Campo") -> DSFormValidation {
         if text.isEmpty {
             return .error("\(fieldName) es requerido")
         } else if text.count < min {
@@ -178,7 +178,7 @@ struct DSFormValidation: Sendable {
     }
 
     /// Valida requerido
-    static func required(_ text: String, fieldName: String = "Campo") -> DSFormValidation {
+    public static func required(_ text: String, fieldName: String = "Campo") -> DSFormValidation {
         if text.isEmpty {
             return .error("\(fieldName) es requerido")
         } else {

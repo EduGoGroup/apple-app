@@ -13,7 +13,7 @@ import SwiftUI
 // MARK: - TextField Style
 
 /// Estilos de TextField disponibles
-enum DSTextFieldStyle: Sendable {
+public enum DSTextFieldStyle: Sendable {
     /// Estilo filled - Background filled (actual)
     case filled
     /// Estilo outlined - Solo border
@@ -54,16 +54,16 @@ enum DSTextFieldStyle: Sendable {
 ///     leadingIcon: "envelope"
 /// )
 /// ```
-struct DSTextField: View {
-    let placeholder: String
-    @Binding var text: String
-    let style: DSTextFieldStyle
-    let isSecure: Bool
-    let errorMessage: String?
-    let leadingIcon: String?
-    let trailingIcon: String?
-    let trailingAction: (() -> Void)?
-    let maxLength: Int?
+public struct DSTextField: View {
+    public let placeholder: String
+    @Binding public var text: String
+    public let style: DSTextFieldStyle
+    public let isSecure: Bool
+    public let errorMessage: String?
+    public let leadingIcon: String?
+    public let trailingIcon: String?
+    public let trailingAction: (() -> Void)?
+    public let maxLength: Int?
 
     @FocusState private var isFocused: Bool
 
@@ -79,7 +79,7 @@ struct DSTextField: View {
     ///   - trailingIcon: Icono derecho (opcional)
     ///   - trailingAction: Acción del icono derecho (opcional)
     ///   - maxLength: Longitud máxima de caracteres (opcional)
-    init(
+    public init(
         placeholder: String,
         text: Binding<String>,
         style: DSTextFieldStyle = .filled,
@@ -101,7 +101,7 @@ struct DSTextField: View {
         self.maxLength = maxLength
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xs) {
             // Field content
             textFieldContent()
@@ -273,13 +273,13 @@ struct DSTextField: View {
 /// )
 /// ```
 @MainActor
-struct DSFloatingLabelTextField: View {
-    let label: String
-    @Binding var text: String
-    let isRequired: Bool
-    let isSecure: Bool
-    let errorMessage: String?
-    let leadingIcon: String?
+public struct DSFloatingLabelTextField: View {
+    public let label: String
+    @Binding public var text: String
+    public let isRequired: Bool
+    public let isSecure: Bool
+    public let errorMessage: String?
+    public let leadingIcon: String?
 
     @FocusState private var isFocused: Bool
 
@@ -292,7 +292,7 @@ struct DSFloatingLabelTextField: View {
     ///   - isSecure: Si es campo de contraseña
     ///   - errorMessage: Mensaje de error (opcional)
     ///   - leadingIcon: Icono izquierdo (opcional)
-    init(
+    public init(
         label: String,
         text: Binding<String>,
         isRequired: Bool = false,
@@ -308,7 +308,7 @@ struct DSFloatingLabelTextField: View {
         self.leadingIcon = leadingIcon
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Floating label
             Text(label + (isRequired ? " *" : ""))

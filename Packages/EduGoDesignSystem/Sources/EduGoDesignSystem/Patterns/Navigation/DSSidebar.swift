@@ -24,12 +24,12 @@ import SwiftUI
 ///     badge: 5
 /// )
 /// ```
-struct DSSidebarItem: Identifiable, Sendable, Hashable {
-    let id: String
-    let title: String
-    let icon: String
-    let badge: Int?
-    let isDestructive: Bool
+public struct DSSidebarItem: Identifiable, Sendable, Hashable {
+    public let id: String
+    public let title: String
+    public let icon: String
+    public let badge: Int?
+    public let isDestructive: Bool
 
     /// Crea un item de sidebar
     ///
@@ -39,7 +39,7 @@ struct DSSidebarItem: Identifiable, Sendable, Hashable {
     ///   - icon: Nombre del SF Symbol
     ///   - badge: Número de badge (opcional)
     ///   - isDestructive: Si el item es destructivo (color rojo)
-    init(
+    public init(
         id: String,
         title: String,
         icon: String,
@@ -53,11 +53,11 @@ struct DSSidebarItem: Identifiable, Sendable, Hashable {
         self.isDestructive = isDestructive
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 
-    static func == (lhs: DSSidebarItem, rhs: DSSidebarItem) -> Bool {
+    public static func == (lhs: DSSidebarItem, rhs: DSSidebarItem) -> Bool {
         lhs.id == rhs.id
     }
 }
@@ -76,10 +76,10 @@ struct DSSidebarItem: Identifiable, Sendable, Hashable {
 ///     items: [homeItem, searchItem]
 /// )
 /// ```
-struct DSSidebarSection: Identifiable, Sendable {
-    let id: String
-    let title: String?
-    let items: [DSSidebarItem]
+public struct DSSidebarSection: Identifiable, Sendable {
+    public let id: String
+    public let title: String?
+    public let items: [DSSidebarItem]
 
     /// Crea una sección de sidebar
     ///
@@ -87,7 +87,7 @@ struct DSSidebarSection: Identifiable, Sendable {
     ///   - id: Identificador único de la sección
     ///   - title: Título de la sección (opcional)
     ///   - items: Array de items en la sección
-    init(
+    public init(
         id: String,
         title: String? = nil,
         items: [DSSidebarItem]
@@ -124,11 +124,11 @@ struct DSSidebarSection: Identifiable, Sendable {
 /// }
 /// ```
 @MainActor
-struct DSSidebar<Content: View>: View {
-    @Binding var selection: String?
-    let sections: [DSSidebarSection]
-    let glassIntensity: LiquidGlassIntensity
-    @ViewBuilder let content: (String?) -> Content
+public struct DSSidebar<Content: View>: View {
+    @Binding public var selection: String?
+    public let sections: [DSSidebarSection]
+    public let glassIntensity: LiquidGlassIntensity
+    @ViewBuilder public let content: (String?) -> Content
 
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
 
@@ -139,7 +139,7 @@ struct DSSidebar<Content: View>: View {
     ///   - sections: Array de secciones del sidebar
     ///   - glassIntensity: Intensidad del efecto glass (iOS 18+)
     ///   - content: Closure que devuelve el contenido para cada item ID
-    init(
+    public init(
         selection: Binding<String?>,
         sections: [DSSidebarSection],
         glassIntensity: LiquidGlassIntensity = .subtle,
@@ -151,7 +151,7 @@ struct DSSidebar<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebarView
         } detail: {

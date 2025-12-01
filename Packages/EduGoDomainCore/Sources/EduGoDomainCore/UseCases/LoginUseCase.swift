@@ -12,7 +12,7 @@ import Foundation
 /// Aislado a MainActor porque depende de AuthRepository que es @MainActor
 /// y es usado por ViewModels que también son @MainActor.
 @MainActor
-protocol LoginUseCase: Sendable {
+public protocol LoginUseCase: Sendable {
     /// Ejecuta el proceso de login con validaciones
     /// - Parameters:
     ///   - email: Email del usuario
@@ -23,36 +23,36 @@ protocol LoginUseCase: Sendable {
 
 /// Implementación por defecto del caso de uso de login
 @MainActor
-final class DefaultLoginUseCase: LoginUseCase {
+public final class DefaultLoginUseCase: LoginUseCase {
     private let authRepository: AuthRepository
     private let validator: InputValidator
-    
-    init(authRepository: AuthRepository, validator: InputValidator = DefaultInputValidator()) {
+
+    public init(authRepository: AuthRepository, validator: InputValidator = DefaultInputValidator()) {
         self.authRepository = authRepository
         self.validator = validator
     }
-    
-    func execute(email: String, password: String) async -> Result<User, AppError> {
+
+    public func execute(email: String, password: String) async -> Result<User, AppError> {
         // Validación: Email vacío
         guard !email.isEmpty else {
             return .failure(.validation(.emptyEmail))
         }
-        
+
         // Validación: Formato de email
         guard validator.isValidEmail(email) else {
             return .failure(.validation(.invalidEmailFormat))
         }
-        
+
         // Validación: Contraseña vacía
         guard !password.isEmpty else {
             return .failure(.validation(.emptyPassword))
         }
-        
+
         // Validación: Longitud de contraseña
         guard validator.isValidPassword(password) else {
             return .failure(.validation(.passwordTooShort))
         }
-        
+
         // Delegación al repositorio
         return await authRepository.login(email: email, password: password)
     }

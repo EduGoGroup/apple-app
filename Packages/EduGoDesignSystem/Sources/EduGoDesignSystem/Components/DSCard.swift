@@ -11,14 +11,14 @@ import SwiftUI
 /// Usa efectos visuales adaptativos que aprovechan Liquid Glass en iOS 18+/macOS 15+
 /// y materials modernos en iOS 18+/macOS 15+
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSCard<Content: View>: View {
-    let content: Content
-    let padding: CGFloat
-    let cornerRadius: CGFloat
-    let visualEffect: DSVisualEffectStyle
-    let isInteractive: Bool
+public struct DSCard<Content: View>: View {
+    public let content: Content
+    public let padding: CGFloat
+    public let cornerRadius: CGFloat
+    public let visualEffect: DSVisualEffectStyle
+    public let isInteractive: Bool
 
-    init(
+    public init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
         visualEffect: DSVisualEffectStyle = .regular,
@@ -32,7 +32,7 @@ struct DSCard<Content: View>: View {
         self.isInteractive = isInteractive
     }
 
-    var body: some View {
+    public var body: some View {
         content
             .padding(padding)
             .dsGlassEffect(
@@ -47,16 +47,16 @@ struct DSCard<Content: View>: View {
 
 /// Tarjeta con soporte para Header y Footer
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSCardWithSections<Header: View, Content: View, Footer: View>: View {
-    let header: Header?
-    let content: Content
-    let footer: Footer?
-    let padding: CGFloat
-    let cornerRadius: CGFloat
-    let visualEffect: DSVisualEffectStyle
-    let isInteractive: Bool
+public struct DSCardWithSections<Header: View, Content: View, Footer: View>: View {
+    public let header: Header?
+    public let content: Content
+    public let footer: Footer?
+    public let padding: CGFloat
+    public let cornerRadius: CGFloat
+    public let visualEffect: DSVisualEffectStyle
+    public let isInteractive: Bool
 
-    init(
+    public init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
         visualEffect: DSVisualEffectStyle = .regular,
@@ -74,7 +74,7 @@ struct DSCardWithSections<Header: View, Content: View, Footer: View>: View {
         self.isInteractive = isInteractive
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             if let header = header as? AnyView {
                 header
@@ -108,7 +108,7 @@ struct DSCardWithSections<Header: View, Content: View, Footer: View>: View {
 
 // Inicializador opcional para header
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension DSCardWithSections where Header == EmptyView {
+public extension DSCardWithSections where Header == EmptyView {
     init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
@@ -129,7 +129,7 @@ extension DSCardWithSections where Header == EmptyView {
 
 // Inicializador opcional para footer
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension DSCardWithSections where Footer == EmptyView {
+public extension DSCardWithSections where Footer == EmptyView {
     init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
@@ -152,14 +152,14 @@ extension DSCardWithSections where Footer == EmptyView {
 
 /// Tarjeta con fondo Liquid Glass animado
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSLiquidCard<Content: View>: View {
-    let content: Content
-    let padding: CGFloat
-    let cornerRadius: CGFloat
-    let liquidIntensity: DSVisualEffectStyle
+public struct DSLiquidCard<Content: View>: View {
+    public let content: Content
+    public let padding: CGFloat
+    public let cornerRadius: CGFloat
+    public let liquidIntensity: DSVisualEffectStyle
     @State private var isHovered = false
 
-    init(
+    public init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
         liquidIntensity: DSVisualEffectStyle = .regular,
@@ -171,7 +171,7 @@ struct DSLiquidCard<Content: View>: View {
         self.liquidIntensity = liquidIntensity
     }
 
-    var body: some View {
+    public var body: some View {
         content
             .padding(padding)
             .dsGlassEffect(
@@ -191,17 +191,17 @@ struct DSLiquidCard<Content: View>: View {
 
 /// Tarjeta interactiva mejorada con estados de hover, press y focus
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSInteractiveCard<Content: View>: View {
-    let content: Content
-    let action: () -> Void
-    let padding: CGFloat
-    let cornerRadius: CGFloat
-    let visualEffect: DSVisualEffectStyle
+public struct DSInteractiveCard<Content: View>: View {
+    public let content: Content
+    public let action: () -> Void
+    public let padding: CGFloat
+    public let cornerRadius: CGFloat
+    public let visualEffect: DSVisualEffectStyle
 
     @State private var isHovered = false
     @State private var isPressed = false
 
-    init(
+    public init(
         padding: CGFloat = DSSpacing.large,
         cornerRadius: CGFloat = DSCornerRadius.large,
         visualEffect: DSVisualEffectStyle = .regular,
@@ -215,7 +215,7 @@ struct DSInteractiveCard<Content: View>: View {
         self.visualEffect = visualEffect
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: action) {
             content
                 .padding(padding)

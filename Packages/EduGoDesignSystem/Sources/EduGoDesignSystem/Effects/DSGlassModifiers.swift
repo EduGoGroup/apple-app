@@ -28,10 +28,10 @@ import SwiftUI
 /// - Note: En iOS 18+ esto usará las APIs nativas cuando estén disponibles.
 ///         Por ahora es una aproximación con blend modes.
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct GlassAdaptiveModifier: ViewModifier {
-    let enabled: Bool
+public struct GlassAdaptiveModifier: ViewModifier {
+    public let enabled: Bool
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if enabled {
             content
                 .compositingGroup()
@@ -43,7 +43,7 @@ struct GlassAdaptiveModifier: ViewModifier {
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Hace que el glass se adapte al contenido subyacente
     ///
     /// Ajusta la intensidad y color del glass basándose en el contenido debajo.
@@ -74,10 +74,10 @@ extension View {
 /// - Note: Por ahora es una aproximación visual.
 ///         En iOS 18+ usará las APIs nativas cuando estén disponibles.
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct GlassDepthMappingModifier: ViewModifier {
-    let enabled: Bool
+public struct GlassDepthMappingModifier: ViewModifier {
+    public let enabled: Bool
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if enabled {
             content
                 .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
@@ -89,7 +89,7 @@ struct GlassDepthMappingModifier: ViewModifier {
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Habilita mapeo de profundidad para el glass
     ///
     /// Crea sensación de profundidad 3D en el efecto glass.
@@ -120,10 +120,10 @@ extension View {
 /// - Note: Por ahora es una aproximación con blur y opacity.
 ///         En iOS 18+ usará las APIs nativas cuando estén disponibles.
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct GlassRefractionModifier: ViewModifier {
-    let amount: Double
+public struct GlassRefractionModifier: ViewModifier {
+    public let amount: Double
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .blur(radius: CGFloat(amount * 2.0))
             .opacity(1.0 - (amount * 0.1))
@@ -131,7 +131,7 @@ struct GlassRefractionModifier: ViewModifier {
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Controla la cantidad de refracción del glass
     ///
     /// - Parameter amount: Cantidad de refracción (0.0 = sin refracción, 1.0 = máxima)
@@ -158,18 +158,18 @@ extension View {
 ///     .liquidAnimation(.ripple, value: isExpanded)
 /// ```
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct LiquidAnimationModifier<V: Equatable>: ViewModifier {
-    let style: LiquidAnimation
-    let value: V
+public struct LiquidAnimationModifier<V: Equatable>: ViewModifier {
+    public let style: LiquidAnimation
+    public let value: V
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .animation(style.animation, value: value)
     }
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica animaciones líquidas al glass
     ///
     /// - Parameters:
@@ -199,10 +199,10 @@ extension View {
 ///     .glassState(state)
 /// ```
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct GlassStateModifier: ViewModifier {
-    let state: GlassState
+public struct GlassStateModifier: ViewModifier {
+    public let state: GlassState
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .brightness(state.brightnessModifier)
             .opacity(state.opacityModifier)
@@ -210,7 +210,7 @@ struct GlassStateModifier: ViewModifier {
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica estilos según el estado glass
     ///
     /// - Parameter state: Estado de interacción
@@ -225,7 +225,7 @@ extension View {
 // Transiciones animadas para glass
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension AnyTransition {
+public extension AnyTransition {
     /// Transición liquid glass
     ///
     /// Aplica una transición animada con efecto liquid glass.
@@ -264,10 +264,10 @@ extension AnyTransition {
 ///     .glassDesktopOptimized(true)
 /// ```
 @available(macOS 26.0, *)
-struct GlassDesktopOptimizedModifier: ViewModifier {
-    let enabled: Bool
+public struct GlassDesktopOptimizedModifier: ViewModifier {
+    public let enabled: Bool
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if enabled {
             content
                 .drawingGroup() // Optimización de rendering
@@ -278,7 +278,7 @@ struct GlassDesktopOptimizedModifier: ViewModifier {
 }
 
 @available(macOS 26.0, *)
-extension View {
+public extension View {
     /// Optimiza el glass para desktop
     ///
     /// - Parameter enabled: Si las optimizaciones desktop están habilitadas
@@ -307,10 +307,10 @@ extension View {
 ///     }
 /// ```
 @available(macOS 26.0, *)
-struct GlassMouseTrackingModifier: ViewModifier {
-    let enabled: Bool
+public struct GlassMouseTrackingModifier: ViewModifier {
+    public let enabled: Bool
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if enabled {
             content
                 .contentShape(Rectangle())
@@ -321,7 +321,7 @@ struct GlassMouseTrackingModifier: ViewModifier {
 }
 
 @available(macOS 26.0, *)
-extension View {
+public extension View {
     /// Habilita tracking preciso de mouse
     ///
     /// - Parameter enabled: Si el mouse tracking está habilitado
@@ -343,11 +343,11 @@ extension View {
 ///     .glassWindowIntegration(true)
 /// ```
 @available(macOS 26.0, *)
-struct GlassWindowIntegrationModifier: ViewModifier {
-    let enabled: Bool
+public struct GlassWindowIntegrationModifier: ViewModifier {
+    public let enabled: Bool
     @Environment(\.controlActiveState) private var controlActiveState
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if enabled {
             content
                 .opacity(controlActiveState == .key ? 1.0 : 0.8)
@@ -358,7 +358,7 @@ struct GlassWindowIntegrationModifier: ViewModifier {
 }
 
 @available(macOS 26.0, *)
-extension View {
+public extension View {
     /// Integra glass con el window system
     ///
     /// - Parameter enabled: Si la integración de ventana está habilitada
@@ -380,11 +380,11 @@ extension View {
 ///     .glassMultiDisplayAware(true)
 /// ```
 @available(macOS 26.0, *)
-struct GlassMultiDisplayAwareModifier: ViewModifier {
-    let enabled: Bool
+public struct GlassMultiDisplayAwareModifier: ViewModifier {
+    public let enabled: Bool
     @Environment(\.displayScale) private var displayScale
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if enabled {
             content
                 .drawingGroup(opaque: false, colorMode: .linear)
@@ -395,7 +395,7 @@ struct GlassMultiDisplayAwareModifier: ViewModifier {
 }
 
 @available(macOS 26.0, *)
-extension View {
+public extension View {
     /// Hace glass consciente de múltiples displays
     ///
     /// - Parameter enabled: Si la conciencia multi-display está habilitada
@@ -409,7 +409,7 @@ extension View {
 // MARK: - Convenience Modifiers
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica un conjunto completo de modifiers glass
     ///
     /// Convenience method que aplica los modifiers más comunes para glass.

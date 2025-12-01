@@ -8,39 +8,39 @@
 import Foundation
 
 /// Errores del sistema y operaciones de bajo nivel
-enum SystemError: Error, Equatable, Sendable {
+public enum SystemError: Error, Equatable, Sendable {
     /// Error desconocido
     case unknown
-    
+
     /// Error de Keychain
     case keychainError
-    
+
     /// Error de persistencia (UserDefaults, archivos, etc.)
     case persistenceError
-    
+
     /// Memoria insuficiente
     case outOfMemory
-    
+
     /// Operación cancelada
     case cancelled
-    
+
     /// Biometría no disponible
     case biometryNotAvailable
-    
+
     /// Biometría no configurada
     case biometryNotEnrolled
-    
+
     /// Autenticación biométrica fallida
     case biometryFailed
-    
+
     /// Error de permisos del sistema
     case permissionDenied(String)
-    
+
     /// Error del sistema con mensaje específico
     case system(String)
-    
+
     /// Mensaje amigable para mostrar al usuario
-    var userMessage: String {
+    public var userMessage: String {
         switch self {
         case .unknown:
             return "Ocurrió un error inesperado. Por favor intenta de nuevo."
@@ -64,9 +64,9 @@ enum SystemError: Error, Equatable, Sendable {
             return message.isEmpty ? "Error del sistema." : message
         }
     }
-    
+
     /// Mensaje técnico para logs y debugging
-    var technicalMessage: String {
+    public var technicalMessage: String {
         switch self {
         case .unknown:
             return "Unknown system error occurred"

@@ -10,7 +10,7 @@ import SwiftUI
 /// Sistema de sombras consistente para el Design System
 /// Proporciona niveles de elevación estandarizados para elementos UI
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum DSShadowLevel {
+public enum DSShadowLevel {
     /// Sin sombra
     case none
 
@@ -35,7 +35,7 @@ enum DSShadowLevel {
     case xxl
 
     /// Configuración de sombra para el nivel
-    var configuration: ShadowConfiguration {
+    public var configuration: ShadowConfiguration {
         switch self {
         case .none:
             return ShadowConfiguration(
@@ -85,21 +85,32 @@ enum DSShadowLevel {
 
 /// Configuración de parámetros de sombra
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct ShadowConfiguration {
-    let color: Color
-    let radius: CGFloat
-    let x: CGFloat
-    let y: CGFloat
+public struct ShadowConfiguration {
+    public let color: Color
+    public let radius: CGFloat
+    public let x: CGFloat
+    public let y: CGFloat
+
+    public init(color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
+        self.color = color
+        self.radius = radius
+        self.x = x
+        self.y = y
+    }
 }
 
 // MARK: - ViewModifier
 
 /// ViewModifier para aplicar sombras sistematizadas
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSShadowModifier: ViewModifier {
-    let level: DSShadowLevel
+public struct DSShadowModifier: ViewModifier {
+    public let level: DSShadowLevel
 
-    func body(content: Content) -> some View {
+    public init(level: DSShadowLevel) {
+        self.level = level
+    }
+
+    public func body(content: Content) -> some View {
         let config = level.configuration
         content
             .shadow(
@@ -114,7 +125,7 @@ struct DSShadowModifier: ViewModifier {
 // MARK: - View Extension
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica un nivel de sombra estandarizado al view
     /// - Parameter level: Nivel de sombra a aplicar
     /// - Returns: View con la sombra aplicada
@@ -135,7 +146,7 @@ extension View {
 // MARK: - Glass-Aware Shadows
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica sombra optimizada para elementos con Glass effect
     /// Las sombras son más sutiles para no competir con el efecto Glass
     /// - Parameter level: Nivel de sombra base

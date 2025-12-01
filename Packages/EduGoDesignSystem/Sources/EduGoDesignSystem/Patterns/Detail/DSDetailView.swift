@@ -10,13 +10,13 @@ import SwiftUI
 /// Helper para vistas de detalle con master-detail pattern
 /// Optimizado para iPad y macOS con navegación adaptativa
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSDetailView<Content: View>: View {
-    let title: String
-    let subtitle: String?
-    let headerAction: DetailHeaderAction?
-    @ViewBuilder let content: () -> Content
+public struct DSDetailView<Content: View>: View {
+    public let title: String
+    public let subtitle: String?
+    public let headerAction: DetailHeaderAction?
+    @ViewBuilder public let content: () -> Content
 
-    init(
+    public init(
         title: String,
         subtitle: String? = nil,
         headerAction: DetailHeaderAction? = nil,
@@ -28,7 +28,7 @@ struct DSDetailView<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 // Header
@@ -100,13 +100,20 @@ struct DSDetailView<Content: View>: View {
 
 /// Acción para el header del detail view
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DetailHeaderAction {
-    let title: String
-    let icon: String?
-    let style: ActionStyle
-    let action: () -> Void
+public struct DetailHeaderAction {
+    public let title: String
+    public let icon: String?
+    public let style: ActionStyle
+    public let action: () -> Void
 
-    enum ActionStyle {
+    public init(title: String, icon: String? = nil, style: ActionStyle, action: @escaping () -> Void) {
+        self.title = title
+        self.icon = icon
+        self.style = style
+        self.action = action
+    }
+
+    public enum ActionStyle {
         case primary
         case secondary
     }
@@ -116,12 +123,12 @@ struct DetailHeaderAction {
 
 /// Sección reutilizable para organizar contenido en detail views
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSDetailSection<Content: View>: View {
-    let title: String?
-    let icon: String?
-    @ViewBuilder let content: () -> Content
+public struct DSDetailSection<Content: View>: View {
+    public let title: String?
+    public let icon: String?
+    @ViewBuilder public let content: () -> Content
 
-    init(
+    public init(
         title: String? = nil,
         icon: String? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -131,7 +138,7 @@ struct DSDetailSection<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.medium) {
             if let title = title {
                 HStack(spacing: DSSpacing.small) {
@@ -160,13 +167,13 @@ struct DSDetailSection<Content: View>: View {
 
 /// Fila de información key-value para detail views
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSDetailRow: View {
-    let label: String
-    let value: String
-    let icon: String?
-    let valueColor: Color?
+public struct DSDetailRow: View {
+    public let label: String
+    public let value: String
+    public let icon: String?
+    public let valueColor: Color?
 
-    init(
+    public init(
         label: String,
         value: String,
         icon: String? = nil,
@@ -178,7 +185,7 @@ struct DSDetailRow: View {
         self.valueColor = valueColor
     }
 
-    var body: some View {
+    public var body: some View {
         HStack {
             HStack(spacing: DSSpacing.small) {
                 if let icon = icon {

@@ -9,15 +9,29 @@
 import Foundation
 
 /// Estadísticas de progreso del usuario
-struct UserStats: Equatable, Sendable {
-    let coursesCompleted: Int
-    let studyHoursTotal: Int
-    let currentStreakDays: Int
-    let totalPoints: Int
-    let rank: String
+public struct UserStats: Equatable, Sendable {
+    public let coursesCompleted: Int
+    public let studyHoursTotal: Int
+    public let currentStreakDays: Int
+    public let totalPoints: Int
+    public let rank: String
+
+    public init(
+        coursesCompleted: Int,
+        studyHoursTotal: Int,
+        currentStreakDays: Int,
+        totalPoints: Int,
+        rank: String
+    ) {
+        self.coursesCompleted = coursesCompleted
+        self.studyHoursTotal = studyHoursTotal
+        self.currentStreakDays = currentStreakDays
+        self.totalPoints = totalPoints
+        self.rank = rank
+    }
 
     /// Estadísticas vacías para estado inicial
-    static let empty = UserStats(
+    public static let empty = UserStats(
         coursesCompleted: 0,
         studyHoursTotal: 0,
         currentStreakDays: 0,
@@ -28,7 +42,7 @@ struct UserStats: Equatable, Sendable {
 
 // MARK: - Formatted Values
 
-extension UserStats {
+public extension UserStats {
     /// Horas formateadas (ej: "48h")
     var formattedStudyHours: String {
         "\(studyHoursTotal)h"
@@ -52,7 +66,7 @@ extension UserStats {
 
 // MARK: - Mock para Previews y Tests
 
-extension UserStats {
+public extension UserStats {
     static let mock = UserStats(
         coursesCompleted: 12,
         studyHoursTotal: 48,

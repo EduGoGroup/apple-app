@@ -16,7 +16,7 @@ import Foundation
 /// ver la extensión en `Presentation/Extensions/UserRole+UI.swift`.
 ///
 /// - Note: Cumple Clean Architecture - Domain Layer puro
-enum UserRole: String, Codable, Sendable {
+public enum UserRole: String, Codable, Sendable {
     case student
     case teacher
     case admin
@@ -25,12 +25,12 @@ enum UserRole: String, Codable, Sendable {
     // MARK: - Business Logic Properties
 
     /// Indica si el rol tiene privilegios administrativos
-    var hasAdminPrivileges: Bool {
+    public var hasAdminPrivileges: Bool {
         self == .admin
     }
 
     /// Indica si el rol puede gestionar estudiantes
-    var canManageStudents: Bool {
+    public var canManageStudents: Bool {
         switch self {
         case .teacher, .admin:
             return true
@@ -40,7 +40,7 @@ enum UserRole: String, Codable, Sendable {
     }
 
     /// Indica si el rol puede crear contenido educativo
-    var canCreateContent: Bool {
+    public var canCreateContent: Bool {
         switch self {
         case .teacher, .admin:
             return true
@@ -50,7 +50,7 @@ enum UserRole: String, Codable, Sendable {
     }
 
     /// Indica si el rol puede ver reportes de progreso
-    var canViewProgressReports: Bool {
+    public var canViewProgressReports: Bool {
         switch self {
         case .teacher, .admin, .parent:
             return true
@@ -60,7 +60,7 @@ enum UserRole: String, Codable, Sendable {
     }
 
     /// Indica si el rol puede calificar trabajos
-    var canGrade: Bool {
+    public var canGrade: Bool {
         switch self {
         case .teacher, .admin:
             return true
@@ -70,7 +70,7 @@ enum UserRole: String, Codable, Sendable {
     }
 
     /// Nivel jerárquico del rol (para ordenamiento)
-    var hierarchyLevel: Int {
+    public var hierarchyLevel: Int {
         switch self {
         case .admin:
             return 3

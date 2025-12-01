@@ -10,11 +10,16 @@ import SwiftUI
 /// Shape personalizado con bordes redondeados estilo "liquid"
 /// Proporciona esquinas más orgánicas y fluidas que RoundedRectangle
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct LiquidRoundedRectangle: Shape {
-    var cornerRadius: CGFloat
-    var smoothness: CGFloat = 0.6
+public struct LiquidRoundedRectangle: Shape {
+    public var cornerRadius: CGFloat
+    public var smoothness: CGFloat = 0.6
 
-    var animatableData: AnimatablePair<CGFloat, CGFloat> {
+    public init(cornerRadius: CGFloat, smoothness: CGFloat = 0.6) {
+        self.cornerRadius = cornerRadius
+        self.smoothness = smoothness
+    }
+
+    public var animatableData: AnimatablePair<CGFloat, CGFloat> {
         get { AnimatablePair(cornerRadius, smoothness) }
         set {
             cornerRadius = newValue.first
@@ -22,7 +27,7 @@ struct LiquidRoundedRectangle: Shape {
         }
     }
 
-    func path(in rect: CGRect) -> Path {
+    public func path(in rect: CGRect) -> Path {
         var path = Path()
 
         let width = rect.width
@@ -83,7 +88,7 @@ struct LiquidRoundedRectangle: Shape {
 
 /// Enum para definir shapes que pueden hacer morphing
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum MorphableShape {
+public enum MorphableShape {
     case circle
     case roundedRectangle(cornerRadius: CGFloat)
     case liquidRectangle(cornerRadius: CGFloat, smoothness: CGFloat)
@@ -94,13 +99,20 @@ enum MorphableShape {
 
 /// ViewModifier para animar morphing entre shapes
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct ShapeMorphingModifier: ViewModifier {
-    let fromRadius: CGFloat
-    let toRadius: CGFloat
-    let progress: CGFloat
-    let smoothness: CGFloat
+public struct ShapeMorphingModifier: ViewModifier {
+    public let fromRadius: CGFloat
+    public let toRadius: CGFloat
+    public let progress: CGFloat
+    public let smoothness: CGFloat
 
-    func body(content: Content) -> some View {
+    public init(fromRadius: CGFloat, toRadius: CGFloat, progress: CGFloat, smoothness: CGFloat) {
+        self.fromRadius = fromRadius
+        self.toRadius = toRadius
+        self.progress = progress
+        self.smoothness = smoothness
+    }
+
+    public func body(content: Content) -> some View {
         let currentRadius = fromRadius + (toRadius - fromRadius) * progress
 
         content
@@ -116,7 +128,7 @@ struct ShapeMorphingModifier: ViewModifier {
 // MARK: - View Extensions
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica un shape con morphing animado
     /// - Parameters:
     ///   - fromRadius: Radio inicial

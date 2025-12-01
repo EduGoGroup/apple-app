@@ -10,7 +10,7 @@ import Foundation
 
 /// Caso de uso para obtener estadísticas del usuario
 @MainActor
-protocol GetUserStatsUseCase: Sendable {
+public protocol GetUserStatsUseCase: Sendable {
     /// Ejecuta el caso de uso
     /// - Returns: Estadísticas del usuario o error
     func execute() async -> Result<UserStats, AppError>
@@ -18,14 +18,14 @@ protocol GetUserStatsUseCase: Sendable {
 
 /// Implementación por defecto
 @MainActor
-final class DefaultGetUserStatsUseCase: GetUserStatsUseCase {
+public final class DefaultGetUserStatsUseCase: GetUserStatsUseCase {
     private let statsRepository: StatsRepository
 
-    nonisolated init(statsRepository: StatsRepository) {
+    public nonisolated init(statsRepository: StatsRepository) {
         self.statsRepository = statsRepository
     }
 
-    func execute() async -> Result<UserStats, AppError> {
+    public func execute() async -> Result<UserStats, AppError> {
         await statsRepository.getUserStats()
     }
 }

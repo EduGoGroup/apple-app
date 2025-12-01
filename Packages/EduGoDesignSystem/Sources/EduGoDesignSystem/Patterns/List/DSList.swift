@@ -29,12 +29,12 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSList<Data: RandomAccessCollection, RowContent: View>: View where Data.Element: Identifiable {
-    let data: Data
-    @ViewBuilder let rowContent: (Data.Element) -> RowContent
-    let headerTitle: String?
-    let glassIntensity: LiquidGlassIntensity
-    let emptyState: AnyView?
+public struct DSList<Data: RandomAccessCollection, RowContent: View>: View where Data.Element: Identifiable {
+    public let data: Data
+    @ViewBuilder public let rowContent: (Data.Element) -> RowContent
+    public let headerTitle: String?
+    public let glassIntensity: LiquidGlassIntensity
+    public let emptyState: AnyView?
 
     /// Crea un List con glass header
     ///
@@ -44,7 +44,7 @@ struct DSList<Data: RandomAccessCollection, RowContent: View>: View where Data.E
     ///   - glassIntensity: Intensidad del glass effect
     ///   - emptyState: Vista cuando no hay datos (opcional)
     ///   - rowContent: Contenido de cada row
-    init(
+    public init(
         data: Data,
         headerTitle: String? = nil,
         glassIntensity: LiquidGlassIntensity = .subtle,
@@ -58,7 +58,7 @@ struct DSList<Data: RandomAccessCollection, RowContent: View>: View where Data.E
         self.rowContent = rowContent
     }
 
-    var body: some View {
+    public var body: some View {
         if data.isEmpty, let empty = emptyState {
             empty
         } else {
@@ -103,14 +103,14 @@ struct DSList<Data: RandomAccessCollection, RowContent: View>: View where Data.E
 
 /// Default empty state view
 @MainActor
-struct DSListEmptyState: View {
-    let icon: String
-    let title: String
-    let message: String
-    let action: (() -> Void)?
-    let actionTitle: String?
+public struct DSListEmptyState: View {
+    public let icon: String
+    public let title: String
+    public let message: String
+    public let action: (() -> Void)?
+    public let actionTitle: String?
 
-    init(
+    public init(
         icon: String = "tray",
         title: String = "No hay elementos",
         message: String = "No se encontraron elementos para mostrar",
@@ -124,7 +124,7 @@ struct DSListEmptyState: View {
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: DSSpacing.large) {
             Image(systemName: icon)
                 .font(.system(size: 60))

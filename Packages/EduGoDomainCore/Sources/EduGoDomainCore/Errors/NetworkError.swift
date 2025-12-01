@@ -8,7 +8,7 @@
 import Foundation
 
 /// Errores relacionados con operaciones de red
-enum NetworkError: Error, Equatable, Sendable {
+public enum NetworkError: Error, Equatable, Sendable {
     /// No hay conexión a internet
     case noConnection
 
@@ -38,7 +38,7 @@ enum NetworkError: Error, Equatable, Sendable {
 
     /// Mensaje amigable para mostrar al usuario
     /// SPEC-010: Migrado a Localizable.xcstrings
-    var userMessage: String {
+    public var userMessage: String {
         switch self {
         case .noConnection:
             return String(localized: "error.network.noConnection")
@@ -62,7 +62,7 @@ enum NetworkError: Error, Equatable, Sendable {
     }
 
     /// Mensaje técnico para logs y debugging
-    var technicalMessage: String {
+    public var technicalMessage: String {
         switch self {
         case .noConnection:
             return "Network connection unavailable"
@@ -87,7 +87,7 @@ enum NetworkError: Error, Equatable, Sendable {
 
     /// Indica si el error es un conflicto de sincronización (HTTP 409)
     /// - SPEC-013: Usado por OfflineQueue para conflict resolution
-    var isConflict: Bool {
+    public var isConflict: Bool {
         if case .serverError(409) = self {
             return true
         }

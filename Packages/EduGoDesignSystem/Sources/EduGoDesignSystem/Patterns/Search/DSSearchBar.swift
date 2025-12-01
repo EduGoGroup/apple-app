@@ -10,16 +10,16 @@ import SwiftUI
 /// Barra de búsqueda reutilizable con efecto Glass
 /// Soporta búsqueda en tiempo real, sugerencias y estados
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSSearchBar: View {
-    @Binding var text: String
+public struct DSSearchBar: View {
+    @Binding public var text: String
     @FocusState private var isFocused: Bool
 
-    let placeholder: String
-    let showCancelButton: Bool
-    let onSubmit: (() -> Void)?
-    let onCancel: (() -> Void)?
+    public let placeholder: String
+    public let showCancelButton: Bool
+    public let onSubmit: (() -> Void)?
+    public let onCancel: (() -> Void)?
 
-    init(
+    public init(
         text: Binding<String>,
         placeholder: String = "Buscar...",
         showCancelButton: Bool = true,
@@ -33,7 +33,7 @@ struct DSSearchBar: View {
         self.onCancel = onCancel
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: DSSpacing.medium) {
             searchField
 
@@ -108,14 +108,14 @@ struct DSSearchBar: View {
 
 /// Barra de búsqueda con efecto Glass prominent
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSGlassSearchBar: View {
-    @Binding var text: String
+public struct DSGlassSearchBar: View {
+    @Binding public var text: String
     @FocusState private var isFocused: Bool
 
-    let placeholder: String
-    let visualEffect: DSVisualEffectStyle
+    public let placeholder: String
+    public let visualEffect: DSVisualEffectStyle
 
-    init(
+    public init(
         text: Binding<String>,
         placeholder: String = "Buscar...",
         visualEffect: DSVisualEffectStyle = .prominent
@@ -125,7 +125,7 @@ struct DSGlassSearchBar: View {
         self.visualEffect = visualEffect
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: DSSpacing.small) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(isFocused ? DSColors.accent : DSColors.textSecondary)

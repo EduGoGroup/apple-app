@@ -10,25 +10,47 @@ import Foundation
 import SwiftUI
 
 /// Representa un curso en el que está inscrito el usuario
-struct Course: Identifiable, Equatable, Sendable {
-    let id: String
-    let title: String
-    let description: String
-    let progress: Double // 0.0 - 1.0
-    let thumbnailURL: URL?
-    let instructor: String
-    let category: CourseCategory
-    let totalLessons: Int
-    let completedLessons: Int
+public struct Course: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let title: String
+    public let description: String
+    public let progress: Double // 0.0 - 1.0
+    public let thumbnailURL: URL?
+    public let instructor: String
+    public let category: CourseCategory
+    public let totalLessons: Int
+    public let completedLessons: Int
 
-    enum CourseCategory: String, Sendable, CaseIterable {
+    public init(
+        id: String,
+        title: String,
+        description: String,
+        progress: Double,
+        thumbnailURL: URL?,
+        instructor: String,
+        category: CourseCategory,
+        totalLessons: Int,
+        completedLessons: Int
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.progress = progress
+        self.thumbnailURL = thumbnailURL
+        self.instructor = instructor
+        self.category = category
+        self.totalLessons = totalLessons
+        self.completedLessons = completedLessons
+    }
+
+    public enum CourseCategory: String, Sendable, CaseIterable {
         case programming = "programming"
         case design = "design"
         case business = "business"
         case language = "language"
         case other = "other"
 
-        var displayName: String {
+        public var displayName: String {
             switch self {
             case .programming: return "Programación"
             case .design: return "Diseño"
@@ -38,7 +60,7 @@ struct Course: Identifiable, Equatable, Sendable {
             }
         }
 
-        var color: Color {
+        public var color: Color {
             switch self {
             case .programming: return .blue
             case .design: return .purple
@@ -48,7 +70,7 @@ struct Course: Identifiable, Equatable, Sendable {
             }
         }
 
-        var iconName: String {
+        public var iconName: String {
             switch self {
             case .programming: return "chevron.left.forwardslash.chevron.right"
             case .design: return "paintbrush.fill"
@@ -62,7 +84,7 @@ struct Course: Identifiable, Equatable, Sendable {
 
 // MARK: - Computed Properties
 
-extension Course {
+public extension Course {
     /// Porcentaje de progreso formateado (ej: "75%")
     var progressPercentage: String {
         "\(Int(progress * 100))%"
@@ -86,7 +108,7 @@ extension Course {
 
 // MARK: - Mock para Previews y Tests
 
-extension Course {
+public extension Course {
     static let mock = Course(
         id: "mock-1",
         title: "Curso de Prueba",

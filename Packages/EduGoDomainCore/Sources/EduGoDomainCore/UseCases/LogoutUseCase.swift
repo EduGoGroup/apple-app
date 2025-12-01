@@ -12,7 +12,7 @@ import Foundation
 /// Aislado a MainActor porque depende de AuthRepository que es @MainActor
 /// y es usado por ViewModels que también son @MainActor.
 @MainActor
-protocol LogoutUseCase: Sendable {
+public protocol LogoutUseCase: Sendable {
     /// Ejecuta el proceso de cierre de sesión
     /// - Returns: Result con Void en éxito o AppError
     func execute() async -> Result<Void, AppError>
@@ -20,14 +20,14 @@ protocol LogoutUseCase: Sendable {
 
 /// Implementación por defecto del caso de uso de logout
 @MainActor
-final class DefaultLogoutUseCase: LogoutUseCase {
+public final class DefaultLogoutUseCase: LogoutUseCase {
     private let authRepository: AuthRepository
-    
-    init(authRepository: AuthRepository) {
+
+    public init(authRepository: AuthRepository) {
         self.authRepository = authRepository
     }
-    
-    func execute() async -> Result<Void, AppError> {
+
+    public func execute() async -> Result<Void, AppError> {
         // Delegación directa al repositorio
         // No requiere validaciones adicionales
         await authRepository.logout()

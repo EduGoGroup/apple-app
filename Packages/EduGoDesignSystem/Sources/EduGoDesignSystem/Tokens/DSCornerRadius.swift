@@ -8,25 +8,25 @@
 import Foundation
 
 /// Sistema de bordes redondeados consistente
-enum DSCornerRadius {
+public enum DSCornerRadius {
     /// Sin bordes redondeados
-    static let none: CGFloat = 0
+    public static let none: CGFloat = 0
 
     /// Bordes ligeramente redondeados (4pt)
-    static let small: CGFloat = 4
+    public static let small: CGFloat = 4
 
     /// Bordes medianamente redondeados (8pt)
-    static let medium: CGFloat = 8
+    public static let medium: CGFloat = 8
 
     /// Bordes redondeados (12pt) - Default para la mayoría de componentes
-    static let large: CGFloat = 12
+    public static let large: CGFloat = 12
 
     /// Bordes muy redondeados (16pt)
-    static let xl: CGFloat = 16
+    public static let xl: CGFloat = 16
 
     /// Bordes extra redondeados (24pt)
-    static let xxl: CGFloat = 24
+    public static let xxl: CGFloat = 24
 
     /// Bordes completamente redondeados (circular)
-    static let circular: CGFloat = 9999
+    public static let circular: CGFloat = 9999
 }

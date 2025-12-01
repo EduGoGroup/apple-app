@@ -8,21 +8,21 @@
 import Foundation
 
 /// Error principal de la aplicación que encapsula todos los tipos de errores
-enum AppError: Error, Equatable, Sendable {
+public enum AppError: Error, Equatable, Sendable {
     /// Error de red
     case network(NetworkError)
-    
+
     /// Error de validación
     case validation(ValidationError)
-    
+
     /// Error de lógica de negocio
     case business(BusinessError)
-    
+
     /// Error del sistema
     case system(SystemError)
-    
+
     /// Mensaje amigable para mostrar al usuario
-    var userMessage: String {
+    public var userMessage: String {
         switch self {
         case .network(let error):
             return error.userMessage
@@ -34,9 +34,9 @@ enum AppError: Error, Equatable, Sendable {
             return error.userMessage
         }
     }
-    
+
     /// Mensaje técnico para logs y debugging
-    var technicalMessage: String {
+    public var technicalMessage: String {
         switch self {
         case .network(let error):
             return "Network: \(error.technicalMessage)"
@@ -48,9 +48,9 @@ enum AppError: Error, Equatable, Sendable {
             return "System: \(error.technicalMessage)"
         }
     }
-    
+
     /// Indica si el error es recuperable (el usuario puede reintentar)
-    var isRecoverable: Bool {
+    public var isRecoverable: Bool {
         switch self {
         case .network(.timeout), .network(.noConnection), .network(.serverError):
             return true
@@ -68,9 +68,9 @@ enum AppError: Error, Equatable, Sendable {
             return true
         }
     }
-    
+
     /// Indica si se debe mostrar al usuario (algunos errores internos no deben mostrarse)
-    var shouldDisplayToUser: Bool {
+    public var shouldDisplayToUser: Bool {
         switch self {
         case .system(.cancelled):
             return false
@@ -82,11 +82,11 @@ enum AppError: Error, Equatable, Sendable {
 
 // MARK: - LocalizedError Conformance
 extension AppError: LocalizedError {
-    var errorDescription: String? {
+    public var errorDescription: String? {
         userMessage
     }
-    
-    var failureReason: String? {
+
+    public var failureReason: String? {
         technicalMessage
     }
 }

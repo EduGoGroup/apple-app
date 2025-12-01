@@ -10,7 +10,7 @@ import Foundation
 
 /// Protocolo para gestionar cursos del usuario
 @MainActor
-protocol CoursesRepository: Sendable {
+public protocol CoursesRepository: Sendable {
     /// Obtiene los cursos recientes del usuario (ordenados por última actividad)
     /// - Parameter limit: Número máximo de cursos a retornar
     /// - Returns: Lista de cursos o error

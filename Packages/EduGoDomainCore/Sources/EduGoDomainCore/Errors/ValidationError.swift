@@ -8,7 +8,7 @@
 import Foundation
 
 /// Errores de validación de datos de entrada
-enum ValidationError: Error, Equatable, Sendable {
+public enum ValidationError: Error, Equatable, Sendable {
     /// Email vacío
     case emptyEmail
 
@@ -38,7 +38,7 @@ enum ValidationError: Error, Equatable, Sendable {
 
     /// Mensaje amigable para mostrar al usuario
     /// SPEC-010: Migrado a Localizable.xcstrings
-    var userMessage: String {
+    public var userMessage: String {
         switch self {
         case .emptyEmail:
             return String(localized: "error.validation.emptyEmail")
@@ -62,7 +62,7 @@ enum ValidationError: Error, Equatable, Sendable {
     }
 
     /// Mensaje técnico para logs y debugging
-    var technicalMessage: String {
+    public var technicalMessage: String {
         switch self {
         case .emptyEmail:
             return "Validation failed: Email field is empty"

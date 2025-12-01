@@ -40,12 +40,12 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSSplitView<Sidebar: View, Content: View, Detail: View>: View {
-    let sidebarGlassIntensity: LiquidGlassIntensity
-    let contentGlassIntensity: LiquidGlassIntensity
-    @ViewBuilder let sidebar: () -> Sidebar
-    @ViewBuilder let content: () -> Content
-    @ViewBuilder let detail: () -> Detail
+public struct DSSplitView<Sidebar: View, Content: View, Detail: View>: View {
+    public let sidebarGlassIntensity: LiquidGlassIntensity
+    public let contentGlassIntensity: LiquidGlassIntensity
+    @ViewBuilder public let sidebar: () -> Sidebar
+    @ViewBuilder public let content: () -> Content
+    @ViewBuilder public let detail: () -> Detail
 
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
@@ -57,7 +57,7 @@ struct DSSplitView<Sidebar: View, Content: View, Detail: View>: View {
     ///   - sidebar: Contenido de la barra lateral
     ///   - content: Contenido de la columna central
     ///   - detail: Contenido de la columna de detalle
-    init(
+    public init(
         sidebarGlassIntensity: LiquidGlassIntensity = .subtle,
         contentGlassIntensity: LiquidGlassIntensity = .standard,
         @ViewBuilder sidebar: @escaping () -> Sidebar,
@@ -71,7 +71,7 @@ struct DSSplitView<Sidebar: View, Content: View, Detail: View>: View {
         self.detail = detail
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             // Sidebar
             sidebar()
@@ -125,10 +125,10 @@ struct DSSplitView<Sidebar: View, Content: View, Detail: View>: View {
 /// }
 /// ```
 @MainActor
-struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
-    let sidebarGlassIntensity: LiquidGlassIntensity
-    @ViewBuilder let sidebar: () -> Sidebar
-    @ViewBuilder let detail: () -> Detail
+public struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
+    public let sidebarGlassIntensity: LiquidGlassIntensity
+    @ViewBuilder public let sidebar: () -> Sidebar
+    @ViewBuilder public let detail: () -> Detail
 
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
 
@@ -138,7 +138,7 @@ struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
     ///   - sidebarGlassIntensity: Intensidad glass para sidebar (iOS 18+)
     ///   - sidebar: Contenido de la barra lateral
     ///   - detail: Contenido de detalle
-    init(
+    public init(
         sidebarGlassIntensity: LiquidGlassIntensity = .subtle,
         @ViewBuilder sidebar: @escaping () -> Sidebar,
         @ViewBuilder detail: @escaping () -> Detail
@@ -148,7 +148,7 @@ struct DSTwoColumnSplitView<Sidebar: View, Detail: View>: View {
         self.detail = detail
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebar()
                 .background(sidebarBackground)

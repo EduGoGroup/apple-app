@@ -14,7 +14,7 @@ import Foundation
 ///
 /// Cuando un usuario edita datos offline y el servidor también los modifica,
 /// necesitamos una estrategia para resolver el conflicto.
-enum ConflictResolutionStrategy: Sendable {
+public enum ConflictResolutionStrategy: Sendable {
     /// El servidor siempre gana (default seguro)
     case serverWins
 
@@ -34,21 +34,35 @@ enum ConflictResolutionStrategy: Sendable {
 ///
 /// Contiene ambas versiones de los datos para que el resolver
 /// pueda tomar una decisión informada.
-struct SyncConflict: Sendable {
+public struct SyncConflict: Sendable {
     /// Datos locales (del cliente)
-    let localData: Data
+    public let localData: Data
 
     /// Datos del servidor
-    let serverData: Data
+    public let serverData: Data
 
     /// Timestamp del request original
-    let timestamp: Date
+    public let timestamp: Date
 
     /// Endpoint donde ocurrió el conflicto
-    let endpoint: String
+    public let endpoint: String
 
     /// Metadata adicional (opcional)
-    let metadata: [String: String]
+    public let metadata: [String: String]
+
+    public init(
+        localData: Data,
+        serverData: Data,
+        timestamp: Date,
+        endpoint: String,
+        metadata: [String: String] = [:]
+    ) {
+        self.localData = localData
+        self.serverData = serverData
+        self.timestamp = timestamp
+        self.endpoint = endpoint
+        self.metadata = metadata
+    }
 }
 
 // MARK: - Conflict Resolver Protocol
@@ -56,7 +70,7 @@ struct SyncConflict: Sendable {
 /// Protocol para resolver conflictos de sincronización
 ///
 /// Implementaciones pueden tener diferentes estrategias según el contexto.
-protocol ConflictResolver: Sendable {
+public protocol ConflictResolver: Sendable {
     /// Resuelve un conflicto usando la estrategia especificada
     /// - Parameters:
     ///   - conflict: El conflicto a resolver
@@ -74,8 +88,10 @@ protocol ConflictResolver: Sendable {
 ///
 /// Swift 6: Struct simple que implementa resolución sin aislamiento.
 /// Seguro para usar desde cualquier contexto, incluyendo actors.
-struct SimpleConflictResolver: ConflictResolver {
-    func resolve(
+public struct SimpleConflictResolver: ConflictResolver {
+    public init() {}
+
+    public func resolve(
         _ conflict: SyncConflict,
         strategy: ConflictResolutionStrategy
     ) async -> Data {
@@ -108,10 +124,12 @@ struct SimpleConflictResolver: ConflictResolver {
 /// para casos más complejos que requieran estado mutable.
 ///
 /// Swift 6: Actor sin @MainActor para permitir uso desde otros actors
-actor DefaultConflictResolver: ConflictResolver {
+public actor DefaultConflictResolver: ConflictResolver {
     // MARK: - Public Methods
 
-    func resolve(
+    public init() {}
+
+    public func resolve(
         _ conflict: SyncConflict,
         strategy: ConflictResolutionStrategy
     ) async -> Data {

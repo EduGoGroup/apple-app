@@ -15,7 +15,7 @@ import Foundation
 /// ver la extensión en `Presentation/Extensions/Theme+UI.swift`.
 ///
 /// - Note: Cumple Clean Architecture - Domain Layer puro
-enum Theme: String, Codable, CaseIterable, Sendable {
+public enum Theme: String, Codable, CaseIterable, Sendable {
     /// Tema claro
     case light
 
@@ -28,13 +28,13 @@ enum Theme: String, Codable, CaseIterable, Sendable {
     // MARK: - Business Logic Properties
 
     /// Tema por defecto para nuevos usuarios
-    static let `default`: Theme = .system
+    public static let `default`: Theme = .system
 
     /// Indica si es un tema explícito (no sigue al sistema)
     ///
     /// Útil para determinar si el usuario ha seleccionado activamente
     /// un tema o si está usando el predeterminado del sistema.
-    var isExplicit: Bool {
+    public var isExplicit: Bool {
         self != .system
     }
 
@@ -42,7 +42,7 @@ enum Theme: String, Codable, CaseIterable, Sendable {
     ///
     /// - Note: Para `.system`, esto es indeterminado y devuelve false.
     ///   Use `colorScheme` en la extensión UI para obtener el valor real.
-    var prefersDark: Bool {
+    public var prefersDark: Bool {
         self == .dark
     }
 }

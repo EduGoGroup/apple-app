@@ -25,20 +25,20 @@ import LocalAuthentication
 /// }
 /// ```
 @MainActor
-struct DSBiometricButton: View {
-    let action: () -> Void
-    let title: String?
+public struct DSBiometricButton: View {
+    public let action: () -> Void
+    public let title: String?
 
     @State private var biometricType: BiometricType = .none
     @State private var errorMessage: String?
 
-    enum BiometricType: Sendable {
+    public enum BiometricType: Sendable {
         case faceID
         case touchID
         case opticID
         case none
 
-        var iconName: String {
+        public var iconName: String {
             switch self {
             case .faceID: return "faceid"
             case .touchID: return "touchid"
@@ -47,7 +47,7 @@ struct DSBiometricButton: View {
             }
         }
 
-        var displayName: String {
+        public var displayName: String {
             switch self {
             case .faceID: return "Face ID"
             case .touchID: return "Touch ID"
@@ -62,7 +62,7 @@ struct DSBiometricButton: View {
     /// - Parameters:
     ///   - title: Título customizado (opcional)
     ///   - action: Acción al autenticar exitosamente
-    init(
+    public init(
         title: String? = nil,
         action: @escaping () -> Void
     ) {
@@ -70,7 +70,7 @@ struct DSBiometricButton: View {
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: authenticateWithBiometric) {
             HStack(spacing: DSSpacing.small) {
                 Image(systemName: biometricType.iconName)

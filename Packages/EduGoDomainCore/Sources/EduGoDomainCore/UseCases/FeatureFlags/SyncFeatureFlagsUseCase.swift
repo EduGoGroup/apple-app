@@ -27,14 +27,14 @@ import Foundation
 /// - Retorna `Result<Void, AppError>` (no throws)
 /// - No depende de estado mutable
 /// - Lógica de negocio pura
-struct SyncFeatureFlagsUseCase: Sendable {
+public struct SyncFeatureFlagsUseCase: Sendable {
     // MARK: - Properties
 
     private let repository: FeatureFlagRepository
 
     // MARK: - Initialization
 
-    nonisolated init(repository: FeatureFlagRepository) {
+    public nonisolated init(repository: FeatureFlagRepository) {
         self.repository = repository
     }
 
@@ -43,7 +43,7 @@ struct SyncFeatureFlagsUseCase: Sendable {
     /// Ejecuta la sincronización de feature flags
     ///
     /// - Returns: `Result` con éxito o error de sincronización
-    func execute() async -> Result<Void, AppError> {
+    public func execute() async -> Result<Void, AppError> {
         // Delegar al repositorio la sincronización
         return await repository.syncFlags()
     }
@@ -51,7 +51,7 @@ struct SyncFeatureFlagsUseCase: Sendable {
     /// Ejecuta la sincronización forzada (ignora cache)
     ///
     /// - Returns: `Result` con éxito o error de sincronización
-    func executeForced() async -> Result<Void, AppError> {
+    public func executeForced() async -> Result<Void, AppError> {
         // Delegar al repositorio la recarga forzada
         return await repository.forceRefresh()
     }

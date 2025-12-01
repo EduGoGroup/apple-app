@@ -31,12 +31,12 @@ import SwiftUI
 /// }
 /// .dsAlert($alert)
 /// ```
-struct DSAlert: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String?
-    let primaryButton: DSAlertButton
-    let secondaryButton: DSAlertButton?
+public struct DSAlert: Identifiable {
+    public let id = UUID()
+    public let title: String
+    public let message: String?
+    public let primaryButton: DSAlertButton
+    public let secondaryButton: DSAlertButton?
 
     /// Crea un Alert con uno o dos botones
     ///
@@ -45,7 +45,7 @@ struct DSAlert: Identifiable {
     ///   - message: Mensaje descriptivo (opcional)
     ///   - primaryButton: Botón principal
     ///   - secondaryButton: Botón secundario (opcional)
-    init(
+    public init(
         title: String,
         message: String? = nil,
         primaryButton: DSAlertButton,
@@ -58,7 +58,7 @@ struct DSAlert: Identifiable {
     }
 
     /// Crea un Alert simple con un solo botón OK
-    static func simple(
+    public static func simple(
         title: String,
         message: String? = nil,
         onDismiss: @escaping () -> Void = {}
@@ -71,7 +71,7 @@ struct DSAlert: Identifiable {
     }
 
     /// Crea un Alert de confirmación con botones Sí/No
-    static func confirmation(
+    public static func confirmation(
         title: String,
         message: String? = nil,
         onConfirm: @escaping () -> Void,
@@ -86,7 +86,7 @@ struct DSAlert: Identifiable {
     }
 
     /// Crea un Alert destructivo (ej: eliminar)
-    static func destructive(
+    public static func destructive(
         title: String,
         message: String? = nil,
         actionTitle: String = "Eliminar",
@@ -103,10 +103,10 @@ struct DSAlert: Identifiable {
 }
 
 /// Botón de Alert
-struct DSAlertButton {
-    let title: String
-    let role: ButtonRole?
-    let action: () -> Void
+public struct DSAlertButton {
+    public let title: String
+    public let role: ButtonRole?
+    public let action: () -> Void
 
     /// Crea un botón de Alert
     ///
@@ -114,7 +114,7 @@ struct DSAlertButton {
     ///   - title: Título del botón
     ///   - role: Rol del botón (cancel, destructive)
     ///   - action: Acción al presionar
-    init(
+    public init(
         title: String,
         role: ButtonRole? = nil,
         action: @escaping () -> Void
@@ -127,7 +127,7 @@ struct DSAlertButton {
 
 // MARK: - View Extension
 
-extension View {
+public extension View {
     /// Presenta un DSAlert
     ///
     /// **Uso:**

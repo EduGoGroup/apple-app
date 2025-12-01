@@ -30,10 +30,10 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSForm<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-    let glassIntensity: LiquidGlassIntensity
-    let onSubmit: () -> Void
+public struct DSForm<Content: View>: View {
+    @ViewBuilder public let content: () -> Content
+    public let glassIntensity: LiquidGlassIntensity
+    public let onSubmit: () -> Void
 
     /// Crea un Form con glass background
     ///
@@ -41,7 +41,7 @@ struct DSForm<Content: View>: View {
     ///   - glassIntensity: Intensidad del glass effect
     ///   - onSubmit: Acción al enviar el form
     ///   - content: Contenido del form
-    init(
+    public init(
         glassIntensity: LiquidGlassIntensity = .subtle,
         onSubmit: @escaping () -> Void = {},
         @ViewBuilder content: @escaping () -> Content
@@ -51,7 +51,7 @@ struct DSForm<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         Form {
             content()
         }

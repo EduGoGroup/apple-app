@@ -13,7 +13,7 @@ import Foundation
 /// - Important: Las implementaciones deben ser @MainActor para garantizar
 ///   thread-safety con SwiftUI
 @MainActor
-protocol ActivityRepository: Sendable {
+public protocol ActivityRepository: Sendable {
     /// Obtiene las actividades recientes del usuario
     /// - Parameter limit: Número máximo de actividades a retornar
     /// - Returns: Lista de actividades ordenadas por fecha (más reciente primero) o error

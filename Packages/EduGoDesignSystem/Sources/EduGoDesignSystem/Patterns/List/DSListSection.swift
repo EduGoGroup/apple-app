@@ -27,12 +27,12 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSListSection<Content: View>: View {
-    let title: String?
-    let footer: String?
-    let useGlassHeader: Bool
-    let glassIntensity: LiquidGlassIntensity
-    @ViewBuilder let content: () -> Content
+public struct DSListSection<Content: View>: View {
+    public let title: String?
+    public let footer: String?
+    public let useGlassHeader: Bool
+    public let glassIntensity: LiquidGlassIntensity
+    @ViewBuilder public let content: () -> Content
 
     /// Crea una sección de lista
     ///
@@ -42,7 +42,7 @@ struct DSListSection<Content: View>: View {
     ///   - useGlassHeader: Usar glass header (iOS 18+)
     ///   - glassIntensity: Intensidad del glass effect
     ///   - content: Contenido de la sección
-    init(
+    public init(
         title: String? = nil,
         footer: String? = nil,
         useGlassHeader: Bool = false,
@@ -56,7 +56,7 @@ struct DSListSection<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         Section {
             content()
         } header: {

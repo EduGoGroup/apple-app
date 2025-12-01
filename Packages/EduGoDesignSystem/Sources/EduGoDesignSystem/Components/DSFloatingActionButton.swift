@@ -37,19 +37,19 @@ import SwiftUI
 /// )
 /// ```
 @MainActor
-struct DSFloatingActionButton: View {
-    let icon: String
-    let label: String?
-    let size: FABSize
-    let glassIntensity: LiquidGlassIntensity
-    let tint: Color
-    let action: () -> Void
+public struct DSFloatingActionButton: View {
+    public let icon: String
+    public let label: String?
+    public let size: FABSize
+    public let glassIntensity: LiquidGlassIntensity
+    public let tint: Color
+    public let action: () -> Void
 
     @State private var isPressed = false
     @State private var isHovered = false
 
     /// Tamaños de FAB disponibles
-    enum FABSize: Sendable {
+    public enum FABSize: Sendable {
         /// Mini FAB - 40x40
         case mini
         /// Standard FAB - 56x56
@@ -57,14 +57,14 @@ struct DSFloatingActionButton: View {
         /// Extended FAB - 56 alto, ancho variable con label
         case extended
 
-        var dimension: CGFloat {
+        public var dimension: CGFloat {
             switch self {
             case .mini: return 40
             case .standard, .extended: return 56
             }
         }
 
-        var iconSize: Font {
+        public var iconSize: Font {
             switch self {
             case .mini: return .title3
             case .standard, .extended: return .title2
@@ -81,7 +81,7 @@ struct DSFloatingActionButton: View {
     ///   - glassIntensity: Intensidad del glass effect
     ///   - tint: Color de tint
     ///   - action: Acción al presionar
-    init(
+    public init(
         icon: String,
         label: String? = nil,
         size: FABSize = .standard,
@@ -97,7 +97,7 @@ struct DSFloatingActionButton: View {
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: handleAction) {
             fabContent
         }
@@ -218,18 +218,23 @@ private struct AnyShape: Shape {
 /// }
 /// ```
 @MainActor
-struct FABContainer<Content: View>: View {
-    let position: FABPosition
-    @ViewBuilder let content: () -> Content
+public struct FABContainer<Content: View>: View {
+    public let position: FABPosition
+    @ViewBuilder public let content: () -> Content
 
-    enum FABPosition: Sendable {
+    public enum FABPosition: Sendable {
         case bottomTrailing
         case bottomLeading
         case topTrailing
         case topLeading
     }
 
-    var body: some View {
+    public init(position: FABPosition, @ViewBuilder content: @escaping () -> Content) {
+        self.position = position
+        self.content = content
+    }
+
+    public var body: some View {
         VStack {
             if position == .bottomTrailing || position == .bottomLeading {
                 Spacer()

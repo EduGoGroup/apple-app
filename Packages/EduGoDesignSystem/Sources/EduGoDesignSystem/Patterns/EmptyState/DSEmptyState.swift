@@ -10,15 +10,15 @@ import SwiftUI
 /// Vista reutilizable para estados vacíos
 /// Muestra iconos, títulos, mensajes y acciones opcionales
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSEmptyState: View {
-    let icon: String
-    let title: String
-    let message: String?
-    let actionTitle: String?
-    let action: (() -> Void)?
-    let style: EmptyStateStyle
+public struct DSEmptyState: View {
+    public let icon: String
+    public let title: String
+    public let message: String?
+    public let actionTitle: String?
+    public let action: (() -> Void)?
+    public let style: EmptyStateStyle
 
-    init(
+    public init(
         icon: String,
         title: String,
         message: String? = nil,
@@ -34,7 +34,7 @@ struct DSEmptyState: View {
         self.style = style
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: DSSpacing.xl) {
             // Icon
             iconView
@@ -113,13 +113,13 @@ struct DSEmptyState: View {
 
 /// Estilos de Empty State
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum EmptyStateStyle {
+public enum EmptyStateStyle {
     case standard
     case compact
     case colorful(Color)
     case glass
 
-    var iconSize: CGFloat {
+    public var iconSize: CGFloat {
         switch self {
         case .standard, .colorful, .glass:
             return 60
@@ -128,7 +128,7 @@ enum EmptyStateStyle {
         }
     }
 
-    var titleFont: Font {
+    public var titleFont: Font {
         switch self {
         case .standard, .colorful, .glass:
             return DSTypography.title2
@@ -137,7 +137,7 @@ enum EmptyStateStyle {
         }
     }
 
-    var messageFont: Font {
+    public var messageFont: Font {
         switch self {
         case .standard, .colorful, .glass:
             return DSTypography.body
@@ -146,7 +146,7 @@ enum EmptyStateStyle {
         }
     }
 
-    var maxWidth: CGFloat {
+    public var maxWidth: CGFloat {
         switch self {
         case .standard, .colorful, .glass:
             return 400
@@ -159,7 +159,7 @@ enum EmptyStateStyle {
 // MARK: - Preset Empty States
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension DSEmptyState {
+public extension DSEmptyState {
     /// Empty state para listas vacías
     static func emptyList(
         title: String = "No hay elementos",

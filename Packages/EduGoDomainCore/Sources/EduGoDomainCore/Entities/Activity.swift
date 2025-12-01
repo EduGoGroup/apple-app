@@ -10,21 +10,35 @@ import Foundation
 import SwiftUI
 
 /// Representa una actividad reciente del usuario
-struct Activity: Identifiable, Equatable, Sendable {
-    let id: String
-    let type: ActivityType
-    let title: String
-    let timestamp: Date
-    let iconName: String
+public struct Activity: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let type: ActivityType
+    public let title: String
+    public let timestamp: Date
+    public let iconName: String
 
-    enum ActivityType: String, Sendable, CaseIterable {
+    public init(
+        id: String,
+        type: ActivityType,
+        title: String,
+        timestamp: Date,
+        iconName: String
+    ) {
+        self.id = id
+        self.type = type
+        self.title = title
+        self.timestamp = timestamp
+        self.iconName = iconName
+    }
+
+    public enum ActivityType: String, Sendable, CaseIterable {
         case moduleCompleted = "module_completed"
         case badgeEarned = "badge_earned"
         case forumMessage = "forum_message"
         case courseStarted = "course_started"
         case quizCompleted = "quiz_completed"
 
-        var color: Color {
+        public var color: Color {
             switch self {
             case .moduleCompleted: return .green
             case .badgeEarned: return .yellow
@@ -36,7 +50,7 @@ struct Activity: Identifiable, Equatable, Sendable {
     }
 }
 
-extension Activity {
+public extension Activity {
     /// Tiempo relativo desde la actividad (ej: "Hace 2 horas")
     var relativeTimeString: String {
         let formatter = RelativeDateTimeFormatter()
@@ -53,7 +67,7 @@ extension Activity {
 
 // MARK: - Mock para Previews y Tests
 
-extension Activity {
+public extension Activity {
     static let mock = Activity(
         id: "mock-1",
         type: .moduleCompleted,

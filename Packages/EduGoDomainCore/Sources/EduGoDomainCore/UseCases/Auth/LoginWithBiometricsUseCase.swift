@@ -13,7 +13,7 @@ import Foundation
 /// Aislado a MainActor porque depende de AuthRepository que es @MainActor
 /// y es usado por ViewModels que también son @MainActor.
 @MainActor
-protocol LoginWithBiometricsUseCase: Sendable {
+public protocol LoginWithBiometricsUseCase: Sendable {
     /// Ejecuta login usando las credenciales almacenadas y autenticación biométrica
     /// - Returns: Usuario autenticado o error
     func execute() async -> Result<User, AppError>
@@ -21,14 +21,14 @@ protocol LoginWithBiometricsUseCase: Sendable {
 
 /// Implementación del caso de uso de login biométrico
 @MainActor
-final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
+public final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
     private let authRepository: AuthRepository
 
-    init(authRepository: AuthRepository) {
+    public init(authRepository: AuthRepository) {
         self.authRepository = authRepository
     }
 
-    func execute() async -> Result<User, AppError> {
+    public func execute() async -> Result<User, AppError> {
         // Delegar al repositorio que maneja la lógica completa:
         // 1. Verificar disponibilidad de biometría
         // 2. Solicitar autenticación biométrica
@@ -43,11 +43,13 @@ final class DefaultLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
 #if DEBUG
 /// Mock para testing
 @MainActor
-final class MockLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
-    var result: Result<User, AppError> = .success(.fixture())
-    var executeCallCount = 0
+public final class MockLoginWithBiometricsUseCase: LoginWithBiometricsUseCase {
+    public var result: Result<User, AppError> = .success(.fixture())
+    public var executeCallCount = 0
 
-    func execute() async -> Result<User, AppError> {
+    public init() {}
+
+    public func execute() async -> Result<User, AppError> {
         executeCallCount += 1
         return result
     }

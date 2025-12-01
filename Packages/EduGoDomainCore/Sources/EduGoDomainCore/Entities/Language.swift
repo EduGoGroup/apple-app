@@ -17,7 +17,7 @@ import Foundation
 ///
 /// - Note: Cumple Clean Architecture - Domain Layer puro
 /// - Note: Conforme a iOS 15+ String Catalog (xcstrings)
-enum Language: String, Codable, CaseIterable, Sendable {
+public enum Language: String, Codable, CaseIterable, Sendable {
     /// Español
     case spanish = "es"
 
@@ -27,12 +27,12 @@ enum Language: String, Codable, CaseIterable, Sendable {
     // MARK: - Business Logic Properties
 
     /// Código de idioma ISO 639-1
-    nonisolated var code: String {
+    public nonisolated var code: String {
         rawValue
     }
 
     /// Idioma predeterminado de la aplicación
-    nonisolated static var `default`: Language {
+    public nonisolated static var `default`: Language {
         .spanish
     }
 
@@ -43,7 +43,7 @@ enum Language: String, Codable, CaseIterable, Sendable {
     /// más cercano.
     ///
     /// - Returns: Language soportado más cercano al idioma del sistema
-    nonisolated static func systemLanguage() -> Language {
+    public nonisolated static func systemLanguage() -> Language {
         let preferredLanguages = Locale.preferredLanguages
 
         for preferredLanguage in preferredLanguages {
@@ -59,7 +59,7 @@ enum Language: String, Codable, CaseIterable, Sendable {
     }
 
     /// Indica si es el idioma predeterminado
-    nonisolated var isDefault: Bool {
+    public nonisolated var isDefault: Bool {
         self == .default
     }
 }

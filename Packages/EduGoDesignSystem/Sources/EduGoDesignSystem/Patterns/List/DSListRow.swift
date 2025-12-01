@@ -30,11 +30,11 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSListRow<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-    let leadingSwipeActions: [DSSwipeAction]?
-    let trailingSwipeActions: [DSSwipeAction]?
-    let allowsFullSwipe: Bool
+public struct DSListRow<Content: View>: View {
+    @ViewBuilder public let content: () -> Content
+    public let leadingSwipeActions: [DSSwipeAction]?
+    public let trailingSwipeActions: [DSSwipeAction]?
+    public let allowsFullSwipe: Bool
 
     /// Crea un List Row
     ///
@@ -43,7 +43,7 @@ struct DSListRow<Content: View>: View {
     ///   - trailingSwipeActions: Acciones al swipe desde la derecha (opcional)
     ///   - allowsFullSwipe: Permitir full swipe (default: false)
     ///   - content: Contenido del row
-    init(
+    public init(
         leadingSwipeActions: [DSSwipeAction]? = nil,
         trailingSwipeActions: [DSSwipeAction]? = nil,
         allowsFullSwipe: Bool = false,
@@ -56,7 +56,7 @@ struct DSListRow<Content: View>: View {
     }
 
     /// Compatibilidad con versión anterior (solo trailing actions)
-    init(
+    public init(
         swipeActions: [DSSwipeAction]? = nil,
         allowsFullSwipe: Bool = false,
         @ViewBuilder content: @escaping () -> Content
@@ -67,7 +67,7 @@ struct DSListRow<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         content()
             .swipeActions(edge: .leading, allowsFullSwipe: false) {
                 if let actions = leadingSwipeActions {
@@ -99,13 +99,13 @@ struct DSListRow<Content: View>: View {
 // MARK: - Swipe Action
 
 /// Swipe action para List Row
-struct DSSwipeAction: Identifiable, Sendable {
-    let id = UUID()
-    let title: String
-    let icon: String
-    let tint: Color
-    let role: ButtonRole?
-    let action: @Sendable () -> Void
+public struct DSSwipeAction: Identifiable, Sendable {
+    public let id = UUID()
+    public let title: String
+    public let icon: String
+    public let tint: Color
+    public let role: ButtonRole?
+    public let action: @Sendable () -> Void
 
     /// Crea una swipe action
     ///
@@ -115,7 +115,7 @@ struct DSSwipeAction: Identifiable, Sendable {
     ///   - tint: Color del botón
     ///   - role: Rol del botón (destructive, cancel)
     ///   - action: Acción al presionar
-    init(
+    public init(
         title: String,
         icon: String,
         tint: Color = DSColors.accent,
@@ -130,7 +130,7 @@ struct DSSwipeAction: Identifiable, Sendable {
     }
 
     /// Swipe action para eliminar
-    static func delete(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
+    public static func delete(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
         DSSwipeAction(
             title: "Eliminar",
             icon: "trash",
@@ -141,7 +141,7 @@ struct DSSwipeAction: Identifiable, Sendable {
     }
 
     /// Swipe action para editar
-    static func edit(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
+    public static func edit(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
         DSSwipeAction(
             title: "Editar",
             icon: "pencil",
@@ -151,7 +151,7 @@ struct DSSwipeAction: Identifiable, Sendable {
     }
 
     /// Swipe action para compartir
-    static func share(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
+    public static func share(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
         DSSwipeAction(
             title: "Compartir",
             icon: "square.and.arrow.up",
@@ -161,7 +161,7 @@ struct DSSwipeAction: Identifiable, Sendable {
     }
 
     /// Swipe action para archivar
-    static func archive(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
+    public static func archive(action: @escaping @Sendable () -> Void) -> DSSwipeAction {
         DSSwipeAction(
             title: "Archivar",
             icon: "archivebox",

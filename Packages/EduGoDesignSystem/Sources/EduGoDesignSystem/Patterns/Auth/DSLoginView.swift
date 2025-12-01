@@ -28,16 +28,16 @@ import SwiftUI
 /// )
 /// ```
 @MainActor
-struct DSLoginView: View {
-    @Binding var email: String
-    @Binding var password: String
-    let onLogin: () -> Void
-    let onBiometric: (() -> Void)?
-    let onForgotPassword: (() -> Void)?
-    let logoSystemName: String
-    let title: String
-    let subtitle: String?
-    let glassIntensity: LiquidGlassIntensity
+public struct DSLoginView: View {
+    @Binding public var email: String
+    @Binding public var password: String
+    public let onLogin: () -> Void
+    public let onBiometric: (() -> Void)?
+    public let onForgotPassword: (() -> Void)?
+    public let logoSystemName: String
+    public let title: String
+    public let subtitle: String?
+    public let glassIntensity: LiquidGlassIntensity
 
     @State private var emailError: String?
     @State private var passwordError: String?
@@ -54,7 +54,7 @@ struct DSLoginView: View {
     ///   - title: Título del login
     ///   - subtitle: Subtítulo (opcional)
     ///   - glassIntensity: Intensidad del glass effect
-    init(
+    public init(
         email: Binding<String>,
         password: Binding<String>,
         onLogin: @escaping () -> Void,
@@ -76,7 +76,7 @@ struct DSLoginView: View {
         self.glassIntensity = glassIntensity
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: DSSpacing.xl) {
             Spacer()
 

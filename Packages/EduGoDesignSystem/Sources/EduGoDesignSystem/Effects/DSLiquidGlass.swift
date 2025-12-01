@@ -33,7 +33,7 @@ import SwiftUI
 ///
 /// - Note: En iOS 18-25 / macOS 15-25 se usa fallback con materials estándar
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum LiquidGlassIntensity: String, Sendable, CaseIterable {
+public enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     /// Efecto sutil - Ideal para overlays y backgrounds ligeros
     ///
     /// **Características:**
@@ -82,7 +82,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     case desktop
 
     /// Valor de opacidad base para esta intensidad
-    var baseOpacity: Double {
+    public var baseOpacity: Double {
         switch self {
         case .subtle: return 0.3
         case .standard: return 0.6
@@ -93,7 +93,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     }
 
     /// Valor de refracción para esta intensidad (0.0-1.0)
-    var refractionAmount: Double {
+    public var refractionAmount: Double {
         switch self {
         case .subtle: return 0.2
         case .standard: return 0.5
@@ -104,7 +104,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     }
 
     /// Radio de blur para esta intensidad
-    var blurRadius: CGFloat {
+    public var blurRadius: CGFloat {
         switch self {
         case .subtle: return 4
         case .standard: return 8
@@ -118,7 +118,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
     ///
     /// Mientras Apple no documente las APIs oficiales de Liquid Glass,
     /// usamos materials estándar como approximación.
-    var materialBase: Material {
+    public var materialBase: Material {
         switch self {
         case .subtle: return .ultraThinMaterial
         case .standard: return .thinMaterial
@@ -141,7 +141,7 @@ enum LiquidGlassIntensity: String, Sendable, CaseIterable {
 /// - Todas usan spring physics para movimiento natural
 /// - Aceleradas por Core Animation
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum LiquidAnimation: Sendable {
+public enum LiquidAnimation: Sendable {
     /// Animación suave - Transiciones lentas y fluidas
     ///
     /// **Características:**
@@ -167,7 +167,7 @@ enum LiquidAnimation: Sendable {
     case pour
 
     /// Convierte el estilo a una Animation de SwiftUI
-    var animation: Animation {
+    public var animation: Animation {
         switch self {
         case .smooth:
             return .spring(response: 0.6, dampingFraction: 0.8)
@@ -188,7 +188,7 @@ enum LiquidAnimation: Sendable {
 /// Define los diferentes estados visuales que puede tener un elemento glass
 /// durante la interacción del usuario.
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum GlassState: Sendable {
+public enum GlassState: Sendable {
     /// Estado normal - Sin interacción
     case normal
 
@@ -205,7 +205,7 @@ enum GlassState: Sendable {
     case disabled
 
     /// Modificador de brillo para este estado (-1.0 a 1.0)
-    var brightnessModifier: Double {
+    public var brightnessModifier: Double {
         switch self {
         case .normal: return 0.0
         case .hovered: return 0.1
@@ -216,7 +216,7 @@ enum GlassState: Sendable {
     }
 
     /// Opacidad para este estado (0.0 a 1.0)
-    var opacityModifier: Double {
+    public var opacityModifier: Double {
         switch self {
         case .normal, .hovered, .focused, .pressed: return 1.0
         case .disabled: return 0.4
@@ -232,7 +232,7 @@ enum GlassState: Sendable {
 ///
 /// Define el tipo de transición visual al mostrar/ocultar elementos con glass.
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum LiquidTransitionStyle: Sendable {
+public enum LiquidTransitionStyle: Sendable {
     /// Transición tipo vertido - Aparece como líquido vertiéndose
     case pour
 
@@ -243,7 +243,7 @@ enum LiquidTransitionStyle: Sendable {
     case dissolve
 
     /// Convierte el estilo a un AnyTransition
-    var transition: AnyTransition {
+    public var transition: AnyTransition {
         switch self {
         case .pour:
             return .asymmetric(
@@ -258,17 +258,16 @@ enum LiquidTransitionStyle: Sendable {
     }
 }
 
-// MARK: - Preview Support
+// MARK: - Identifiable Support
 
-#if DEBUG
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension LiquidGlassIntensity: Identifiable {
-    var id: String { rawValue }
+    public var id: String { rawValue }
 }
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension LiquidAnimation: Identifiable {
-    var id: String {
+    public var id: String {
         switch self {
         case .smooth: return "smooth"
         case .ripple: return "ripple"
@@ -277,9 +276,13 @@ extension LiquidAnimation: Identifiable {
     }
 }
 
+// MARK: - Preview Support
+
+#if DEBUG
+
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
 extension GlassState: Identifiable {
-    var id: String {
+    public var id: String {
         switch self {
         case .normal: return "normal"
         case .hovered: return "hovered"

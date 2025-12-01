@@ -9,52 +9,52 @@
 import Foundation
 
 /// Representa un usuario autenticado en el sistema
-struct User: Codable, Identifiable, Equatable, Sendable {
+public struct User: Codable, Identifiable, Equatable, Sendable {
     /// Identificador único del usuario (UUID)
-    let id: String
+    public let id: String
 
     /// Correo electrónico del usuario
-    let email: String
+    public let email: String
 
     /// Nombre para mostrar del usuario
-    let displayName: String
+    public let displayName: String
 
     /// Rol del usuario en el sistema
-    let role: UserRole
+    public let role: UserRole
 
     /// Indica si el email ha sido verificado
-    let isEmailVerified: Bool
+    public let isEmailVerified: Bool
 
     // MARK: - Computed Properties
 
     /// Retorna las iniciales del nombre (primeras 2 letras en mayúsculas)
-    var initials: String {
+    public var initials: String {
         String(displayName.prefix(2).uppercased())
     }
 
     /// Indica si el usuario es estudiante
-    var isStudent: Bool {
+    public var isStudent: Bool {
         role == .student
     }
 
     /// Indica si el usuario es profesor
-    var isTeacher: Bool {
+    public var isTeacher: Bool {
         role == .teacher
     }
 
     /// Indica si el usuario es administrador
-    var isAdmin: Bool {
+    public var isAdmin: Bool {
         role == .admin
     }
 
     /// Indica si el usuario es padre/tutor
-    var isParent: Bool {
+    public var isParent: Bool {
         role == .parent
     }
 
     // MARK: - Initializers
 
-    init(
+    public init(
         id: String,
         email: String,
         displayName: String,
@@ -71,7 +71,7 @@ struct User: Codable, Identifiable, Equatable, Sendable {
 
 // MARK: - Previews & Testing
 
-extension User {
+public extension User {
     // Mock básico siempre disponible para previews
     static let mock = User(
         id: "550e8400-e29b-41d4-a716-446655440000",
@@ -83,7 +83,7 @@ extension User {
 }
 
 #if DEBUG
-extension User {
+public extension User {
     /// Usuario fixture para testing con valores por defecto
     static func fixture(
         id: String = "550e8400-e29b-41d4-a716-446655440000",

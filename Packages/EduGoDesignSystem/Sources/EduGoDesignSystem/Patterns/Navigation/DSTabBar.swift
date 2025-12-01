@@ -24,12 +24,12 @@ import SwiftUI
 ///     selectedIcon: "house.fill"
 /// )
 /// ```
-struct DSTabBarItem: Identifiable, Sendable {
-    let id: String
-    let title: String
-    let icon: String
-    let selectedIcon: String?
-    let badge: Int?
+public struct DSTabBarItem: Identifiable, Sendable {
+    public let id: String
+    public let title: String
+    public let icon: String
+    public let selectedIcon: String?
+    public let badge: Int?
 
     /// Crea un item de tab bar
     ///
@@ -39,7 +39,7 @@ struct DSTabBarItem: Identifiable, Sendable {
     ///   - icon: Nombre del SF Symbol para estado normal
     ///   - selectedIcon: Nombre del SF Symbol para estado seleccionado (opcional)
     ///   - badge: Número de badge (opcional)
-    init(
+    public init(
         id: String,
         title: String,
         icon: String,
@@ -57,7 +57,7 @@ struct DSTabBarItem: Identifiable, Sendable {
     ///
     /// - Parameter isSelected: Si el tab está seleccionado
     /// - Returns: Nombre del SF Symbol apropiado
-    func iconName(isSelected: Bool) -> String {
+    public func iconName(isSelected: Bool) -> String {
         if isSelected, let selectedIcon = selectedIcon {
             return selectedIcon
         }
@@ -96,11 +96,11 @@ struct DSTabBarItem: Identifiable, Sendable {
 ///     ProfileView().tag("profile")
 /// }
 /// ```
-struct DSTabBar<Content: View>: View {
-    @Binding var selection: String
-    let items: [DSTabBarItem]
-    let useGlass: Bool
-    @ViewBuilder let content: () -> Content
+public struct DSTabBar<Content: View>: View {
+    @Binding public var selection: String
+    public let items: [DSTabBarItem]
+    public let useGlass: Bool
+    @ViewBuilder public let content: () -> Content
 
     /// Crea un Tab Bar
     ///
@@ -109,7 +109,7 @@ struct DSTabBar<Content: View>: View {
     ///   - items: Array de items del tab bar
     ///   - useGlass: Si debe usar Liquid Glass en iOS 18+ (default: true)
     ///   - content: Contenido de cada tab (debe usar .tag() con IDs)
-    init(
+    public init(
         selection: Binding<String>,
         items: [DSTabBarItem],
         useGlass: Bool = true,
@@ -121,7 +121,7 @@ struct DSTabBar<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         TabView(selection: $selection) {
             content()
         }
@@ -153,11 +153,11 @@ struct DSTabBar<Content: View>: View {
 /// }
 /// ```
 @MainActor
-struct DSCustomTabBar<Content: View>: View {
-    @Binding var selection: String
-    let items: [DSTabBarItem]
-    let glassIntensity: LiquidGlassIntensity
-    @ViewBuilder let content: (String) -> Content
+public struct DSCustomTabBar<Content: View>: View {
+    @Binding public var selection: String
+    public let items: [DSTabBarItem]
+    public let glassIntensity: LiquidGlassIntensity
+    @ViewBuilder public let content: (String) -> Content
 
     /// Crea un Tab Bar personalizado
     ///
@@ -166,7 +166,7 @@ struct DSCustomTabBar<Content: View>: View {
     ///   - items: Array de items del tab bar
     ///   - glassIntensity: Intensidad del efecto glass (iOS 18+)
     ///   - content: Closure que devuelve el contenido para cada tab ID
-    init(
+    public init(
         selection: Binding<String>,
         items: [DSTabBarItem],
         glassIntensity: LiquidGlassIntensity = .standard,
@@ -178,7 +178,7 @@ struct DSCustomTabBar<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             // Content area
             content(selection)

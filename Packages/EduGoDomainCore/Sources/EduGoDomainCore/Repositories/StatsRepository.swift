@@ -10,7 +10,7 @@ import Foundation
 
 /// Protocolo para obtener estadísticas del usuario
 @MainActor
-protocol StatsRepository: Sendable {
+public protocol StatsRepository: Sendable {
     /// Obtiene las estadísticas actuales del usuario
     /// - Returns: Estadísticas del usuario o error
     func getUserStats() async -> Result<UserStats, AppError>

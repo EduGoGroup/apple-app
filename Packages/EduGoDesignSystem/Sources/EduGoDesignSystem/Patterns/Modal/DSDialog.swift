@@ -32,12 +32,12 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSDialog<Content: View>: View {
+public struct DSDialog<Content: View>: View {
     @Binding var isPresented: Bool
-    let title: String
-    let glassIntensity: LiquidGlassIntensity
-    let maxWidth: CGFloat
-    let dismissOnTapOutside: Bool
+    public let title: String
+    public let glassIntensity: LiquidGlassIntensity
+    public let maxWidth: CGFloat
+    public let dismissOnTapOutside: Bool
     @ViewBuilder let content: Content
 
     /// Crea un Dialog custom
@@ -49,7 +49,7 @@ struct DSDialog<Content: View>: View {
     ///   - maxWidth: Ancho máximo del dialog
     ///   - dismissOnTapOutside: Permitir cerrar al tocar fuera
     ///   - content: Contenido del dialog
-    init(
+    public init(
         isPresented: Binding<Bool>,
         title: String,
         glassIntensity: LiquidGlassIntensity = .prominent,
@@ -65,7 +65,7 @@ struct DSDialog<Content: View>: View {
         self.content = content()
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack {
             if isPresented {
                 // Overlay
@@ -145,7 +145,7 @@ struct DSDialog<Content: View>: View {
 
 // MARK: - View Extension
 
-extension View {
+public extension View {
     /// Presenta un DSDialog
     ///
     /// **Uso:**

@@ -27,10 +27,10 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSFormSection<Content: View>: View {
-    let title: String?
-    let footer: String?
-    @ViewBuilder let content: () -> Content
+public struct DSFormSection<Content: View>: View {
+    public let title: String?
+    public let footer: String?
+    @ViewBuilder public let content: () -> Content
 
     /// Crea una sección de formulario
     ///
@@ -38,7 +38,7 @@ struct DSFormSection<Content: View>: View {
     ///   - title: Título de la sección (opcional)
     ///   - footer: Pie de la sección (opcional)
     ///   - content: Contenido de la sección
-    init(
+    public init(
         title: String? = nil,
         footer: String? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -48,7 +48,7 @@ struct DSFormSection<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         Section {
             content()
         } header: {

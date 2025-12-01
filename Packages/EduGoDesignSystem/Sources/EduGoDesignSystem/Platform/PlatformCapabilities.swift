@@ -148,6 +148,12 @@ public struct PlatformCapabilities: Sendable {
         public let supportsLiquidGlass: Bool
         public let supportsAdvancedConcurrency: Bool
 
+        public init(supportsModernEffects: Bool, supportsLiquidGlass: Bool, supportsAdvancedConcurrency: Bool) {
+            self.supportsModernEffects = supportsModernEffects
+            self.supportsLiquidGlass = supportsLiquidGlass
+            self.supportsAdvancedConcurrency = supportsAdvancedConcurrency
+        }
+
         public static var current: OSCapabilities {
             if #available(iOS 18.0, macOS 15.0, visionOS 2.0, *) {
                 return OSCapabilities(
@@ -172,6 +178,13 @@ public struct PlatformCapabilities: Sendable {
         public let hasTrackpad: Bool
         public let supportsPencil: Bool
         public let supportsHover: Bool
+
+        public init(hasKeyboard: Bool, hasTrackpad: Bool, supportsPencil: Bool, supportsHover: Bool) {
+            self.hasKeyboard = hasKeyboard
+            self.hasTrackpad = hasTrackpad
+            self.supportsPencil = supportsPencil
+            self.supportsHover = supportsHover
+        }
 
         @MainActor
         public static var current: InputCapabilities {

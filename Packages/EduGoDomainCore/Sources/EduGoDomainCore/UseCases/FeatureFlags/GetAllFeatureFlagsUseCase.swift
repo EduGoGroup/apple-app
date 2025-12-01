@@ -23,14 +23,14 @@ import Foundation
 /// - Retorna `Result<[FeatureFlag: Bool], AppError>` (no throws)
 /// - Lógica de negocio pura
 /// - Reutiliza lógica de `GetFeatureFlagUseCase`
-struct GetAllFeatureFlagsUseCase: Sendable {
+public struct GetAllFeatureFlagsUseCase: Sendable {
     // MARK: - Properties
 
     private let repository: FeatureFlagRepository
 
     // MARK: - Initialization
 
-    nonisolated init(repository: FeatureFlagRepository) {
+    public nonisolated init(repository: FeatureFlagRepository) {
         self.repository = repository
     }
 
@@ -39,7 +39,7 @@ struct GetAllFeatureFlagsUseCase: Sendable {
     /// Ejecuta el use case para obtener todos los feature flags
     ///
     /// - Returns: `Result` con diccionario de todos los flags y sus valores
-    func execute() async -> Result<[FeatureFlag: Bool], AppError> {
+    public func execute() async -> Result<[FeatureFlag: Bool], AppError> {
         // Crear use case para validar cada flag individualmente
         let getFlagUseCase = GetFeatureFlagUseCase(repository: repository)
 

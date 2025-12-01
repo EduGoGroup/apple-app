@@ -8,18 +8,24 @@
 import Foundation
 
 /// Representa las preferencias configurables del usuario
-struct UserPreferences: Codable, Equatable, Sendable {
+public struct UserPreferences: Codable, Equatable, Sendable {
     /// Tema de apariencia seleccionado
-    var theme: Theme
+    public var theme: Theme
 
     /// Código de idioma (ej: "es", "en")
-    var language: String
+    public var language: String
 
     /// Indica si la autenticación biométrica está habilitada
-    var biometricsEnabled: Bool
+    public var biometricsEnabled: Bool
+
+    public init(theme: Theme, language: String, biometricsEnabled: Bool) {
+        self.theme = theme
+        self.language = language
+        self.biometricsEnabled = biometricsEnabled
+    }
 
     /// Configuración por defecto para nuevos usuarios
-    static let `default` = UserPreferences(
+    public static let `default` = UserPreferences(
         theme: .system,
         language: "es",
         biometricsEnabled: false
@@ -28,13 +34,13 @@ struct UserPreferences: Codable, Equatable, Sendable {
     // MARK: - SPEC-010: Language Helper
 
     /// Obtiene el idioma como enum Language
-    var languageEnum: Language {
+    public var languageEnum: Language {
         Language(rawValue: language) ?? .default
     }
 }
 
 // MARK: - Mock Data
-extension UserPreferences {
+public extension UserPreferences {
     /// Preferencias de ejemplo con biometría activada
     static let mockWithBiometrics = UserPreferences(
         theme: .dark,

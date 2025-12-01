@@ -161,7 +161,7 @@ extension TokenInfo: CustomDebugStringConvertible {
 #if DEBUG
 extension TokenInfo {
     /// Token fixture para testing con valores por defecto
-    static func fixture(
+    public static func fixture(
         accessToken: String = "mock_access_token",
         refreshToken: String = "mock_refresh_token",
         expiresIn: TimeInterval = 900
@@ -174,7 +174,7 @@ extension TokenInfo {
     }
 
     /// Token expirado para testing
-    static var expired: TokenInfo {
+    public static var expired: TokenInfo {
         TokenInfo(
             accessToken: "expired_token",
             refreshToken: "expired_refresh",
@@ -184,7 +184,7 @@ extension TokenInfo {
     }
 
     /// Token que necesita refresh para testing (dentro del threshold)
-    static var needingRefresh: TokenInfo {
+    public static var needingRefresh: TokenInfo {
         // Usar threshold de configuración + un poco menos
         let threshold = TokenConfiguration.defaultRefreshThreshold
         return TokenInfo(
@@ -196,7 +196,7 @@ extension TokenInfo {
     }
 
     /// Token recién creado para testing
-    static var fresh: TokenInfo {
+    public static var fresh: TokenInfo {
         TokenInfo(
             accessToken: "fresh_token",
             refreshToken: "fresh_refresh",
@@ -205,7 +205,7 @@ extension TokenInfo {
     }
 
     /// Token válido pero no fresco (a mitad de vida)
-    static var halfLife: TokenInfo {
+    public static var halfLife: TokenInfo {
         let halfDuration = TokenConfiguration.defaultAccessTokenDuration / 2
         return TokenInfo(
             accessToken: "half_life_token",

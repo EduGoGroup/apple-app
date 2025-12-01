@@ -16,7 +16,7 @@ import SwiftUI
 // - iOS 18+ / macOS 15+: Materials como fallback (COMPATIBILIDAD)
 
 /// Protocolo base para efectos visuales del Design System
-protocol DSVisualEffect {
+public protocol DSVisualEffect {
     /// Aplica el efecto visual a una vista
     func apply<Content: View>(to content: Content) -> AnyView
 }
@@ -29,12 +29,12 @@ protocol DSVisualEffect {
 /// - Note: Esta es la implementación PRINCIPAL del sistema de efectos.
 ///   El código de iOS 18+ es solo para compatibilidad con versiones antiguas.
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-struct DSVisualEffectModern: DSVisualEffect {
-    let style: DSVisualEffectStyle
-    let shape: DSEffectShape
-    let isInteractive: Bool
+public struct DSVisualEffectModern: DSVisualEffect {
+    public let style: DSVisualEffectStyle
+    public let shape: DSEffectShape
+    public let isInteractive: Bool
 
-    func apply<Content: View>(to content: Content) -> AnyView {
+    public func apply<Content: View>(to content: Content) -> AnyView {
         // TODO: Cuando Apple documente las APIs de Liquid Glass, reemplazar con:
         // switch shape {
         // case .capsule:
@@ -222,12 +222,12 @@ struct DSVisualEffectModern: DSVisualEffect {
 /// - Note: Esta es la implementación de FALLBACK.
 ///   Se usa solo cuando iOS 18+ no está disponible.
 @available(iOS 18.0, macOS 15.0, *)
-struct DSVisualEffectLegacy: DSVisualEffect {
-    let style: DSVisualEffectStyle
-    let shape: DSEffectShape
-    let isInteractive: Bool
+public struct DSVisualEffectLegacy: DSVisualEffect {
+    public let style: DSVisualEffectStyle
+    public let shape: DSEffectShape
+    public let isInteractive: Bool
 
-    func apply<Content: View>(to content: Content) -> AnyView {
+    public func apply<Content: View>(to content: Content) -> AnyView {
         switch shape {
         case .capsule:
             return AnyView(
@@ -323,7 +323,7 @@ struct DSVisualEffectLegacy: DSVisualEffect {
 // MARK: - Tipos de Soporte
 
 /// Estilos de efectos visuales disponibles
-enum DSVisualEffectStyle: Equatable, Sendable {
+public enum DSVisualEffectStyle: Equatable, Sendable {
     /// Estilo regular - efecto sutil
     case regular
     /// Estilo prominente - efecto más visible
@@ -335,7 +335,7 @@ enum DSVisualEffectStyle: Equatable, Sendable {
     case liquidGlass(LiquidGlassIntensity)
 
     // Equatable conformance manual para Color y LiquidGlassIntensity
-    static func == (lhs: DSVisualEffectStyle, rhs: DSVisualEffectStyle) -> Bool {
+    public static func == (lhs: DSVisualEffectStyle, rhs: DSVisualEffectStyle) -> Bool {
         switch (lhs, rhs) {
         case (.regular, .regular):
             return true
@@ -357,7 +357,7 @@ enum DSVisualEffectStyle: Equatable, Sendable {
 }
 
 /// Formas disponibles para efectos visuales
-enum DSEffectShape: Sendable {
+public enum DSEffectShape: Sendable {
     /// Forma de cápsula (bordes redondeados completos)
     case capsule
     /// Rectángulo con esquinas redondeadas personalizables
@@ -373,12 +373,12 @@ enum DSEffectShape: Sendable {
 /// ESTRATEGIA:
 /// 1. iOS 18+ / macOS 15+: DSVisualEffectModern (PRIORIDAD)
 /// 2. iOS 18-25 / macOS 15-25: DSVisualEffectLegacy (FALLBACK)
-struct DSVisualEffectFactory {
+public struct DSVisualEffectFactory {
     /// Crea el efecto visual apropiado según la versión del OS
     ///
     /// - Important: SIEMPRE intenta usar la implementación moderna primero.
     ///   Solo usa legacy si el OS es < iOS 26 / macOS 26.
-    static func createEffect(
+    public static func createEffect(
         style: DSVisualEffectStyle = .regular,
         shape: DSEffectShape = .roundedRectangle(cornerRadius: DSCornerRadius.large),
         isInteractive: Bool = false
@@ -404,12 +404,12 @@ struct DSVisualEffectFactory {
 // MARK: - View Modifier
 
 /// ViewModifier que aplica efectos visuales del Design System
-struct DSGlassModifier: ViewModifier {
-    let style: DSVisualEffectStyle
-    let shape: DSEffectShape
-    let isInteractive: Bool
+public struct DSGlassModifier: ViewModifier {
+    public let style: DSVisualEffectStyle
+    public let shape: DSEffectShape
+    public let isInteractive: Bool
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         let effect = DSVisualEffectFactory.createEffect(
             style: style,
             shape: shape,
@@ -422,7 +422,7 @@ struct DSGlassModifier: ViewModifier {
 
 // MARK: - View Extension
 
-extension View {
+public extension View {
     /// Aplica un efecto visual de glass del Design System
     ///
     /// **Estrategia de versiones:**

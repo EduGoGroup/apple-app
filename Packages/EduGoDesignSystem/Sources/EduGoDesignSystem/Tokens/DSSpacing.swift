@@ -10,114 +10,114 @@ import SwiftUI
 /// Sistema de espaciado consistente
 /// Incluye Touch Targets, Glass-aware spacing y Desktop margins
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum DSSpacing {
+public enum DSSpacing {
     // MARK: - Base Spacing Scale
 
     /// 0pt - Sin espaciado (útil para reset)
-    static let spacing0: CGFloat = 0
+    public static let spacing0: CGFloat = 0
 
     /// 4pt - Espaciado extra pequeño
-    static let xs: CGFloat = 4
+    public static let xs: CGFloat = 4
 
     /// 8pt - Espaciado pequeño
-    static let small: CGFloat = 8
+    public static let small: CGFloat = 8
 
     /// 12pt - Espaciado mediano-pequeño
-    static let medium: CGFloat = 12
+    public static let medium: CGFloat = 12
 
     /// 16pt - Espaciado mediano
-    static let large: CGFloat = 16
+    public static let large: CGFloat = 16
 
     /// 20pt - Espaciado mediano-grande (nuevo)
-    static let spacing20: CGFloat = 20
+    public static let spacing20: CGFloat = 20
 
     /// 24pt - Espaciado grande
-    static let xl: CGFloat = 24
+    public static let xl: CGFloat = 24
 
     /// 32pt - Espaciado extra grande
-    static let xxl: CGFloat = 32
+    public static let xxl: CGFloat = 32
 
     /// 48pt - Espaciado extra extra grande
-    static let xxxl: CGFloat = 48
+    public static let xxxl: CGFloat = 48
 
     /// 64pt - Espaciado masivo (para secciones grandes)
-    static let spacing64: CGFloat = 64
+    public static let spacing64: CGFloat = 64
 
     // MARK: - Touch Target Constants (iOS/iPadOS/visionOS)
 
     /// Touch target mínimo recomendado - 44pt (Apple HIG)
-    static let touchTargetMinimum: CGFloat = 44
+    public static let touchTargetMinimum: CGFloat = 44
 
     /// Touch target estándar - 48pt (más cómodo)
-    static let touchTargetStandard: CGFloat = 48
+    public static let touchTargetStandard: CGFloat = 48
 
     /// Touch target grande - 56pt (para accesibilidad)
-    static let touchTargetLarge: CGFloat = 56
+    public static let touchTargetLarge: CGFloat = 56
 
     // MARK: - Glass-Aware Spacing
 
     /// Espaciado para bordes de elementos Glass (mínimo para claridad)
-    static let glassEdge: CGFloat = 16
+    public static let glassEdge: CGFloat = 16
 
     /// Espaciado para flujo de contenido en Glass containers
-    static let glassFlow: CGFloat = 20
+    public static let glassFlow: CGFloat = 20
 
     /// Espaciado para separación de Glass cards
-    static let glassCardSeparation: CGFloat = 24
+    public static let glassCardSeparation: CGFloat = 24
 
     /// Padding interno para Glass elements
-    static let glassInternalPadding: CGFloat = 16
+    public static let glassInternalPadding: CGFloat = 16
 
     /// Margin externo para Glass elements
-    static let glassExternalMargin: CGFloat = 20
+    public static let glassExternalMargin: CGFloat = 20
 
     // MARK: - Desktop Margins (macOS específico)
 
     /// Margen mínimo de ventana en macOS
-    static let desktopWindowMargin: CGFloat = 20
+    public static let desktopWindowMargin: CGFloat = 20
 
     /// Margen de contenido en macOS (sidebar, etc.)
-    static let desktopContentMargin: CGFloat = 24
+    public static let desktopContentMargin: CGFloat = 24
 
     /// Espaciado entre columnas en layouts de escritorio
-    static let desktopColumnGap: CGFloat = 32
+    public static let desktopColumnGap: CGFloat = 32
 
     /// Padding para toolbars en macOS
-    static let desktopToolbarPadding: CGFloat = 12
+    public static let desktopToolbarPadding: CGFloat = 12
 
     /// Margen de sección en layouts grandes (macOS/iPad)
-    static let desktopSectionMargin: CGFloat = 48
+    public static let desktopSectionMargin: CGFloat = 48
 
     // MARK: - Layout Constants
 
     /// Ancho máximo de contenido para legibilidad
-    static let contentMaxWidth: CGFloat = 1200
+    public static let contentMaxWidth: CGFloat = 1200
 
     /// Ancho de sidebar estándar (iPad/macOS)
-    static let sidebarWidth: CGFloat = 280
+    public static let sidebarWidth: CGFloat = 280
 
     /// Ancho de sidebar compacto
-    static let sidebarWidthCompact: CGFloat = 220
+    public static let sidebarWidthCompact: CGFloat = 220
 
     /// Altura de header/toolbar estándar
-    static let headerHeight: CGFloat = 56
+    public static let headerHeight: CGFloat = 56
 
     /// Altura de tab bar (iOS)
-    static let tabBarHeight: CGFloat = 49
+    public static let tabBarHeight: CGFloat = 49
 
     // MARK: - Grid System
 
     /// Grid columns para layouts responsive
-    static let gridColumns: Int = 12
+    public static let gridColumns: Int = 12
 
     /// Grid gutter (espacio entre columnas)
-    static let gridGutter: CGFloat = 16
+    public static let gridGutter: CGFloat = 16
 }
 
 // MARK: - View Modifiers para Spacing
 
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-extension View {
+public extension View {
     /// Aplica padding optimizado para Glass elements
     func glassAwarePadding() -> some View {
         self.padding(DSSpacing.glassInternalPadding)
@@ -137,12 +137,12 @@ extension View {
 
 /// Tamaños de touch target disponibles
 @available(iOS 18.0, macOS 15.0, visionOS 2.0, *)
-enum TouchTargetSize {
+public enum TouchTargetSize {
     case minimum
     case standard
     case large
 
-    var value: CGFloat {
+    public var value: CGFloat {
         switch self {
         case .minimum: return DSSpacing.touchTargetMinimum
         case .standard: return DSSpacing.touchTargetStandard

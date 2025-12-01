@@ -9,7 +9,7 @@ import Foundation
 
 /// Protocolo para el caso de uso de actualizar tema
 @MainActor
-protocol UpdateThemeUseCase: Sendable {
+public protocol UpdateThemeUseCase: Sendable {
     /// Actualiza el tema de la aplicación
     /// - Parameter theme: Nuevo tema a aplicar
     func execute(_ theme: Theme) async
@@ -17,14 +17,14 @@ protocol UpdateThemeUseCase: Sendable {
 
 /// Implementación por defecto del caso de uso de actualizar tema
 @MainActor
-final class DefaultUpdateThemeUseCase: UpdateThemeUseCase {
+public final class DefaultUpdateThemeUseCase: UpdateThemeUseCase {
     private let preferencesRepository: PreferencesRepository
-    
-    init(preferencesRepository: PreferencesRepository) {
+
+    public init(preferencesRepository: PreferencesRepository) {
         self.preferencesRepository = preferencesRepository
     }
-    
-    func execute(_ theme: Theme) async {
+
+    public func execute(_ theme: Theme) async {
         // Actualiza el tema en el repositorio
         await preferencesRepository.updateTheme(theme)
     }

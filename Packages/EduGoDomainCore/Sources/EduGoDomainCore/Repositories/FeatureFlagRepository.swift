@@ -24,7 +24,7 @@ import Foundation
 /// 4. Si backend falla, usar valores por defecto
 ///
 /// - Note: La implementación DEBE ser un `actor` para concurrency
-protocol FeatureFlagRepository: Sendable {
+public protocol FeatureFlagRepository: Sendable {
     /// Obtiene el valor de un feature flag específico
     ///
     /// Estrategia de fallback:

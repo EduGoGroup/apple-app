@@ -28,13 +28,13 @@ import SwiftUI
 /// )
 /// ```
 @MainActor
-struct DSMetricCard: View {
-    let title: String
-    let value: String
-    let change: Double?
-    let icon: String
-    let glassIntensity: LiquidGlassIntensity
-    let action: (() -> Void)?
+public struct DSMetricCard: View {
+    public let title: String
+    public let value: String
+    public let change: Double?
+    public let icon: String
+    public let glassIntensity: LiquidGlassIntensity
+    public let action: (() -> Void)?
 
     /// Crea un Metric Card
     ///
@@ -45,7 +45,7 @@ struct DSMetricCard: View {
     ///   - icon: Icono SF Symbol (opcional)
     ///   - glassIntensity: Intensidad del glass effect
     ///   - action: Acción al tocar (opcional)
-    init(
+    public init(
         title: String,
         value: String,
         change: Double? = nil,
@@ -61,7 +61,7 @@ struct DSMetricCard: View {
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: { action?() }) {
             cardContent
         }

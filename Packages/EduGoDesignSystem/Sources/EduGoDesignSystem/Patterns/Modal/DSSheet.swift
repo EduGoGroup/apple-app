@@ -29,10 +29,10 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSSheet<Content: View>: View {
-    let title: String?
-    let glassIntensity: LiquidGlassIntensity
-    let showCloseButton: Bool
+public struct DSSheet<Content: View>: View {
+    public let title: String?
+    public let glassIntensity: LiquidGlassIntensity
+    public let showCloseButton: Bool
     @Environment(\.dismiss) private var dismiss
     @ViewBuilder let content: Content
 
@@ -43,7 +43,7 @@ struct DSSheet<Content: View>: View {
     ///   - glassIntensity: Intensidad del glass effect
     ///   - showCloseButton: Mostrar botón de cerrar
     ///   - content: Contenido del sheet
-    init(
+    public init(
         title: String? = nil,
         glassIntensity: LiquidGlassIntensity = .prominent,
         showCloseButton: Bool = true,
@@ -55,7 +55,7 @@ struct DSSheet<Content: View>: View {
         self.content = content()
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationStack {
             content
                 .navigationTitle(title ?? "")
@@ -95,7 +95,7 @@ struct DSSheet<Content: View>: View {
 
 // MARK: - View Extension Helper
 
-extension View {
+public extension View {
     /// Helper para aplicar modificador condicionalmente
     @ViewBuilder
     func `if`<Content: View>(
@@ -112,7 +112,7 @@ extension View {
 
 // MARK: - DSSheet Modifiers
 
-extension View {
+public extension View {
     /// Presenta un DSSheet
     ///
     /// **Uso:**
@@ -156,7 +156,7 @@ extension View {
 
 // MARK: - Presentation Detents Helper
 
-extension View {
+public extension View {
     /// Configura los detents del sheet
     ///
     /// **Uso:**

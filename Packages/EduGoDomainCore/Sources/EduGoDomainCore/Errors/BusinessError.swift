@@ -8,7 +8,7 @@
 import Foundation
 
 /// Errores de lógica de negocio
-enum BusinessError: Error, Equatable, Sendable {
+public enum BusinessError: Error, Equatable, Sendable {
     /// Usuario ya existe
     case userAlreadyExists
 
@@ -41,7 +41,7 @@ enum BusinessError: Error, Equatable, Sendable {
 
     /// Mensaje amigable para mostrar al usuario
     /// SPEC-010: Migrado a Localizable.xcstrings
-    var userMessage: String {
+    public var userMessage: String {
         switch self {
         case .userAlreadyExists:
             return String(localized: "error.business.userAlreadyExists")
@@ -67,7 +67,7 @@ enum BusinessError: Error, Equatable, Sendable {
     }
 
     /// Mensaje técnico para logs y debugging
-    var technicalMessage: String {
+    public var technicalMessage: String {
         switch self {
         case .userAlreadyExists:
             return "Business rule violation: User already exists"

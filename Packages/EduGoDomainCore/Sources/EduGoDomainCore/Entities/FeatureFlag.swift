@@ -33,7 +33,7 @@ import Foundation
 ///
 /// - Note: Para propiedades de UI, ver `FeatureFlag+UI.swift`
 /// - Note: Cumple Clean Architecture - Domain Layer puro
-enum FeatureFlag: String, CaseIterable, Codable, Sendable {
+public enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     // MARK: - Security Flags
 
     /// Habilita login con Face ID/Touch ID
@@ -83,7 +83,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     /// - No hay valor en cache
     /// - No hay valor remoto
     /// - El flag no se ha sincronizado
-    nonisolated var defaultValue: Bool {
+    public nonisolated var defaultValue: Bool {
         switch self {
         // Security: habilitados por defecto
         case .biometricLogin: return true
@@ -107,7 +107,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     }
 
     /// Indica si el flag requiere reiniciar la app para aplicar cambios
-    nonisolated var requiresRestart: Bool {
+    public nonisolated var requiresRestart: Bool {
         switch self {
         case .certificatePinning: return true
         case .debugLogs: return true
@@ -120,7 +120,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     ///
     /// Si el build actual es menor, el flag se considera deshabilitado
     /// independientemente de su valor.
-    nonisolated var minimumBuildNumber: Int? {
+    public nonisolated var minimumBuildNumber: Int? {
         switch self {
         case .newDashboard: return 100  // Solo disponible desde build 100
         default: return nil
@@ -133,7 +133,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     /// - Pueden ser inestables
     /// - Pueden eliminarse sin previo aviso
     /// - Solo deberían habilitarse para testers
-    nonisolated var isExperimental: Bool {
+    public nonisolated var isExperimental: Bool {
         switch self {
         case .newDashboard: return true
         case .mockAPI: return true
@@ -142,7 +142,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     }
 
     /// Indica si el flag solo está disponible en builds de debug
-    nonisolated var isDebugOnly: Bool {
+    public nonisolated var isDebugOnly: Bool {
         switch self {
         case .debugLogs: return true
         case .mockAPI: return true
@@ -151,7 +151,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     }
 
     /// Indica si el flag afecta la seguridad
-    nonisolated var affectsSecurity: Bool {
+    public nonisolated var affectsSecurity: Bool {
         switch self {
         case .biometricLogin,
              .certificatePinning,
@@ -169,7 +169,7 @@ enum FeatureFlag: String, CaseIterable, Codable, Sendable {
     /// - Feature flags: 40-60
     /// - UI flags: 10-30
     /// - Debug flags: 1-9
-    nonisolated var priority: Int {
+    public nonisolated var priority: Int {
         switch self {
         case .biometricLogin: return 100
         case .certificatePinning: return 99

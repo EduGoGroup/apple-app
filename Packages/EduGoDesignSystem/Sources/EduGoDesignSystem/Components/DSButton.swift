@@ -20,21 +20,21 @@ import SwiftUI
 /// - Interacciones mejoradas con hover states
 /// - Liquid animations opcionales
 /// - Haptic feedback (opcional)
-struct DSButton: View {
-    let title: String
-    let style: Style
-    let size: Size
-    let isLoading: Bool
-    let isDisabled: Bool
-    let glassIntensity: LiquidGlassIntensity?
-    let liquidAnimation: LiquidAnimation?
-    let action: () -> Void
+public struct DSButton: View {
+    public let title: String
+    public let style: Style
+    public let size: Size
+    public let isLoading: Bool
+    public let isDisabled: Bool
+    public let glassIntensity: LiquidGlassIntensity?
+    public let liquidAnimation: LiquidAnimation?
+    public let action: () -> Void
 
     @State private var isHovered = false
     @State private var isPressed = false
 
     /// Estilos de botón disponibles
-    enum Style: Sendable {
+    public enum Style: Sendable {
         // Estilos originales
         case primary
         case secondary
@@ -105,7 +105,7 @@ struct DSButton: View {
         }
     }
 
-    enum Size: Sendable {
+    public enum Size: Sendable {
         case small
         case medium
         case large
@@ -135,7 +135,7 @@ struct DSButton: View {
         }
     }
 
-    init(
+    public init(
         title: String,
         style: Style = .primary,
         size: Size = .medium,
@@ -155,7 +155,7 @@ struct DSButton: View {
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: handleAction) {
             buttonContent()
         }
@@ -304,7 +304,7 @@ struct DSButton: View {
 
 // MARK: - Tamaños Adaptados por Plataforma
 
-extension DSButton {
+public extension DSButton {
     /// Crea un botón con tamaño automático según la plataforma
     ///
     /// - iPhone: Medium

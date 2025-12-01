@@ -36,7 +36,7 @@ import Foundation
 ///     // Usar valor por defecto
 /// }
 /// ```
-struct GetFeatureFlagUseCase: Sendable {
+public struct GetFeatureFlagUseCase: Sendable {
     // MARK: - Properties
 
     private let repository: FeatureFlagRepository
@@ -46,7 +46,7 @@ struct GetFeatureFlagUseCase: Sendable {
     /// Inicializa el use case con el repositorio de feature flags
     ///
     /// - Parameter repository: Repositorio para acceder a los feature flags
-    nonisolated init(repository: FeatureFlagRepository) {
+    public nonisolated init(repository: FeatureFlagRepository) {
         self.repository = repository
     }
 
@@ -62,7 +62,7 @@ struct GetFeatureFlagUseCase: Sendable {
     ///
     /// - Parameter flag: El feature flag a consultar
     /// - Returns: `Result` con `true` si está habilitado, `false` si está deshabilitado
-    func execute(flag: FeatureFlag) async -> Result<Bool, AppError> {
+    public func execute(flag: FeatureFlag) async -> Result<Bool, AppError> {
         // 1. Obtener valor del repositorio
         let isEnabledRemote = await repository.isEnabled(flag)
 

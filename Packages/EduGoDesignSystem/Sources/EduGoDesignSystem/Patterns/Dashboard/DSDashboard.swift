@@ -25,10 +25,10 @@ import SwiftUI
 /// }
 /// ```
 @MainActor
-struct DSDashboard<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-    let columns: [GridItem]
-    let spacing: CGFloat
+public struct DSDashboard<Content: View>: View {
+    @ViewBuilder public let content: () -> Content
+    public let columns: [GridItem]
+    public let spacing: CGFloat
 
     /// Crea un Dashboard
     ///
@@ -36,7 +36,7 @@ struct DSDashboard<Content: View>: View {
     ///   - columnsCount: Número de columnas (default: 2)
     ///   - spacing: Espaciado entre items (default: DSSpacing.large)
     ///   - content: Contenido del dashboard
-    init(
+    public init(
         columnsCount: Int = 2,
         spacing: CGFloat = DSSpacing.large,
         @ViewBuilder content: @escaping () -> Content
@@ -50,7 +50,7 @@ struct DSDashboard<Content: View>: View {
     ///
     /// - iPhone: 2 columnas
     /// - iPad/Mac: 3 columnas
-    init(
+    public init(
         adaptive spacing: CGFloat = DSSpacing.large,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -60,7 +60,7 @@ struct DSDashboard<Content: View>: View {
         self.content = content
     }
 
-    var body: some View {
+    public var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: spacing) {
                 content()
