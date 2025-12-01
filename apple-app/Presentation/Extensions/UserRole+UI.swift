@@ -96,10 +96,14 @@ extension UserRole {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - String Representation
 
-extension UserRole: CustomStringConvertible {
-    public var description: String {
+extension UserRole {
+    /// Representación formateada para UI (emoji + nombre)
+    ///
+    /// - Note: No se usa CustomStringConvertible para evitar conflictos
+    /// con conformancias que podrían agregarse en EduGoDomainCore
+    var formattedDescription: String {
         "\(emoji) \(displayName)"
     }
 }

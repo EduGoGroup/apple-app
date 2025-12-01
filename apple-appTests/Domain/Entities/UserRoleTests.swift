@@ -48,13 +48,13 @@ struct UserRoleTests {
         #expect(UserRole.parent.emoji == "👨‍👩‍👧")
     }
 
-    @Test("Role description combines emoji and display name")
-    func description() {
+    @Test("Role formattedDescription combines emoji and display name")
+    func formattedDescription() {
         let student = UserRole.student
-        #expect(student.description == "🎓 Estudiante")
+        #expect(student.formattedDescription == "🎓 Estudiante")
 
         let teacher = UserRole.teacher
-        #expect(teacher.description == "👨‍🏫 Profesor")
+        #expect(teacher.formattedDescription == "👨‍🏫 Profesor")
     }
 
     @Test("Role is Codable")
