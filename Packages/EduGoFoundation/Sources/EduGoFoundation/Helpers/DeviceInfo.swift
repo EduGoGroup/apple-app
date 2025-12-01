@@ -4,6 +4,7 @@ import UIKit
 #endif
 
 /// Información del dispositivo actual
+@MainActor
 public struct DeviceInfo: Sendable {
     public static let shared = DeviceInfo()
 
@@ -34,7 +35,7 @@ public struct DeviceInfo: Sendable {
     }
 
     /// Nombre del sistema operativo
-    public var osName: String {
+    public nonisolated var osName: String {
         #if os(iOS)
         return "iOS"
         #elseif os(macOS)
@@ -56,7 +57,7 @@ public struct DeviceInfo: Sendable {
     }
 
     /// Es un Mac
-    public var isMac: Bool {
+    public nonisolated var isMac: Bool {
         #if os(macOS)
         return true
         #else
@@ -65,7 +66,7 @@ public struct DeviceInfo: Sendable {
     }
 
     /// Es Vision Pro
-    public var isVisionOS: Bool {
+    public nonisolated var isVisionOS: Bool {
         #if os(visionOS)
         return true
         #else
