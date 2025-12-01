@@ -15,7 +15,7 @@ import EduGoDomainCore
 @MainActor
 public final class LoginViewModel {
     /// Estados posibles del login
-    public enum State: Equatable {
+    public enum State: Equatable, Sendable {
         case idle
         case loading
         case success(User)
@@ -26,7 +26,7 @@ public final class LoginViewModel {
     private let loginUseCase: LoginUseCase
     private let loginWithBiometricsUseCase: LoginWithBiometricsUseCase?
 
-    public init(
+    public nonisolated init(
         loginUseCase: LoginUseCase,
         loginWithBiometricsUseCase: LoginWithBiometricsUseCase? = nil
     ) {

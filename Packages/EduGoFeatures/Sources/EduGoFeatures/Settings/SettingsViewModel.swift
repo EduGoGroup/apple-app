@@ -21,7 +21,7 @@ public final class SettingsViewModel {
     private let updateThemeUseCase: UpdateThemeUseCase
     private let preferencesRepository: PreferencesRepository
 
-    public init(
+    public nonisolated init(
         updateThemeUseCase: UpdateThemeUseCase,
         preferencesRepository: PreferencesRepository
     ) {

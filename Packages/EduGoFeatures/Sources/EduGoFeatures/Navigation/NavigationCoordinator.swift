@@ -19,7 +19,7 @@ public final class NavigationCoordinator {
 
     // MARK: - Initialization
 
-    public init() {}
+    public nonisolated init() {}
 
     // MARK: - Navigation Methods
 

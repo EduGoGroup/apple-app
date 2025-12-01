@@ -25,7 +25,7 @@ public final class AuthenticationState {
 
     // MARK: - Initialization
 
-    public init(currentUser: User? = nil) {
+    public nonisolated init(currentUser: User? = nil) {
         self.currentUser = currentUser
     }
 

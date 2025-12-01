@@ -62,12 +62,12 @@ public final class NetworkState {
     /// - Parameters:
     ///   - networkMonitor: Monitor de conectividad
     ///   - offlineQueue: Cola de requests offline
-    public init(networkMonitor: NetworkMonitor, offlineQueue: OfflineQueue) {
+    /// - Note: Llamar `startMonitoring()` después de init o usar `.task` en la View
+    public nonisolated init(networkMonitor: NetworkMonitor, offlineQueue: OfflineQueue) {
         self.networkMonitor = networkMonitor
         self.offlineQueue = offlineQueue
-
-        // Iniciar monitoreo automáticamente
-        startMonitoring()
+        // Note: startMonitoring() debe llamarse desde un contexto @MainActor
+        // Por ejemplo, en .task { networkState.startMonitoring() }
     }
 
     // MARK: - Public Methods
@@ -87,10 +87,11 @@ public final class NetworkState {
         monitoringTask = nil
     }
 
-    // MARK: - Private Methods
+    // MARK: - Monitoring Methods
 
     /// Inicia el monitoreo de cambios de conectividad
-    private func startMonitoring() {
+    /// Debe llamarse después de la inicialización desde un contexto @MainActor
+    public func startMonitoring() {
         // Cancelar monitoreo previo si existe
         stopMonitoring()
 
@@ -170,6 +171,9 @@ extension NetworkState {
             networkMonitor: mockMonitor,
             offlineQueue: mockQueue
         )
+
+        // Iniciar monitoreo en el mock
+        state.startMonitoring()
 
         state.isConnected = isConnected
         state.isSyncing = isSyncing

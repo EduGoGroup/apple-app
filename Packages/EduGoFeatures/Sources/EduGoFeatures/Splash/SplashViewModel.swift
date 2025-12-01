@@ -16,7 +16,7 @@ import EduGoDomainCore
 public final class SplashViewModel {
     private let authRepository: AuthRepository
 
-    public init(authRepository: AuthRepository) {
+    public nonisolated init(authRepository: AuthRepository) {
         self.authRepository = authRepository
     }
 
