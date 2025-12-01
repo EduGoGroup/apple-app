@@ -1,22 +1,35 @@
 //
 //  TokenInfo.swift
-//  apple-app
+//  EduGoDomainCore
 //
 //  Created on 24-01-25.
 //  Updated on 24-11-25 - SPRINT2-T03: Integración con Environment centralizado
+//  Updated on 30-11-25 - Modularización: Constantes locales para Domain puro
 //  SPEC-003: Authentication Real API Migration
 //
 
 import Foundation
 
+// MARK: - Token Configuration Constants
+
+/// Configuración de tokens para Domain (capa pura sin dependencias externas)
+/// Estos valores pueden ser sobrescritos por la capa de aplicación si es necesario
+public enum TokenConfiguration {
+    /// Duración por defecto del access token (15 minutos)
+    public static let defaultAccessTokenDuration: TimeInterval = 900
+
+    /// Threshold para refresh automático (2 minutos antes de expirar)
+    public static let defaultRefreshThreshold: TimeInterval = 120
+}
+
 /// Alias para compatibilidad con documentación de Sprint 2
 /// AuthTokens y TokenInfo son intercambiables
-typealias AuthTokens = TokenInfo
+public typealias AuthTokens = TokenInfo
 
 /// Información de tokens de autenticación con expiración
 ///
 /// Contiene access token y refresh token con metadata de expiración.
-/// Usa configuración de `AppEnvironment` para threshold de refresh.
+/// Usa `TokenConfiguration` para valores por defecto de threshold y duración.
 ///
 /// ## Propiedades Calculadas
 /// - `isExpired`: true si el token ya expiró
@@ -31,63 +44,63 @@ typealias AuthTokens = TokenInfo
 ///     // Iniciar refresh automático
 /// }
 /// ```
-struct TokenInfo: Codable, Sendable, Equatable {
+public struct TokenInfo: Codable, Sendable, Equatable {
     // MARK: - Properties
 
     /// Token de acceso JWT
-    let accessToken: String
+    public let accessToken: String
 
     /// Token de refresh para obtener nuevos access tokens
-    let refreshToken: String
+    public let refreshToken: String
 
     /// Fecha/hora de expiración del access token
-    let expiresAt: Date
+    public let expiresAt: Date
 
     /// Momento en que se crearon los tokens (para cálculos de vida útil)
-    let createdAt: Date
+    public let createdAt: Date
 
     // MARK: - Computed Properties
 
     /// Indica si el token ya expiró
-    var isExpired: Bool {
+    public var isExpired: Bool {
         Date() >= expiresAt
     }
 
     /// Indica si el token necesita refresh
     ///
-    /// Usa `AppEnvironment.tokenRefreshThreshold` (default: 2 minutos antes de expirar)
-    var shouldRefresh: Bool {
-        let threshold = AppEnvironment.tokenRefreshThreshold
+    /// Usa `TokenConfiguration.defaultRefreshThreshold` (default: 2 minutos antes de expirar)
+    public var shouldRefresh: Bool {
+        let threshold = TokenConfiguration.defaultRefreshThreshold
         return Date() >= expiresAt.addingTimeInterval(-threshold)
     }
 
     /// Indica si el token necesita refresh (alias para compatibilidad)
     @available(*, deprecated, message: "Usar shouldRefresh en su lugar")
-    var needsRefresh: Bool {
+    public var needsRefresh: Bool {
         shouldRefresh
     }
 
     /// Tiempo restante en segundos hasta expiración
-    var timeRemaining: TimeInterval {
+    public var timeRemaining: TimeInterval {
         max(0, expiresAt.timeIntervalSinceNow)
     }
 
     /// Tiempo restante hasta expiración (alias para compatibilidad)
     @available(*, deprecated, message: "Usar timeRemaining en su lugar")
-    var timeUntilExpiration: TimeInterval {
+    public var timeUntilExpiration: TimeInterval {
         timeRemaining
     }
 
     /// Segundos totales de vida del token (desde creación hasta expiración)
-    var expiresIn: Int {
+    public var expiresIn: Int {
         Int(expiresAt.timeIntervalSince(createdAt))
     }
 
     /// Porcentaje de vida útil restante (0.0 = expirado, 1.0 = recién creado)
-    var remainingLifePercentage: Double {
+    public var remainingLifePercentage: Double {
         guard !isExpired else { return 0.0 }
 
-        let totalLife = AppEnvironment.accessTokenDuration
+        let totalLife = TokenConfiguration.defaultAccessTokenDuration
         let remaining = timeRemaining
 
         return max(0.0, min(1.0, remaining / totalLife))
@@ -96,7 +109,7 @@ struct TokenInfo: Codable, Sendable, Equatable {
     // MARK: - Initializers
 
     /// Inicializador completo
-    init(accessToken: String, refreshToken: String, expiresAt: Date, createdAt: Date = Date()) {
+    public init(accessToken: String, refreshToken: String, expiresAt: Date, createdAt: Date = Date()) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         self.expiresAt = expiresAt
@@ -108,7 +121,7 @@ struct TokenInfo: Codable, Sendable, Equatable {
     ///   - accessToken: Token de acceso JWT
     ///   - refreshToken: Token de refresh
     ///   - expiresIn: Segundos hasta expiración
-    init(accessToken: String, refreshToken: String, expiresIn: Int) {
+    public init(accessToken: String, refreshToken: String, expiresIn: Int) {
         let now = Date()
         self.accessToken = accessToken
         self.refreshToken = refreshToken
@@ -129,7 +142,7 @@ struct TokenInfo: Codable, Sendable, Equatable {
 // MARK: - CustomDebugStringConvertible
 
 extension TokenInfo: CustomDebugStringConvertible {
-    var debugDescription: String {
+    public var debugDescription: String {
         """
         TokenInfo(
           accessToken: \(accessToken.prefix(20))...,
@@ -172,8 +185,8 @@ extension TokenInfo {
 
     /// Token que necesita refresh para testing (dentro del threshold)
     static var needingRefresh: TokenInfo {
-        // Usar threshold de Environment + un poco menos
-        let threshold = AppEnvironment.tokenRefreshThreshold
+        // Usar threshold de configuración + un poco menos
+        let threshold = TokenConfiguration.defaultRefreshThreshold
         return TokenInfo(
             accessToken: "soon_to_expire",
             refreshToken: "refresh_token",
@@ -187,13 +200,13 @@ extension TokenInfo {
         TokenInfo(
             accessToken: "fresh_token",
             refreshToken: "fresh_refresh",
-            expiresIn: Int(AppEnvironment.accessTokenDuration)
+            expiresIn: Int(TokenConfiguration.defaultAccessTokenDuration)
         )
     }
 
     /// Token válido pero no fresco (a mitad de vida)
     static var halfLife: TokenInfo {
-        let halfDuration = AppEnvironment.accessTokenDuration / 2
+        let halfDuration = TokenConfiguration.defaultAccessTokenDuration / 2
         return TokenInfo(
             accessToken: "half_life_token",
             refreshToken: "refresh_token",
