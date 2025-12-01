@@ -1,7 +1,8 @@
 # SPEC-009: Feature Flags - RESUMEN Y CONTEXTO
 
 **Fecha de Creación**: 2025-11-29  
-**Estado**: ⚠️ 10% Completado (Fase 1 completada con mock)  
+**Última Actualización**: 2025-12-01  
+**Estado**: 🟠 35% Completado (infraestructura local completa, falta sync remoto)  
 **Prioridad**: P3 - BAJA
 
 ---
@@ -10,20 +11,20 @@
 
 Sistema de feature flags con remote config para controlar funcionalidades desde backend, A/B testing y release management.
 
-**Progreso**: 10% completado - Infraestructura core con mock backend funcionando.
+**Progreso Real**: 35% completado - Infraestructura local completa con mock backend, falta sincronización remota real.
 
 ---
 
-## ✅ LO QUE YA ESTÁ IMPLEMENTADO (Contexto)
+## ✅ LO QUE YA ESTÁ IMPLEMENTADO (Verificado en Código)
 
 ### 1. Domain Layer - 100% Puro ✅
 
-**Archivos**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Domain/Entities/FeatureFlag.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Domain/Repositories/FeatureFlagRepository.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Domain/UseCases/FeatureFlags/GetFeatureFlagUseCase.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Domain/UseCases/FeatureFlags/GetAllFeatureFlagsUseCase.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Domain/UseCases/FeatureFlags/SyncFeatureFlagsUseCase.swift`
+**Ubicación**: `/Packages/EduGoDomainCore/Sources/`
+
+| Archivo | Estado | Descripción |
+|---------|--------|-------------|
+| `FeatureFlag.swift` | ✅ | Enum con 11 flags definidos |
+| `FeatureFlagRepository.swift` | ✅ | Protocol de repository |
 
 **Feature Flags Definidos (11 flags)**:
 
@@ -35,182 +36,90 @@ Sistema de feature flags con remote config para controlar funcionalidades desde 
 | **Debug** | `debug_logs`, `mock_api` |
 
 **Propiedades de Negocio**:
-- `id: String` - Identificador único
 - `defaultValue: Bool` - Valor por defecto si backend falla
-- `isDebugOnly: Bool` - Solo disponible en builds debug
+- `requiresRestart: Bool` - Si requiere reiniciar app
 - `minimumBuildNumber: Int?` - Build mínimo requerido
+- `isExperimental: Bool` - Flag experimental
+- `isDebugOnly: Bool` - Solo disponible en builds debug
+- `affectsSecurity: Bool` - Afecta seguridad
+- `priority: Int` - Prioridad de carga
 
-### 2. Data Layer - Mock Backend Funcional ✅
+### 2. Data Layer - Repository Implementado ✅
 
-**Archivos**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Data/Repositories/FeatureFlagRepositoryImpl.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Data/Models/Cache/CachedFeatureFlag.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Data/DTOs/FeatureFlags/FeatureFlagDTO.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Data/DTOs/FeatureFlags/FeatureFlagsResponseDTO.swift`
+**Ubicación**: `/apple-app/Data/Repositories/FeatureFlagRepositoryImpl.swift`
 
-**Implementación**:
-- ✅ `actor FeatureFlagRepositoryImpl` (thread-safe)
-- ✅ Cache local con SwiftData (TTL 1 hora)
-- ✅ Mock backend con latencia realista (100-300ms)
-- ✅ Preparado para migrar a backend real (código comentado listo)
-- ✅ Fallback a valores por defecto
+- ✅ Implementación con actor (thread-safe)
+- ✅ Cache local con SwiftData
+- 🟡 **Usa mock**: `useMock: Bool = true` - Sincronización remota NO implementada
 
-**Valores Mock Actuales**:
+### 3. SwiftData Cache Model ✅
+
+**Ubicación**: `/apple-app/Data/Models/Cache/CachedFeatureFlag.swift`
+
 ```swift
-// Simulan producción realista
-"biometric_login": true,
-"certificate_pinning": true,
-"offline_mode": true,
-"new_dashboard": false,  // Experimental
-"background_sync": false,
-"debug_logs": false
+@Model
+final class CachedFeatureFlag {
+    var flagId: String
+    var isEnabled: Bool
+    var lastSyncedAt: Date
+    // TTL: 1 hora por defecto
+}
 ```
 
-### 3. Presentation Layer - Extensiones UI ✅
+### 4. Presentation Layer - Extensiones UI ✅
 
-**Archivos**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Presentation/Extensions/FeatureFlag+UI.swift`
+**Ubicación**: `/apple-app/Presentation/Extensions/FeatureFlag+UI.swift`
 
 **Propiedades UI**:
 - `displayName: String` - Nombre legible
 - `iconName: String` - Icono SF Symbol
-- `description: String` - Descripción detallada
-- `category: FeatureFlagCategory` - Categoría visual (Security, Features, UI, Debug)
-- `color: Color` - Color por categoría
+- `category: FeatureFlagCategory` - Categoría visual
 
-### 4. Dependency Injection ✅
+### 5. Dependency Injection ✅
 
-**Registrado en**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/apple_appApp.swift`
+**Registrado en**: `apple_appApp.swift`
 
-**DI configurado**:
 - ✅ FeatureFlagRepositoryImpl registrado
-- ✅ GetFeatureFlagUseCase registrado
-- ✅ GetAllFeatureFlagsUseCase registrado
-- ✅ SyncFeatureFlagsUseCase registrado
 - ✅ CachedFeatureFlag agregado a ModelContainer
-
-### 5. Tests Básicos ✅
-
-**Archivos**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-appTests/DomainTests/UseCases/FeatureFlags/GetFeatureFlagUseCaseTests.swift`
-
-**Cobertura**: Tests básicos con mock repository
-
-### 6. Documentación Backend ✅
-
-**Archivo**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/docs/backend-specs/feature-flags/BACKEND-SPEC-FEATURE-FLAGS.md`
-
-**Contenido**: Especificación completa para API admin (DB, endpoints, DTOs, lógica, seed data)
 
 ---
 
 ## ⚠️ LO QUE FALTA (Tareas Pendientes)
 
-### Tarea 1: Migrar a Backend Real (3h) - 🔴 BLOQUEADO
+### Tarea 1: Implementar Sincronización Remota Real (2h) - 🔴 BLOQUEADO
 
-**Estimación**: 3 horas  
-**Prioridad**: Media  
+**Estimación**: 2 horas  
+**Prioridad**: Alta  
 **Bloqueador**: Requiere endpoint backend implementado
 
-**Requisitos previos**:
-1. Backend debe implementar `GET /api/v1/feature-flags`
-2. Endpoint staging disponible para testing
-
-**Implementación** (código ya preparado):
+**Cambio requerido**:
 ```swift
 // FeatureFlagRepositoryImpl.swift
 private let useMock: Bool = false  // Cambiar de true a false
-
-// Descomentar código HTTP (ya está escrito)
-private func syncFlagsFromBackend() async -> Result<Void, AppError> {
-    // TODO FASE 2: Descomentar llamadas HTTP
-    // let endpoint = Endpoint.featureFlags.getAll
-    // let response: FeatureFlagsResponseDTO = try await apiClient.execute(...)
-}
 ```
 
-**Archivos a modificar**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Data/Repositories/FeatureFlagRepositoryImpl.swift`
+**Requisitos**:
+1. Backend debe implementar `GET /api/v1/feature-flags`
+2. Endpoint staging disponible para testing
 
-**Ver**: `FASE-1-COMPLETADA.md` - Sección "Migración a Backend Real"
+### Tarea 2: Tests Unitarios (1.5h)
 
----
+**Estimación**: 1.5 horas  
+**Prioridad**: Media
 
-### Tarea 2: UI para Visualizar Feature Flags (3h)
-
-**Estimación**: 3 horas  
-**Prioridad**: Baja
-
-**Implementación**:
+**Tests a crear**:
 ```swift
-// FeatureFlagsViewModel.swift
-@Observable @MainActor
-final class FeatureFlagsViewModel {
-    private let getAllFlagsUseCase: GetAllFeatureFlagsUseCase
-    private let syncFlagsUseCase: SyncFeatureFlagsUseCase
-    
-    var flags: [FeatureFlag: Bool] = [:]
-    var isSyncing: Bool = false
-    
-    func loadFlags() async { }
-    func syncFlags() async { }
-}
-
-// FeatureFlagsView.swift
-struct FeatureFlagsView: View {
-    @State private var viewModel: FeatureFlagsViewModel
-    
-    var body: some View {
-        List {
-            ForEach(FeatureFlagCategory.allCases) { category in
-                Section(category.displayName) {
-                    // Mostrar flags de cada categoría
-                }
-            }
-        }
-    }
-}
+// FeatureFlagRepositoryTests.swift
+@Test func testGetFlag() async { }
+@Test func testCacheExpiration() async { }
+@Test func testFallbackToDefault() async { }
+@Test func testSyncFromBackend() async { }
 ```
 
 **Archivos a crear**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Presentation/Scenes/FeatureFlags/FeatureFlagsViewModel.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/Presentation/Scenes/FeatureFlags/FeatureFlagsView.swift`
+- `/apple-appTests/DataTests/Repositories/FeatureFlagRepositoryTests.swift`
 
----
-
-### Tarea 3: Sincronización Automática al Inicio (1h)
-
-**Estimación**: 1 hora  
-**Prioridad**: Media
-
-**Implementación**:
-```swift
-// apple_appApp.swift
-init() {
-    Task { @MainActor in
-        await syncFeatureFlags()
-    }
-}
-
-private func syncFeatureFlags() async {
-    let syncUseCase = container.resolve(SyncFeatureFlagsUseCase.self)
-    let result = await syncUseCase.execute()
-    
-    if case .failure(let error) = result {
-        logger.warning("Feature flags sync failed: \(error)")
-        // Continuar con cache o defaults
-    }
-}
-```
-
-**Archivos a modificar**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-app/apple_appApp.swift`
-
----
-
-### Tarea 4: A/B Testing Support (4h) - 🟢 OPCIONAL
+### Tarea 3: A/B Testing Support (4h) - 🟢 OPCIONAL
 
 **Estimación**: 4 horas  
 **Prioridad**: Baja (fase futura)
@@ -224,91 +133,50 @@ private func syncFeatureFlags() async {
 
 ---
 
-### Tarea 5: Tests de Integración (2h)
-
-**Estimación**: 2 horas  
-**Prioridad**: Media
-
-**Tests a crear**:
-- Cache expiration tests
-- Sync from backend tests (con backend real)
-- Fallback to defaults tests
-- UI tests para FeatureFlagsView
-
-**Archivos a crear**:
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-appTests/DataTests/Repositories/FeatureFlagRepositoryTests.swift`
-- `/Users/jhoanmedina/source/EduGo/EduUI/apple-app/apple-appTests/IntegrationTests/FeatureFlagIntegrationTests.swift`
-
----
-
-## 🔒 BLOQUEADORES Y REQUISITOS
-
-| Tarea | Bloqueador | Responsable | ETA |
-|-------|-----------|-------------|-----|
-| Backend Real | Endpoint `/api/v1/feature-flags` | Backend Team | TBD |
-| A/B Testing | Backend avanzado con segmentación | Backend Team | Futuro |
-
----
-
 ## 📊 PROGRESO DETALLADO
 
 | Componente | Estado | Ubicación |
 |------------|--------|-----------|
-| FeatureFlag Entity | 100% ✅ | `/Domain/Entities/FeatureFlag.swift` |
-| FeatureFlagRepository Protocol | 100% ✅ | `/Domain/Repositories/FeatureFlagRepository.swift` |
-| Use Cases (3) | 100% ✅ | `/Domain/UseCases/FeatureFlags/` |
-| FeatureFlagRepositoryImpl (mock) | 100% ✅ | `/Data/Repositories/FeatureFlagRepositoryImpl.swift` |
-| Cache con SwiftData | 100% ✅ | `/Data/Models/Cache/CachedFeatureFlag.swift` |
-| DTOs | 100% ✅ | `/Data/DTOs/FeatureFlags/` |
-| UI Extensions | 100% ✅ | `/Presentation/Extensions/FeatureFlag+UI.swift` |
+| FeatureFlag Enum (11 flags) | 100% ✅ | `EduGoDomainCore` |
+| FeatureFlagRepository Protocol | 100% ✅ | `EduGoDomainCore` |
+| FeatureFlagRepositoryImpl | 100% ✅ | `/Data/Repositories/` |
+| CachedFeatureFlag @Model | 100% ✅ | `/Data/Models/Cache/` |
+| FeatureFlag+UI Extension | 100% ✅ | `/Presentation/Extensions/` |
+| Propiedades de Negocio | 100% ✅ | En enum FeatureFlag |
 | DI Registration | 100% ✅ | `apple_appApp.swift` |
-| Tests Básicos | 50% 🟡 | `apple-appTests/DomainTests/UseCases/FeatureFlags/` |
-| Backend Real | 0% ❌ | N/A (bloqueado) |
-| UI ViewModel/View | 0% ❌ | N/A |
-| Sincronización Automática | 0% ❌ | N/A |
-| A/B Testing | 0% ❌ | N/A (opcional) |
+| **Remote Sync HTTP** | 0% ❌ | Usa mock (`useMock = true`) |
+| **Tests unitarios** | 0% ❌ | N/A |
+| **A/B Testing** | 0% ❌ | N/A (opcional) |
 
-**Progreso Total**: ~10% (Infraestructura core lista con mock)
+**Progreso Total**: 35%
 
 ---
 
 ## 🎯 CÓMO CONTINUAR ESTA SPEC
 
 ### Opción 1: Esperar Backend (Recomendado)
+
 1. Esperar a que backend implemente endpoint
-2. Ejecutar Tarea 1 (migración a backend real) - 3h
-3. Ejecutar Tarea 3 (sync automático) - 1h
-4. Ejecutar Tarea 5 (tests de integración) - 2h
+2. Cambiar `useMock = false`
+3. Tests de integración con backend real
 
-**Total**: 6 horas
+**Tiempo cuando backend esté listo**: 3.5 horas
 
-### Opción 2: Continuar con Mock
-1. Ejecutar Tarea 2 (UI para visualizar flags) - 3h
-2. Ejecutar Tarea 3 (sync automático con mock) - 1h
-3. Ejecutar Tarea 5 (tests con mock) - 2h
+### Opción 2: Completar Tests con Mock
 
-**Total**: 6 horas
+1. Crear tests unitarios con mock (1.5h)
+2. Después migrar a backend cuando esté listo
 
-**Después migrar a backend cuando esté listo** (+3h)
-
-### Documentos de referencia:
-- `FASE-1-COMPLETADA.md` - Estado detallado de Fase 1
-- `03-tareas.md` - Tareas originales planificadas
-- `/docs/backend-specs/feature-flags/BACKEND-SPEC-FEATURE-FLAGS.md` - Spec para backend
+**Sin bloqueadores para tests**: Puede iniciarse ahora.
 
 ---
 
-## 🚀 RECOMENDACIÓN
+## 🔒 BLOQUEADORES
 
-**SPEC-009 está 10% completa con infraestructura core funcional.**
-
-**Acción recomendada**:
-1. **OPCIÓN A (Recomendada)**: Esperar backend y completar con backend real (6h)
-2. **OPCIÓN B**: Continuar con mock y UI (6h), migrar después (+3h)
-
-**Bloqueador principal**: Endpoint backend `/api/v1/feature-flags`
-
-**Nota**: El código está **100% preparado** para migración a backend. Solo requiere cambiar flag `useMock = false` y descomentar código HTTP.
+| Tarea | Bloqueador | Responsable | ETA |
+|-------|-----------|-------------|-----|
+| Remote Sync | Endpoint `/api/v1/feature-flags` | Backend Team | TBD |
+| A/B Testing | Backend con segmentación | Backend Team | Futuro |
 
 ---
 
@@ -322,9 +190,9 @@ private func syncFeatureFlags() async {
 | Separación UI/Negocio | 100% ✅ |
 | Preparación Backend | 100% ✅ |
 
-**Puede usarse como referencia** para futuras SPECs (es el primer ejemplo post-Sprint 0).
+**Nota**: El código está **100% preparado** para migración a backend. Solo requiere cambiar flag `useMock = false`.
 
 ---
 
-**Última Actualización**: 2025-11-29  
+**Última Actualización**: 2025-12-01  
 **Próxima Revisión**: Cuando endpoint backend esté disponible

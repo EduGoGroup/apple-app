@@ -1,9 +1,9 @@
 # 📊 TRACKING DE ESPECIFICACIONES - FUENTE ÚNICA DE VERDAD
 
-**Última Actualización**: 2025-11-29  
+**Última Actualización**: 2025-12-01  
 **Versión del Proyecto**: 0.1.0 (Pre-release)  
 **Branch Actual**: dev  
-**Metodología**: Verificación directa con código fuente
+**Metodología**: Verificación directa con código fuente (cruce docs vs código)
 
 > ⚠️ **FUENTE ÚNICA DE VERDAD**: Este es el ÚNICO archivo oficial de tracking.  
 > Para detalles de implementación, ver carpetas individuales de cada spec.  
@@ -13,21 +13,21 @@
 
 ## 🎯 RESUMEN EJECUTIVO
 
-**Progreso Real del Proyecto**: **59%** (7 de 13 specs completadas al 100%)
+**Progreso Real del Proyecto**: **72%** (7 completadas + 3 muy avanzadas + 3 parciales)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ PROGRESO GENERAL: ████████████████████████░░░░░░░░░░░░ 59% │
+│ PROGRESO GENERAL: ████████████████████████████░░░░░░░░ 72% │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 | Categoría | Cantidad | Porcentaje |
 |-----------|----------|------------|
 | ✅ Completadas (100%) | 7 | 54% |
-| 🟢 Muy Avanzadas (90%) | 1 | 8% |
-| 🟡 Parciales (75%) | 2 | 15% |
-| 🟠 Básicas (15%) | 1 | 8% |
-| ⚠️ Mínimas (5-10%) | 2 | 15% |
+| 🟢 Muy Avanzadas (90%+) | 1 | 8% |
+| 🟡 Parciales (70-75%) | 1 | 8% |
+| 🟠 En Progreso (35-45%) | 3 | 23% |
+| ❌ No Iniciadas | 1 | 8% |
 
 ---
 
@@ -55,10 +55,10 @@
 
 ---
 
-### 🟢 SPEC-003: Authentication - Real API Migration (90%)
+### 🟢 SPEC-003: Authentication - Real API Migration (92%)
 
 **Prioridad**: 🟠 P1 - ALTA  
-**Última Actualización**: 2025-11-26  
+**Última Actualización**: 2025-12-01  
 **Ubicación**: `docs/specs/authentication-migration/`
 
 #### Estado
@@ -70,7 +70,10 @@
 | BiometricAuthService | 100% ✅ |
 | AuthInterceptor | 100% ✅ |
 | UI Biométrica | 100% ✅ |
+| LoginWithBiometricsUseCase | 100% ✅ |
+| DTOs (Login, Refresh, Logout) | 100% ✅ |
 | Tests Unitarios | 100% ✅ |
+| DI sin dependencias circulares | 100% ✅ |
 | **JWT Signature Validation** | 0% ⏸️ BLOQUEADO |
 | **Tests E2E** | 0% ⏸️ BLOQUEADO |
 
@@ -82,29 +85,33 @@
 #### Archivos Clave
 
 - `JWTDecoder.swift` - Decodifica y valida claims
-- `TokenRefreshCoordinator.swift` - Auto-refresh sin race conditions
+- `TokenRefreshCoordinator.swift` - Auto-refresh sin race conditions (actor)
 - `BiometricAuthService.swift` - Face ID/Touch ID
 - `AuthInterceptor.swift` - Inyección automática de tokens
+- `LoginWithBiometricsUseCase.swift` - Use case registrado en DI
 
 **Ver**: `docs/specs/authentication-migration/SPEC-003-ESTADO-ACTUAL.md`
 
 ---
 
-### 🟡 SPEC-008: Security Hardening (75%)
+### 🟡 SPEC-008: Security Hardening (73%)
 
 **Prioridad**: 🟠 P1 - ALTA  
-**Última Actualización**: 2025-11-26  
+**Última Actualización**: 2025-12-01  
 **Ubicación**: `docs/specs/security-hardening/`
 
 #### Estado
 
 | Componente | Progreso |
 |------------|----------|
-| CertificatePinner | 80% 🟡 (falta hashes reales) |
-| SecurityValidator | 100% ✅ |
-| InputValidator | 100% ✅ |
+| CertificatePinner | 80% 🟡 (código listo, sin hashes reales) |
+| SecurityValidator | 100% ✅ (jailbreak + debugger detection) |
+| InputValidator | 100% ✅ (SQL/XSS/Path traversal) |
 | BiometricAuth | 100% ✅ |
 | SecureSessionDelegate | 100% ✅ |
+| SecurityError enum | 100% ✅ |
+| **Tests CertificatePinner** | 0% ❌ |
+| **Tests SecurityValidator** | 0% ❌ |
 | **Security Checks Startup** | 0% ❌ |
 | **Input Sanitization UI** | 0% ❌ |
 | **Rate Limiting** | 0% ❌ |
@@ -112,16 +119,18 @@
 #### Pendientes (5h)
 
 1. Certificate hashes reales (1h) - Requiere hashes de servidores
-2. Security checks en startup (30min)
-3. Input sanitization en UI (1h)
-4. Info.plist ATS (30min)
-5. Rate limiting básico (2h)
+2. Tests unitarios para security services (1h)
+3. Security checks en startup (30min)
+4. Input sanitization en UI (1h)
+5. Info.plist ATS (30min)
+6. Rate limiting básico (1h)
 
 #### Archivos Clave
 
-- `CertificatePinner.swift` - Public key pinning
-- `SecurityValidator.swift` - Jailbreak detection
-- `InputValidator.swift` - Sanitización SQL/XSS/Path
+- `CertificatePinner.swift` - Public key pinning (código completo)
+- `SecurityValidator.swift` - Jailbreak detection (@MainActor)
+- `InputValidator.swift` - Sanitización SQL/XSS/Path (en EduGoDomainCore)
+- `SecureSessionDelegate.swift` - URLSession delegate para HTTPS
 
 **Ver**: `docs/specs/security-hardening/PLAN-EJECUCION-SPEC-008.md`
 
@@ -143,107 +152,189 @@
 | macOS Optimization | 100% ✅ |
 | visionOS Support | 100% ✅ |
 
-#### Completado (16h reales)
-
-- ✅ PlatformCapabilities system (2h)
-- ✅ DSVisualEffects refactorizado (iOS 26+ primero) (1h)
-- ✅ iPad: NavigationSplitView, layouts 2 columnas, panel dual (5h)
-- ✅ macOS: Toolbar, Menu bar, Shortcuts, window controls (6h)
-- ✅ visionOS: Spatial UI, ornaments, depth effects (4h)
-
-#### Archivos Clave
-
-- `PlatformCapabilities.swift` - Sistema de detección
-- `DSVisualEffects.swift` - Modern + Legacy effects
-- `IPadHomeView.swift`, `IPadSettingsView.swift` - iPad layouts
-- `MacOSToolbarConfiguration.swift`, `MacOSMenuCommands.swift`, `KeyboardShortcuts.swift` - macOS
-- `MacOSSettingsView.swift` - Settings nativo macOS
-- `VisionOSConfiguration.swift`, `VisionOSHomeView.swift` - visionOS
-
 **Ver**: `docs/specs/platform-optimization/SPEC-006-COMPLETADO.md`
 
 ---
 
-### ⚠️ SPEC-009: Feature Flags (10%)
+### 🟠 SPEC-009: Feature Flags (35%)
 
 **Prioridad**: 🟢 P3 - BAJA  
-**Última Actualización**: 2025-11-26  
+**Última Actualización**: 2025-12-01  
 **Ubicación**: `docs/specs/feature-flags/`
 
 #### Estado
 
-- Flags compile-time: 10% ✅
-- **Feature Flags Runtime**: 0% ❌
-- **Remote Config**: 0% ❌
+| Componente | Progreso |
+|------------|----------|
+| FeatureFlag enum (11 flags) | 100% ✅ |
+| FeatureFlagRepository protocol | 100% ✅ |
+| FeatureFlagRepositoryImpl | 100% ✅ |
+| CachedFeatureFlag @Model | 100% ✅ |
+| FeatureFlag+UI extension | 100% ✅ |
+| Propiedades de negocio | 100% ✅ |
+| **Remote Config HTTP** | 0% ❌ (usa mock) |
+| **Sincronización real** | 0% ❌ |
+| **Tests unitarios** | 0% ❌ |
+| **A/B Testing** | 0% ❌ |
 
-#### Pendientes (8h)
+#### Implementado (FASE 1 - Infraestructura Local)
 
-- FeatureFlag service (3h)
-- Remote config (3h) - Requiere backend endpoint
-- Persistencia SwiftData (2h)
+- ✅ FeatureFlag enum con 11 flags definidos:
+  - biometric_login, certificate_pinning, login_rate_limiting
+  - offline_mode, background_sync, push_notifications
+  - auto_dark_mode, new_dashboard, transition_animations
+  - debug_logs, mock_api
+- ✅ Propiedades de negocio: defaultValue, requiresRestart, minimumBuildNumber, isExperimental, isDebugOnly
+- ✅ Repository con cache SwiftData
+- ✅ Extensión UI (displayName, iconName, category)
+
+#### Pendientes (FASE 2 - Remote Config) - 5h
+
+1. Implementar syncFlags() real (2h) - Requiere endpoint backend
+2. Tests unitarios (1.5h)
+3. A/B testing support (1.5h)
+
+**Nota**: Código usa `useMock: Bool = true`, sincronización remota NO implementada.
 
 ---
 
-### ⚠️ SPEC-011: Analytics (5%)
+### 🟠 SPEC-011: Analytics (45%)
 
 **Prioridad**: 🟢 P3 - BAJA  
-**Última Actualización**: 2025-11-26  
+**Última Actualización**: 2025-12-01  
 **Ubicación**: `docs/specs/analytics/`
 
-#### Pendientes (8h)
+#### Estado
 
-- AnalyticsService protocol
-- Event tracking
-- Firebase integration - Requiere GoogleService-Info.plist
+| Componente | Progreso |
+|------------|----------|
+| AnalyticsService protocol | 100% ✅ (Sendable) |
+| AnalyticsManager actor | 100% ✅ |
+| AnalyticsProvider protocol | 100% ✅ |
+| FirebaseAnalyticsProvider | 100% ✅ |
+| ConsoleAnalyticsProvider | 100% ✅ |
+| NoOpAnalyticsProvider | 100% ✅ |
+| ATT Integration | 100% ✅ |
+| **Event Catalog** | 0% ❌ |
+| **Tests unitarios** | 0% ❌ |
+| **GDPR Compliance docs** | 0% ❌ |
+| **Mixpanel provider** | 0% ❌ |
+
+#### Implementado
+
+- ✅ AnalyticsService protocol (Sendable)
+- ✅ AnalyticsManager actor con estado serializado
+- ✅ Soporte para múltiples providers simultáneos
+- ✅ Firebase, Console, NoOp providers
+- ✅ ATT (App Tracking Transparency) integration
+- ✅ Thread-safe implementation (actor pattern)
+- ✅ Métodos: track(), setUserProperty(), setUserId(), reset()
+
+#### Pendientes - 4h
+
+1. Event catalog documentado (1h)
+2. Tests unitarios (1.5h)
+3. GDPR compliance documentation (1h)
+4. Opt-out support completo (30min)
 
 ---
 
-### ❌ SPEC-012: Performance Monitoring (0%)
+### 🟠 SPEC-012: Performance Monitoring (40%)
 
 **Prioridad**: 🟡 P2 - MEDIA  
-**Última Actualización**: 2025-11-26  
+**Última Actualización**: 2025-12-01  
 **Ubicación**: `docs/specs/performance-monitoring/`
 
-#### Pendientes (8h)
+#### Estado
 
-- PerformanceMonitor service
-- Launch time tracking
-- Network metrics
-- Memory monitoring
+| Componente | Progreso |
+|------------|----------|
+| PerformanceMonitor protocol | 100% ✅ (Sendable) |
+| DefaultPerformanceMonitor actor | 100% ✅ |
+| LaunchTimeTracker | 100% ✅ |
+| NetworkMetricsTracker | 100% ✅ |
+| MemoryMonitor | 100% ✅ |
+| Thresholds definidos | 100% ✅ |
+| **Tests completos** | 20% 🟡 (solo AuthPerformanceTests) |
+| **Alerting** | 0% ❌ |
+| **Exportación a backend** | 0% ❌ |
+| **Dashboard UI** | 0% ❌ |
+
+#### Implementado
+
+- ✅ PerformanceMonitor protocol (Sendable)
+- ✅ DefaultPerformanceMonitor actor (thread-safe)
+- ✅ startTrace() / endTrace() para tracking de duraciones
+- ✅ recordMetric() para métricas puntuales
+- ✅ Thresholds: network (5s), UI (0.1s), database (1s), launch (3s)
+- ✅ LaunchTimeTracker, NetworkMetricsTracker, MemoryMonitor
+- ✅ Auto-pruning cuando alcanza límite (1000 métricas)
+
+#### Pendientes - 5h
+
+1. Tests completos (2h)
+2. Alerting cuando se exceden thresholds (1h)
+3. Exportación a logging/backend (1h)
+4. Documentación Instruments integration (1h)
 
 ---
 
 ## 📊 TABLA CONSOLIDADA
 
-| Spec | Nombre | Estado | % | Ubicación |
-|------|--------|--------|---|-----------|
+| Spec | Nombre | Estado | % Real | Ubicación |
+|------|--------|--------|--------|-----------|
 | 001 | Environment Config | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 002 | Logging System | ✅ Archivada | 100% | `archived/completed-specs/` |
-| 003 | Authentication | 🟢 Muy Avanzado | 90% | `authentication-migration/` |
+| 003 | Authentication | 🟢 Muy Avanzado | 92% | `authentication-migration/` |
 | 004 | Network Layer | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 005 | SwiftData | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 006 | Platform Optimization | ✅ Archivada | 100% | `archived/completed-specs/` |
 | 007 | Testing | ✅ Archivada | 100% | `archived/completed-specs/` |
-| 008 | Security | 🟡 Parcial | 75% | `security-hardening/` |
-| 009 | Feature Flags | ⚠️ Mínimo | 10% | `feature-flags/` |
+| 008 | Security | 🟡 Parcial | 73% | `security-hardening/` |
+| 009 | Feature Flags | 🟠 En Progreso | 35% | `feature-flags/` |
 | 010 | Localization | ✅ Archivada | 100% | `archived/completed-specs/` |
-| 011 | Analytics | ⚠️ Mínimo | 5% | `analytics/` |
-| 012 | Performance | ❌ No Iniciado | 0% | `performance-monitoring/` |
+| 011 | Analytics | 🟠 En Progreso | 45% | `analytics/` |
+| 012 | Performance | 🟠 En Progreso | 40% | `performance-monitoring/` |
 | 013 | Offline-First | ✅ Archivada | 100% | `archived/completed-specs/` |
 
-**Progreso Total**: **59%** (768/1300 puntos)
+**Progreso Total Ponderado**: **72%**
+
+Cálculo: (7×100 + 92 + 73 + 35 + 45 + 40) / 1300 = 985/1300 = **75.8%**
 
 ---
 
 ## 🎯 PRÓXIMOS PASOS CRÍTICOS
 
-### Esta Semana
+### Esta Semana (Prioridad Alta)
 
-**Prioridad 1: Completar Seguridad** (5h)
-- [ ] SPEC-008: Certificate pinning + Security checks
+**1. Completar Seguridad - SPEC-008** (5h)
+- [ ] Tests para CertificatePinner y SecurityValidator (1h)
+- [ ] Security checks en startup (30min)
+- [ ] Input sanitization UI (1h)
+- [ ] Rate limiting básico (1h)
+- [ ] Certificate hashes reales (requiere DevOps)
 
-**Prioridad 2: Esperar Backend** (3h bloqueadas)
-- [ ] SPEC-003: JWT signature + Tests E2E
+### Próxima Semana
+
+**2. Completar Analytics - SPEC-011** (4h)
+- [ ] Event catalog documentado
+- [ ] Tests unitarios
+- [ ] GDPR compliance
+
+**3. Completar Performance - SPEC-012** (5h)
+- [ ] Tests completos
+- [ ] Alerting
+- [ ] Exportación
+
+### Bloqueado (Esperar Backend/DevOps)
+
+**SPEC-003** (3h cuando esté disponible):
+- [ ] JWT signature validation (requiere public key)
+- [ ] Tests E2E (requiere staging)
+
+**SPEC-009 FASE 2** (5h cuando esté disponible):
+- [ ] Remote config HTTP real
+- [ ] Sincronización con servidor
 
 ---
 
@@ -281,11 +372,13 @@ Este tracking se genera mediante:
    find . -name "*.swift" | wc -l
    ```
 
-2. **Lectura de archivos clave**:
-   - APIClient.swift, JWTDecoder.swift, etc.
+2. **Cruce de información**:
+   - Documentación (specs) vs TRACKING.md
+   - TRACKING.md vs código real implementado
 
 3. **Conteo de componentes**:
    - @Model classes, @Test decorators
+   - Protocols, implementations, extensions
 
 **Nivel de Confianza**: 95% (verificado con código real)
 
@@ -295,6 +388,7 @@ Este tracking se genera mediante:
 
 | Fecha | Cambio | Specs Afectadas |
 |-------|--------|-----------------|
+| 2025-12-01 | 🔄 Actualización por cruce docs vs código. SPEC-009: 10%→35%, SPEC-011: 5%→45%, SPEC-012: 0%→40% | 009, 011, 012 |
 | 2025-11-29 | ✅ SPEC-006 archivada, RESUMEN-CONTEXTO.md creados para specs pendientes | 003, 006, 008, 009, 011, 012 |
 | 2025-11-27 | ✅ Reorganización documental, archivo de completadas | Todas |
 | 2025-11-26 | ✅ Creación de TRACKING.md como fuente única | Todas |
@@ -309,11 +403,24 @@ Este tracking se genera mediante:
 1. **Actualizar SOLO este archivo** al completar/avanzar una spec
 2. **Incluir fecha de verificación** en cada cambio
 3. **Mover specs completadas** a `archived/completed-specs/`
-4. **Revisar cada semana** para mantener sincronización
+4. **Verificar código vs documentación** antes de actualizar porcentajes
+5. **Revisar semanalmente** para mantener sincronización
 
 ---
 
-**Próxima Revisión Programada**: 2025-12-02 (semanal)  
+## 🔄 DISCREPANCIAS RESUELTAS (2025-12-01)
+
+Durante la auditoría de hoy se encontraron y corrigieron las siguientes discrepancias:
+
+| Spec | Antes (TRACKING) | Después (Código Real) | Razón |
+|------|------------------|----------------------|-------|
+| 009 | 10% | 35% | Infraestructura local completa (enum, repository, cache), falta sync remoto |
+| 011 | 5% | 45% | AnalyticsManager actor + 3 providers implementados, falta event catalog |
+| 012 | 0% | 40% | PerformanceMonitor + trackers implementados, falta tests y alerting |
+
+---
+
+**Próxima Revisión Programada**: 2025-12-08 (semanal)  
 **Responsable**: Tech Lead  
-**Generado**: 2025-11-27  
-**Método**: Verificación directa con código fuente
+**Generado**: 2025-12-01  
+**Método**: Cruce automático documentación vs código fuente
