@@ -1,0 +1,171 @@
+//
+//  BiometricAuthService.swift
+//  EduGoSecureStorage
+//
+//  Created on 24-01-25.
+//  SPEC-003: Authentication Real API Migration - Biometric Authentication
+//
+
+import LocalAuthentication
+import Foundation
+
+// MARK: - Protocol
+
+/// Servicio para autenticación biométrica (Face ID / Touch ID)
+public protocol BiometricAuthService: Sendable {
+    /// Indica si la autenticación biométrica está disponible
+    var isAvailable: Bool { get async }
+
+    /// Tipo de biometría disponible en el dispositivo
+    var biometryType: LABiometryType { get async }
+
+    /// Autentica al usuario con biometría
+    /// - Parameter reason: Razón mostrada al usuario
+    /// - Returns: true si autenticación exitosa
+    /// - Throws: BiometricError si falla
+    func authenticate(reason: String) async throws -> Bool
+}
+
+// MARK: - Errors
+
+/// Errores de autenticación biométrica
+public enum BiometricError: Error, LocalizedError, Sendable {
+    case notAvailable
+    case authenticationFailed
+    case userCancelled
+    case biometryLocked
+    case biometryNotEnrolled
+    case passcodeNotSet
+
+    public var errorDescription: String? {
+        switch self {
+        case .notAvailable:
+            return "Autenticación biométrica no disponible en este dispositivo"
+        case .authenticationFailed:
+            return "La autenticación biométrica falló"
+        case .userCancelled:
+            return "El usuario canceló la autenticación"
+        case .biometryLocked:
+            return "Biometría bloqueada por demasiados intentos fallidos"
+        case .biometryNotEnrolled:
+            return "No hay Face ID o Touch ID configurado en este dispositivo"
+        case .passcodeNotSet:
+            return "No hay código de acceso configurado en el dispositivo"
+        }
+    }
+}
+
+// MARK: - Implementation
+
+/// Implementación usando LocalAuthentication framework de Apple
+///
+/// ## Swift 6 Concurrency
+/// FASE 3 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Debe ser @MainActor porque:
+/// 1. LAContext debe ser accedido desde el main thread (requisito de Apple)
+/// 2. Los métodos internos ya usaban MainActor.run
+/// 3. Simplifica el código eliminando los wrappers MainActor.run
+@MainActor
+public final class LocalAuthenticationService: BiometricAuthService {
+
+    public init() {}
+
+    public var isAvailable: Bool {
+        get async {
+            let context = LAContext()
+            var error: NSError?
+            return context.canEvaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                error: &error
+            )
+        }
+    }
+
+    public var biometryType: LABiometryType {
+        get async {
+            let context = LAContext()
+            _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
+            return context.biometryType
+        }
+    }
+
+    public func authenticate(reason: String) async throws -> Bool {
+        let context = LAContext()
+        context.localizedCancelTitle = "Cancelar"
+        context.localizedFallbackTitle = "Usar contraseña"
+
+        do {
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: reason
+            )
+        } catch let error as LAError {
+            throw mapLAError(error)
+        }
+    }
+
+    // MARK: - Error Mapping
+
+    private func mapLAError(_ error: LAError) -> BiometricError {
+        switch error.code {
+        case .userCancel:
+            return .userCancelled
+        case .biometryLockout:
+            return .biometryLocked
+        case .biometryNotEnrolled:
+            return .biometryNotEnrolled
+        case .biometryNotAvailable:
+            return .notAvailable
+        case .passcodeNotSet:
+            return .passcodeNotSet
+        default:
+            return .authenticationFailed
+        }
+    }
+}
+
+// MARK: - Testing
+
+#if DEBUG
+/// Mock Biometric Service para testing
+///
+/// ## Swift 6 Concurrency
+/// FASE 2 - Refactoring: Eliminado @unchecked Sendable, marcado como @MainActor.
+/// Cumple con Regla 2.3 adaptada: Mocks @MainActor cuando protocolo tiene métodos sincrónicos.
+@MainActor
+public final class MockBiometricService: BiometricAuthService {
+    public var isAvailableValue = true
+    public var biometryTypeValue: LABiometryType = .faceID
+    public var authenticateResult: Bool = true
+    public var authenticateError: Error?
+    public var authenticateCallCount = 0
+
+    public init() {}
+
+    public var isAvailable: Bool {
+        get async { isAvailableValue }
+    }
+
+    public var biometryType: LABiometryType {
+        get async { biometryTypeValue }
+    }
+
+    public func authenticate(reason: String) async throws -> Bool {
+        authenticateCallCount += 1
+
+        if let error = authenticateError {
+            throw error
+        }
+
+        return authenticateResult
+    }
+
+    public func reset() {
+        isAvailableValue = true
+        biometryTypeValue = .faceID
+        authenticateResult = true
+        authenticateError = nil
+        authenticateCallCount = 0
+    }
+}
+#endif
