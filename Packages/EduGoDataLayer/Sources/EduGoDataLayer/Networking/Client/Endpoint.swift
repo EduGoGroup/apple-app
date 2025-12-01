@@ -1,0 +1,118 @@
+//
+//  Endpoint.swift
+//  EduGoDataLayer
+//
+//  Created on 16-11-25.
+//  Updated on 24-01-25 - SPEC-003: Versionado y Feature Flag
+//  Updated on 24-11-25 - SPRINT2-T06: URLs separadas para ecosistema
+//
+
+import Foundation
+import EduGoFoundation
+
+/// Helper privado para crear URLs de forma segura
+private func makeURL(_ string: String) -> URL {
+    guard let url = URL(string: string) else {
+        fatalError("Invalid URL: \(string) - This should never happen with hardcoded URLs")
+    }
+    return url
+}
+
+/// Endpoints disponibles en la API
+///
+/// ## Arquitectura de URLs
+/// - Endpoints de auth (login, logout, refresh, me) → `authAPIBaseURL` (api-admin)
+/// - Endpoints de contenido (materials, progress) → `mobileAPIBaseURL` (api-mobile)
+/// - Endpoints de admin (schools, units) → `adminAPIBaseURL` (api-admin)
+public enum Endpoint: Sendable {
+    case login
+    case logout
+    case refresh
+    case currentUser
+
+    // Futuros endpoints de contenido
+    // case materials
+    // case progress
+
+    /// Path del endpoint según el modo de autenticación
+    public var path: String {
+        let basePath: String
+
+        // DummyJSON no usa versionado, Real API usa /v1
+        switch AppEnvironment.authMode {
+        case .dummyJSON:
+            basePath = "/auth"
+        case .realAPI:
+            basePath = "/v1/auth"
+        }
+
+        switch self {
+        case .login:
+            return "\(basePath)/login"
+        case .logout:
+            return "\(basePath)/logout"
+        case .refresh:
+            return "\(basePath)/refresh"
+        case .currentUser:
+            return "\(basePath)/me"
+        }
+    }
+
+    /// Indica si es un endpoint de autenticación (usa authAPIBaseURL)
+    public var isAuthEndpoint: Bool {
+        switch self {
+        case .login, .logout, .refresh, .currentUser:
+            return true
+        }
+    }
+
+    /// Base URL apropiada para este endpoint
+    private var baseURL: URL {
+        switch AppEnvironment.authMode {
+        case .dummyJSON:
+            // DummyJSON tiene su propia URL
+            return makeURL("https://dummyjson.com")
+        case .realAPI:
+            // Endpoints de auth van a api-admin
+            // Endpoints de contenido irían a api-mobile
+            if isAuthEndpoint {
+                return AppEnvironment.authAPIBaseURL
+            } else {
+                return AppEnvironment.mobileAPIBaseURL
+            }
+        }
+    }
+
+    /// URL completa del endpoint
+    ///
+    /// NOTA: Este método ahora ignora el parámetro `baseURL` y usa la URL correcta
+    /// según el tipo de endpoint (authAPIBaseURL o mobileAPIBaseURL).
+    ///
+    /// - En modo DummyJSON: Usa dummyjson.com
+    /// - En modo Real API: Usa authAPIBaseURL para auth, mobileAPIBaseURL para contenido
+    ///
+    /// @available(*, deprecated, message: "Usar la propiedad fullURL en su lugar")
+    public func url(baseURL: URL) -> URL {
+        // Ignorar el baseURL pasado y usar el correcto según el tipo de endpoint
+        self.baseURL.appendingPathComponent(path)
+    }
+
+    /// URL completa del endpoint (sin necesidad de pasar baseURL)
+    public var fullURL: URL {
+        baseURL.appendingPathComponent(path)
+    }
+}
+
+// MARK: - Convenience
+
+extension Endpoint {
+    /// Descripción para logging
+    public var description: String {
+        switch self {
+        case .login: return "Login"
+        case .logout: return "Logout"
+        case .refresh: return "Refresh Token"
+        case .currentUser: return "Current User"
+        }
+    }
+}
