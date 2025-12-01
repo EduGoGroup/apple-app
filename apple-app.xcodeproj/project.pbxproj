@@ -13,6 +13,10 @@
 		A985C85A2EDD26F700B8D7CE /* EduGoDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = A985C8592EDD26F700B8D7CE /* EduGoDesignSystem */; };
 		A985C85D2EDD271100B8D7CE /* EduGoDomainCore in Frameworks */ = {isa = PBXBuildFile; productRef = A985C85C2EDD271100B8D7CE /* EduGoDomainCore */; };
 		A985C8602EDD272700B8D7CE /* EduGoFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = A985C85F2EDD272700B8D7CE /* EduGoFoundation */; };
+		A985CB4F2EDD428400B8D7CE /* EduGoObservability in Frameworks */ = {isa = PBXBuildFile; productRef = A985CB4E2EDD428400B8D7CE /* EduGoObservability */; };
+		A985CB522EDD429E00B8D7CE /* EduGoSecureStorage in Frameworks */ = {isa = PBXBuildFile; productRef = A985CB512EDD429E00B8D7CE /* EduGoSecureStorage */; };
+		A985CB552EDD42B600B8D7CE /* EduGoDataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = A985CB542EDD42B600B8D7CE /* EduGoDataLayer */; };
+		A985CB582EDD42CE00B8D7CE /* EduGoSecurityKit in Frameworks */ = {isa = PBXBuildFile; productRef = A985CB572EDD42CE00B8D7CE /* EduGoSecurityKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,8 +91,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				A985C8602EDD272700B8D7CE /* EduGoFoundation in Frameworks */,
+				A985CB4F2EDD428400B8D7CE /* EduGoObservability in Frameworks */,
 				A985C85D2EDD271100B8D7CE /* EduGoDomainCore in Frameworks */,
+				A985CB522EDD429E00B8D7CE /* EduGoSecureStorage in Frameworks */,
 				A985C85A2EDD26F700B8D7CE /* EduGoDesignSystem in Frameworks */,
+				A985CB552EDD42B600B8D7CE /* EduGoDataLayer in Frameworks */,
+				A985CB582EDD42CE00B8D7CE /* EduGoSecurityKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +176,10 @@
 				A985C8592EDD26F700B8D7CE /* EduGoDesignSystem */,
 				A985C85C2EDD271100B8D7CE /* EduGoDomainCore */,
 				A985C85F2EDD272700B8D7CE /* EduGoFoundation */,
+				A985CB4E2EDD428400B8D7CE /* EduGoObservability */,
+				A985CB512EDD429E00B8D7CE /* EduGoSecureStorage */,
+				A985CB542EDD42B600B8D7CE /* EduGoDataLayer */,
+				A985CB572EDD42CE00B8D7CE /* EduGoSecurityKit */,
 			);
 			productName = "apple-app";
 			productReference = A9C965122EC967EB0041EB9B /* apple-app.app */;
@@ -255,6 +267,10 @@
 				A985C8582EDD26F700B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoDesignSystem" */,
 				A985C85B2EDD271100B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoDomainCore" */,
 				A985C85E2EDD272700B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoFoundation" */,
+				A985CB4D2EDD428400B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoObservability" */,
+				A985CB502EDD429E00B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoSecureStorage" */,
+				A985CB532EDD42B500B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoDataLayer" */,
+				A985CB562EDD42CE00B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoSecurityKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A9C965132EC967EB0041EB9B /* Products */;
@@ -887,6 +903,22 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/EduGoFoundation;
 		};
+		A985CB4D2EDD428400B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoObservability" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/EduGoObservability;
+		};
+		A985CB502EDD429E00B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoSecureStorage" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/EduGoSecureStorage;
+		};
+		A985CB532EDD42B500B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoDataLayer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/EduGoDataLayer;
+		};
+		A985CB562EDD42CE00B8D7CE /* XCLocalSwiftPackageReference "Packages/EduGoSecurityKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/EduGoSecurityKit;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -901,6 +933,22 @@
 		A985C85F2EDD272700B8D7CE /* EduGoFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = EduGoFoundation;
+		};
+		A985CB4E2EDD428400B8D7CE /* EduGoObservability */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EduGoObservability;
+		};
+		A985CB512EDD429E00B8D7CE /* EduGoSecureStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EduGoSecureStorage;
+		};
+		A985CB542EDD42B600B8D7CE /* EduGoDataLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EduGoDataLayer;
+		};
+		A985CB572EDD42CE00B8D7CE /* EduGoSecurityKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EduGoSecurityKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
